@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="FrontB2BCatalogTheme" parent="Theme.MaterialComponents.Light"/>
+
+    <style name="FrontB2BCatalogTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="BrokerCatalogTheme" parent="FrontB2BCatalogTheme.NoActionBar">
+        <item name="android:statusBarColor">@color/secondary_raisin_black</item>
+        <item name="android:navigationBarColor">@color/secondary_raisin_black</item>
+    </style>
+
+</resources>

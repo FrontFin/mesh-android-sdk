@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Subtitle">
+        <item name="fontFamily">@font/jost_medium</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="BodyText">
+        <item name="fontFamily">@font/source_sans_pro</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/shade_white_80</item>
+    </style>
+
+    <style name="SkipButton" parent="BodyText">
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:text">Skip</item>
+        <item name="android:textColor">@color/primary_yellow</item>
+    </style>
+</resources>

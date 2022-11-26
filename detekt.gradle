@@ -1,0 +1,10 @@
+apply plugin: 'io.gitlab.arturbosch.detekt'
+
+detekt {
+    source = files("src/main/java", "src/main/kotlin")
+    parallel = true
+    config = files("$rootDir/detekt.yml")
+    buildUponDefaultConfig = false
+    allRules = false
+    basePath = projectDir
+}

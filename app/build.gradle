@@ -1,0 +1,25 @@
+apply from:"$rootDir/android-app.gradle"
+
+android {
+    namespace 'com.getfront.android'
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    lintOptions {
+        lintConfig file('lint.xml')
+    }
+}
+
+dependencies {
+    debugImplementation project(':catalog')
+    releaseImplementation 'com.getfront:catalog:1.0.0-beta01'
+
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.lifecycle.runtime
+    implementation libs.google.material
+}

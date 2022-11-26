@@ -1,0 +1,5 @@
+// dokka
+dokkaHtml.configure {
+    moduleName.set("Front.B2B.Android")
+    suppressInheritedMembers.set(true)
+}
