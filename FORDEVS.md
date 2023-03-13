@@ -13,14 +13,8 @@ to perform code analysis tools: [ktlint](https://pinterest.github.io/ktlint/),
 ### Maven
 
 Project configured with [maven](http://simpligility.github.io/android-maven-plugin/) plugin
-for library deployment. Recommended steps:
-
-- Perform code analysis process and commit your changes.
-- Run `bundleReleaseAar` to build release arr.
-- Run `publishReleasePublicationToMavenLocal` to generate maven local repository.
-
-Find the library in local maven repository : `user/username/.m2/repository`. Now you can connect
-library to any project on your working machine via `mavenLocal`.
+for library deployment. Run `catalog:deploy` to publish library to Sonatype Repository and
+Maven Central then.
 
 ### Documentation
 

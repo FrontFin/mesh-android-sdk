@@ -3,20 +3,18 @@ apply from:"$rootDir/android-app.gradle"
 android {
     namespace 'com.getfront.android'
 
-    buildTypes {
-        release {
-            signingConfig signingConfigs.debug
-        }
-    }
-
-    lintOptions {
-        lintConfig file('lint.xml')
+    flavorDimensions 'env'
+    productFlavors {
+        dev { dimension 'env' }
+        snapshot { dimension 'env' }
+        staging { dimension 'env' }
     }
 }
 
 dependencies {
-    debugImplementation project(':catalog')
-    releaseImplementation 'com.getfront:catalog:1.0.0-beta01'
+    devImplementation project(':catalog')
+    snapshotImplementation 'com.getfront:catalog:1.0.0-SNAPSHOT'
+    stagingImplementation 'com.getfront:catalog:1.0.0-beta01'
 
     implementation libs.androidx.appcompat
     implementation libs.androidx.core.ktx

@@ -5,20 +5,29 @@
     android:layout_height="match_parent"
     tools:context="com.getfront.android.ConnectActivity">
 
-    <TextView
-        android:id="@+id/accounts_text"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="24dp"
-        android:textSize="17sp"
-        tools:text="@tools:sample/lorem/random" />
+        android:layout_marginBottom="100dp"
+        android:scrollbars="none"
+        android:overScrollMode="never">
+
+        <TextView
+            android:id="@+id/accounts_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:textSize="17sp"
+            tools:text="@tools:sample/lorem/random" />
+
+    </ScrollView>
 
     <Button
         android:id="@+id/connect_btn"
         android:layout_width="200dp"
-        android:layout_height="56dp"
+        android:layout_height="52dp"
         android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="36dp"
+        android:layout_marginBottom="24dp"
         android:text="@string/connect" />
 
 </FrameLayout>

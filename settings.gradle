@@ -12,6 +12,10 @@ dependencyResolutionManagement {
         mavenLocal()
         google()
         mavenCentral()
+        // repository to pull snapshot version
+        maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
+        // repository to pull staging version
+        maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
     }
     versionCatalogs {
         libs {

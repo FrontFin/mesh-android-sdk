@@ -1,7 +1,5 @@
 apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
-apply plugin: 'kotlin-parcelize'
-apply plugin: 'maven-publish'
 apply from: "$rootDir/gnag.gradle"
 apply from: "$rootDir/detekt.gradle"
 
@@ -11,11 +9,9 @@ android {
     defaultConfig {
         minSdk min_sdk
         targetSdk target_sdk
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
-
     buildTypes {
         release {
             minifyEnabled true

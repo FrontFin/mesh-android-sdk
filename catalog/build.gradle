@@ -1,8 +1,18 @@
 apply from: "$rootDir/android-library.gradle"
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+apply from: "$rootDir/publish.gradle"
 
 android {
     namespace 'com.getfront.catalog'
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 dependencies {
@@ -16,16 +26,6 @@ dependencies {
     implementation libs.kotlinx.coroutines.core
 }
 
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId = 'com.getfront'
-            artifactId = 'catalog'
-            version = '1.0.0-beta01'
-
-            afterEvaluate {
-                from components.release
-            }
-        }
-    }
+task deploy(type: GradleBuild) {
+    tasks = ['clean', 'gnagCheck', 'build', 'publish']
 }

@@ -3,6 +3,7 @@ package com.getfront.android
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.HtmlCompat
 import androidx.lifecycle.lifecycleScope
 import com.getfront.android.databinding.ConnectActivityBinding
 import com.getfront.catalog.FrontCatalogContract
@@ -27,8 +28,13 @@ class ConnectActivity : AppCompatActivity() {
             accountStore.accounts().collect { accounts ->
                 runOnUiThread {
                     binding.accountsText.text = accounts.joinToString("\n") { account ->
-                        "${account.brokerName}: ${account.accessToken}"
-                    }
+                        """
+                           <b>brokerName:</b> ${account.brokerName}<br>
+                           <b>accountId:</b> ${account.accountId}<br>
+                           <b>accessToken:</b> ${account.accessToken.take(n = 20)}...
+                           <b>refreshToken:</b> ${account.refreshToken?.take(n = 20)}...
+                        """
+                    }.let { HtmlCompat.fromHtml(it, HtmlCompat.FROM_HTML_MODE_LEGACY) }
                 }
             }
         }

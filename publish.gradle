@@ -1,0 +1,61 @@
+// See https://docs.gradle.org/current/userguide/publishing_maven.html
+// and https://developer.android.com/studio/publish-library
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                groupId = 'com.getfront'
+                artifactId = PUBLISH_ARTIFACT_ID
+                version = PUBLISH_VERSION
+
+                from components.release
+
+                pom {
+                    name = 'Front Finance Android'
+                    description = 'Android library for integrating with Front Finance'
+                    url = 'https://github.com/FrontFin/front-b2b-android'
+
+                    scm {
+                        url = 'https://github.com/FrontFin/front-b2b-android'
+                        connection = 'scm:git:git://github.com/FrontFin/front-b2b-android.git'
+                        developerConnection = 'scm:git:ssh://git@github.com/FrontFin/front-b2b-android.git'
+                        tag = commitHash
+                    }
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'frontfin'
+                            name = 'Front Finance, Inc'
+                            url = 'https://github.com/FrontFin'
+                        }
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                url = PUBLISH_VERSION.endsWith('SNAPSHOT')
+                        ? 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+                        : 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+                credentials {
+                    username ossrhUsername
+                    password ossrhPassword
+                }
+            }
+        }
+    }
+}
+
+// See https://docs.gradle.org/current/userguide/signing_plugin.html
+signing {
+    sign publishing.publications
+}
+
+static def getCommitHash() {
+    return 'git rev-parse --verify HEAD'.execute().text.trim()
+}
