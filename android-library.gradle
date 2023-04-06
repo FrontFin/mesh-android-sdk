@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
-apply from: "$rootDir/gnag.gradle"
+apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply from: "$rootDir/detekt.gradle"
 
 android {

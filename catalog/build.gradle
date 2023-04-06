@@ -3,7 +3,7 @@ apply plugin: 'kotlin-parcelize'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
-apply from: "$rootDir/publish.gradle"
+apply from: "$rootDir/gradle/publish.gradle"
 
 android {
     namespace 'com.getfront.catalog'
@@ -12,6 +12,13 @@ android {
             withSourcesJar()
             withJavadocJar()
         }
+    }
+    // see https://googlesamples.github.io/android-custom-lint-rules/user-guide.md.html#lintgradleplugindsl
+    // and https://googlesamples.github.io/android-custom-lint-rules/user-guide.md.html#performancetuning
+    lint {
+        abortOnError true
+        ignoreTestSources true
+        warningsAsErrors true
     }
 }
 
@@ -24,8 +31,13 @@ dependencies {
     implementation libs.google.material
     implementation libs.google.gson
     implementation libs.kotlinx.coroutines.core
+    testImplementation "junit:junit:4.13.2"
+}
+
+task validate(type: GradleBuild) {
+    tasks = ['ktlintCheck', 'detekt', 'lintRelease', 'test', 'assembleRelease']
 }
 
 task deploy(type: GradleBuild) {
-    tasks = ['clean', 'gnagCheck', 'build', 'publish']
+    tasks = ['validate', 'publish']
 }

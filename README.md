@@ -1,11 +1,10 @@
 ## Front Finance Android SDK
 
-Let your users to connect a brokerage accounts via Front Android SDK.
+Let your users connect brokerage accounts via Front Android SDK.
 
-### Setup
+### Installation
 
-Add `catalog` to your `build.gradle` dependencies.
-
+Add `catalog` to your `build.gradle`.
 ```groovy
 dependencies {
     implementation 'com.getfront:catalog:1.0.0-beta01'
@@ -14,8 +13,7 @@ dependencies {
 
 ### Launch Catalog
 
-Connect brokerage account with `catalogLink` and receive result.
-
+Use `catalogLink` to connect your brokerage account.
 ```kotlin
 class ConnectActivity : AppCompatActivity() {
 
@@ -37,9 +35,7 @@ class ConnectActivity : AppCompatActivity() {
 
 ### Store accounts
 
-SDK has build-in encrypted storage which may be used for storing accounts in safe place.
-
+Built-in encrypted storage allows you to store accounts in a safe place.
 ```kotlin
 private val accountStore: FrontAccountStore = createPreferenceAccountStore(context)
 ```
-

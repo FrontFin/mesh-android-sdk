@@ -1,3 +1,4 @@
+apply from: "$rootDir/gradle/secrets.gradle"
 // See https://docs.gradle.org/current/userguide/publishing_maven.html
 // and https://developer.android.com/studio/publish-library
 afterEvaluate {
@@ -5,8 +6,8 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 groupId = 'com.getfront'
-                artifactId = PUBLISH_ARTIFACT_ID
-                version = PUBLISH_VERSION
+                artifactId = project.name
+                version = publishVersion
 
                 from components.release
 
@@ -39,9 +40,9 @@ afterEvaluate {
         }
         repositories {
             maven {
-                url = PUBLISH_VERSION.endsWith('SNAPSHOT')
-                        ? 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-                        : 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+                url = isReleaseVersion()
+                        ? 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+                        : 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
                 credentials {
                     username ossrhUsername
                     password ossrhPassword
@@ -53,9 +54,15 @@ afterEvaluate {
 
 // See https://docs.gradle.org/current/userguide/signing_plugin.html
 signing {
+    required { isReleaseVersion() && gradle.taskGraph.hasTask('publish') }
+    useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications
 }
 
 static def getCommitHash() {
     return 'git rev-parse --verify HEAD'.execute().text.trim()
+}
+
+def isReleaseVersion() {
+    return publishVersion != null && !publishVersion.endsWith("SNAPSHOT")
 }
