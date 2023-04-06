@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.getfront.catalog.di.di
-import com.getfront.catalog.entity.CatalogResponse
+import com.getfront.catalog.entity.CatalogEvent
 import com.getfront.catalog.ui.web.JSBridge
 import com.getfront.catalog.usecase.ParseCatalogJsonUseCase
 import com.getfront.catalog.utils.EventLiveData
@@ -15,12 +15,12 @@ internal class BrokerConnectViewModel(
 ) : ViewModel(), JSBridge.Callback {
 
     internal val throwable = EventLiveData<Throwable>()
-    internal val catalogResponse = EventLiveData<CatalogResponse>()
+    internal val catalogEvent = EventLiveData<CatalogEvent>()
 
     override fun onJsonReceived(payloadJson: String) {
         viewModelScope.launch {
             parseCatalogJsonUseCase.launch(payloadJson)
-                .onSuccess { catalogResponse.emit(it) }
+                .onSuccess { catalogEvent.emit(it) }
                 .onFailure { throwable.emit(it) }
         }
     }

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="FrontB2BCatalogTheme" parent="Theme.MaterialComponents.Light"/>
+    <style name="FrontB2BCatalogTheme" parent="Theme.MaterialComponents.Light">
+        <item name="colorPrimary">@color/primary_yellow</item>
+    </style>
 
     <style name="FrontB2BCatalogTheme.NoActionBar">
         <item name="windowActionBar">false</item>
@@ -9,8 +11,8 @@
     </style>
 
     <style name="BrokerCatalogTheme" parent="FrontB2BCatalogTheme.NoActionBar">
-        <item name="android:statusBarColor">@color/secondary_raisin_black</item>
-        <item name="android:navigationBarColor">@color/secondary_raisin_black</item>
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:navigationBarColor">@color/background</item>
     </style>
 
 </resources>

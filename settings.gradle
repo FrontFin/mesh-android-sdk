@@ -57,7 +57,7 @@ dependencyResolutionManagement {
             )
             library(
                     'androidx-appcompat',
-                    'androidx.appcompat:appcompat:1.4.1'
+                    'androidx.appcompat:appcompat:1.6.1'
             )
             library(
                     'google-material',

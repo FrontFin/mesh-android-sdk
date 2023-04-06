@@ -27,10 +27,10 @@ class ConnectActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             accountStore.accounts().collect { accounts ->
                 runOnUiThread {
-                    binding.accountsText.text = accounts.joinToString("\n") { account ->
+                    binding.accountsText.text = accounts.joinToString("<br><br>") { account ->
                         """
                            <b>brokerName:</b> ${account.brokerName}<br>
-                           <b>accountId:</b> ${account.accountId}<br>
+                           <b>accountId:</b> ${account.accountId.take(n = 20)}<br>
                            <b>accessToken:</b> ${account.accessToken.take(n = 20)}...
                            <b>refreshToken:</b> ${account.refreshToken?.take(n = 20)}...
                         """

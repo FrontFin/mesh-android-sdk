@@ -6,16 +6,18 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
+import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.getfront.catalog.R
 import com.getfront.catalog.databinding.BrokerCatalogActivityBinding
-import com.getfront.catalog.entity.CatalogResponse
+import com.getfront.catalog.entity.CatalogEvent
 import com.getfront.catalog.entity.FrontAccount
 import com.getfront.catalog.ui.web.BrokerWebChromeClient
 import com.getfront.catalog.ui.web.FrontWebViewClient
 import com.getfront.catalog.ui.web.JSBridge
+import com.getfront.catalog.utils.alertDialog
 import com.getfront.catalog.utils.getParcelableList
 import com.getfront.catalog.utils.intent
 import com.getfront.catalog.utils.lazyNone
@@ -24,44 +26,71 @@ import com.getfront.catalog.utils.onClick
 import com.getfront.catalog.utils.showToast
 import com.getfront.catalog.utils.viewBinding
 import com.getfront.catalog.utils.viewModel
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.getfront.catalog.utils.windowInsetsController
+import java.net.URL
 
 internal class BrokerCatalogActivity : AppCompatActivity() {
 
     private val link get() = intent.getStringExtra(LINK)!!
-
-    private val chromeClient by lazyNone { ChromeClient() }
+    private val linkHost by lazyNone { URL(link).host }
 
     private val binding by viewBinding(BrokerCatalogActivityBinding::inflate)
 
-    private val viewModel by viewModel<BrokerConnectViewModel>(
-        BrokerConnectViewModel.Factory()
-    )
-
-    private var hasDialog = false
+    private val viewModel by viewModel<BrokerConnectViewModel>(BrokerConnectViewModel.Factory())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        binding.close.onClick { finish() }
-        binding.back.onClick { onBackPressed() }
+        windowInsetsController {
+            isAppearanceLightNavigationBars = true
+            isAppearanceLightStatusBars = true
+        }
 
-        observeCatalogResponse()
+        binding.back.onClick { onBack() }
+        binding.close.onClick { showCloseDialog() }
+        binding.toolbar.isVisible = false
+
+        observeCatalogEvent()
         observeThrowable()
         openWebView(link)
     }
 
     override fun onBackPressed() {
-        binding.webView.apply {
-            if (canGoBack()) goBack() else finish()
+        onBack()
+    }
+
+    private fun onBack() {
+        binding.webView.evaluateJavascript("window.history.go(-1)", null)
+    }
+
+    private fun showCloseDialog() {
+        alertDialog {
+            setTitle(R.string.onCloseDialog_title)
+            setMessage(R.string.onCloseDialog_message)
+            setPositiveButton(R.string.onCloseDialog_positiveButton) { _, _ -> finish() }
+            setNeutralButton(R.string.onCloseDialog_neutralButton, null)
+            setCancelable(false)
+            show()
         }
     }
 
-    private fun observeCatalogResponse() {
-        observeEvent(viewModel.catalogResponse) {
-            onCatalogResponse(it)
+    private fun observeCatalogEvent() {
+        observeEvent(viewModel.catalogEvent) { event ->
+            when (event) {
+                is CatalogEvent.Connected -> onConnected(event)
+                is CatalogEvent.Close, CatalogEvent.Done -> finish()
+                is CatalogEvent.ShowClose -> showCloseDialog()
+                is CatalogEvent.Undefined -> Unit
+            }
         }
+    }
+
+    private fun onConnected(connected: CatalogEvent.Connected) {
+        val list = connected.accounts
+        val arrayList = if (list is ArrayList<FrontAccount>) list else ArrayList(list)
+        val data = Intent().apply { putParcelableArrayListExtra(DATA, arrayList) }
+        setResult(RESULT_OK, data)
     }
 
     private fun observeThrowable() {
@@ -70,69 +99,56 @@ internal class BrokerCatalogActivity : AppCompatActivity() {
         }
     }
 
+    private fun showMessage(message: String?) {
+        when {
+            message.isNullOrEmpty() -> Unit
+            message.length <= MAX_TOAST_MSG_LENGTH -> showToast(message)
+            else -> alertDialog {
+                setMessage(message)
+                setPositiveButton(R.string.okay, null)
+                setCancelable(false)
+                show()
+            }
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
     private fun openWebView(url: String) {
         binding.webView.apply {
-            @SuppressLint("SetJavaScriptEnabled")
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.setSupportMultipleWindows(true)
             addJavascriptInterface(JSBridge(viewModel), JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
-            webViewClient = FrontWebViewClient()
-            webChromeClient = chromeClient
+            webViewClient = WebClient()
+            webChromeClient = ChromeClient()
             loadUrl(url)
         }
     }
 
-    private fun onCatalogResponse(response: CatalogResponse) = when (response) {
-        is CatalogResponse.Connected -> onConnected(response)
-        is CatalogResponse.Title -> onTitle(response)
-        is CatalogResponse.Loaded -> Unit
-        is CatalogResponse.Close -> finish()
-        is CatalogResponse.Done -> finish()
-    }
-
-    private fun onConnected(connected: CatalogResponse.Connected) {
-        val list = connected.accounts
-        val arrayList = if (list is ArrayList<FrontAccount>) list else ArrayList(list)
-        val data = Intent().apply { putParcelableArrayListExtra(DATA, arrayList) }
-        setResult(RESULT_OK, data)
-    }
-
-    private fun onTitle(title: CatalogResponse.Title) {
-        binding.title.text = title.title
-        binding.toolbar.isGone = title.hideTitle == true
-        binding.back.isGone = title.hideBackButton == true
-    }
-
-    private fun showMessage(message: String?) = when {
-        message.isNullOrEmpty() -> Unit
-        message.length <= MAX_TOAST_SIZE -> showToast(message)
-        else -> showDialog {
-            setMessage(message)
-            setPositiveButton(R.string.okay, null)
-            setCancelable(false)
-            show()
+    inner class WebClient : FrontWebViewClient() {
+        override fun onPageFinished(view: WebView?, url: String?) {
+            super.onPageFinished(view, url)
+            binding.progress.isVisible = false
         }
-    }
 
-    private fun showDialog(block: AlertDialog.Builder.() -> Unit) {
-        if (hasDialog.not()) {
-            hasDialog = true
-            block(
-                MaterialAlertDialogBuilder(this)
-                    .setOnDismissListener {
-                        hasDialog = false
-                    }
-            )
+        override fun onPageCommitVisible(view: WebView?, url: String?) {
+            super.onPageCommitVisible(view, url)
+            binding.toolbar.isGone = isFrontUrl(url)
+        }
+
+        private fun isFrontUrl(url: String?): Boolean {
+            return try {
+                URL(url).host == linkHost
+            } catch (expected: Exception) {
+                false
+            }
         }
     }
 
     inner class ChromeClient : BrokerWebChromeClient() {
         override fun launchWebView(url: String) {
-            WebViewActivity.launch(
-                this@BrokerCatalogActivity, url, binding.title.text.toString()
-            )
+            WebViewActivity.launch(this@BrokerCatalogActivity, url)
         }
     }
 
@@ -140,7 +156,7 @@ internal class BrokerCatalogActivity : AppCompatActivity() {
         private const val DATA = "data"
         private const val LINK = "link"
 
-        private const val MAX_TOAST_SIZE = 38
+        private const val MAX_TOAST_MSG_LENGTH = 38
 
         fun getIntent(activity: Context, catalogLink: String) =
             intent<BrokerCatalogActivity>(activity)
