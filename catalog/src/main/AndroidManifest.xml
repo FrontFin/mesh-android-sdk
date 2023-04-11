@@ -8,7 +8,7 @@
         android:supportsRtl="false">
         <activity
             android:name="com.getfront.catalog.ui.BrokerCatalogActivity"
-            android:theme="@style/BrokerCatalogTheme" />
+            android:theme="@style/FrontB2BCatalog.Theme.BrokerCatalog" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

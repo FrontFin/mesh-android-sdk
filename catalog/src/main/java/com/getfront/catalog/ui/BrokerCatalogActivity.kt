@@ -68,8 +68,8 @@ internal class BrokerCatalogActivity : AppCompatActivity() {
         alertDialog {
             setTitle(R.string.onCloseDialog_title)
             setMessage(R.string.onCloseDialog_message)
-            setPositiveButton(R.string.onCloseDialog_positiveButton) { _, _ -> finish() }
-            setNeutralButton(R.string.onCloseDialog_neutralButton, null)
+            setPositiveButton(R.string.onCloseDialog_exit) { _, _ -> finish() }
+            setNegativeButton(R.string.onCloseDialog_cancel, null)
             setCancelable(false)
             show()
         }
