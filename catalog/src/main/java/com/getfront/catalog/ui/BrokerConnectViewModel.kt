@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.getfront.catalog.di.di
 import com.getfront.catalog.entity.CatalogEvent
-import com.getfront.catalog.ui.web.JSBridge
 import com.getfront.catalog.usecase.ParseCatalogJsonUseCase
 import com.getfront.catalog.utils.EventLiveData
 import kotlinx.coroutines.launch

@@ -1,4 +1,4 @@
-package com.getfront.catalog.ui.web
+package com.getfront.catalog.ui
 
 import android.webkit.JavascriptInterface
 
