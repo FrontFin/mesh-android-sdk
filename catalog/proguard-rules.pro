@@ -23,3 +23,11 @@
 -keep class com.getfront.catalog.entity.** { *; }
 -keep class com.getfront.catalog.store.** { *; }
 -keep class com.getfront.catalog.FrontCatalogContract { *; }
+
+#--------- Begin: proguard configuration for Gson ------------
+# https://github.com/google/gson/blob/master/examples/android-proguard-example/proguard.cfg
+-keep public class * implements java.lang.reflect.Type
+# Retain generic signatures of TypeToken and its subclasses with R8 version 3.0 and higher.
+-keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
+-keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
+#--------- End: proguard configuration for Gson ------------

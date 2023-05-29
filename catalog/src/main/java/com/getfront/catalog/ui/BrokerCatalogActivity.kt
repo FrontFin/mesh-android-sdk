@@ -155,7 +155,7 @@ internal class BrokerCatalogActivity : AppCompatActivity() {
 
     inner class ChromeClient : WebChromeClient() {
 
-        private val target = WebView(this@BrokerCatalogActivity).apply {
+        private val target get() = WebView(this@BrokerCatalogActivity).apply {
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(
                     view: WebView?,
