@@ -12,6 +12,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -61,7 +62,11 @@ internal class BrokerCatalogActivity : AppCompatActivity() {
     }
 
     private fun onBack() {
-        binding.webView.evaluateJavascript("window.history.go(-1)", null)
+        if (binding.webView.url?.endsWith("broker-connect/done") == true) {
+            Toast.makeText(this, R.string.back_not_allowed, Toast.LENGTH_SHORT).show()
+        } else {
+            binding.webView.evaluateJavascript("window.history.go(-1)", null)
+        }
     }
 
     private fun showCloseDialog() {
