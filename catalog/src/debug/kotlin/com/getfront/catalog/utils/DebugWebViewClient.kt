@@ -1,6 +1,4 @@
-@file:Suppress("unused")
-
-package com.getfront.utils.web
+package com.getfront.catalog.utils
 
 import android.graphics.Bitmap
 import android.net.http.SslError
@@ -17,8 +15,10 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.getfront.utils.log.TAG
 
+private const val TAG = "webClientLog"
+
+@Suppress("unused")
 class DebugWebViewClient: WebViewClient() {
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {

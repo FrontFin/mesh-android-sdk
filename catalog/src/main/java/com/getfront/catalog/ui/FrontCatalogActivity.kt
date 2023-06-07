@@ -1,7 +1,6 @@
 package com.getfront.catalog.ui
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -12,16 +11,16 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.getfront.catalog.BuildConfig
 import com.getfront.catalog.R
-import com.getfront.catalog.databinding.BrokerCatalogActivityBinding
-import com.getfront.catalog.entity.CatalogEvent
-import com.getfront.catalog.entity.FrontAccount
+import com.getfront.catalog.databinding.FrontLinkActivityBinding
+import com.getfront.catalog.entity.AccessTokenPayload
+import com.getfront.catalog.entity.LinkEvent
+import com.getfront.catalog.entity.TransferFinishedPayload
 import com.getfront.catalog.utils.alertDialog
-import com.getfront.catalog.utils.getParcelableList
 import com.getfront.catalog.utils.intent
 import com.getfront.catalog.utils.lazyNone
 import com.getfront.catalog.utils.observeEvent
@@ -32,12 +31,26 @@ import com.getfront.catalog.utils.viewModel
 import com.getfront.catalog.utils.windowInsetsController
 import java.net.URL
 
-internal class BrokerCatalogActivity : AppCompatActivity() {
+fun launchCatalog(activity: Context, catalogLink: String, callback: FrontCatalogCallback) {
+    FrontCatalogActivity.callback = callback
+    activity.startActivity(
+        intent<FrontCatalogActivity>(activity)
+            .putExtra(FrontCatalogActivity.LINK, catalogLink)
+    )
+}
+
+internal class FrontCatalogActivity : AppCompatActivity() {
+
+    companion object {
+        internal const val LINK = "link"
+        internal var callback: FrontCatalogCallback? = null
+        private const val MAX_TOAST_MSG_LENGTH = 38
+    }
 
     private val link get() = intent.getStringExtra(LINK)!!
     private val linkHost by lazyNone { URL(link).host }
-    private val binding by viewBinding(BrokerCatalogActivityBinding::inflate)
-    private val viewModel by viewModel<BrokerConnectViewModel>(BrokerConnectViewModel.Factory())
+    private val binding by viewBinding(FrontLinkActivityBinding::inflate)
+    private val viewModel by viewModel<FrontCatalogViewModel>(FrontCatalogViewModel.Factory())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,9 +65,11 @@ internal class BrokerCatalogActivity : AppCompatActivity() {
         binding.close.onClick { showCloseDialog() }
         binding.toolbar.isVisible = false
 
-        observeCatalogEvent()
+        observeLinkEvent()
         observeThrowable()
         openWebView(link)
+
+        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
     }
 
     override fun onBackPressed() {
@@ -62,11 +77,20 @@ internal class BrokerCatalogActivity : AppCompatActivity() {
     }
 
     private fun onBack() {
-        if (binding.webView.url?.endsWith("broker-connect/done") == true) {
-            Toast.makeText(this, R.string.back_not_allowed, Toast.LENGTH_SHORT).show()
-        } else {
-            binding.webView.evaluateJavascript("window.history.go(-1)", null)
+        binding.webView.run {
+            when {
+                url?.endsWith("broker-connect/done") == true -> {
+                    showToast(getString(R.string.back_not_allowed))
+                }
+                canGoBack() -> evaluateJavascript("window.history.go(-1)", null)
+                else -> finish()
+            }
         }
+    }
+
+    override fun onDestroy() {
+        callback?.onExit()
+        super.onDestroy()
     }
 
     private fun showCloseDialog() {
@@ -80,22 +104,22 @@ internal class BrokerCatalogActivity : AppCompatActivity() {
         }
     }
 
-    private fun observeCatalogEvent() {
-        observeEvent(viewModel.catalogEvent) { event ->
+    private fun observeLinkEvent() {
+        observeEvent(viewModel.linkEvent) { event ->
             when (event) {
-                is CatalogEvent.Connected -> onConnected(event)
-                is CatalogEvent.Close, CatalogEvent.Done -> finish()
-                is CatalogEvent.ShowClose -> showCloseDialog()
-                is CatalogEvent.Undefined -> Unit
+                is LinkEvent.Close, LinkEvent.Done -> finish()
+                is LinkEvent.ShowClose -> showCloseDialog()
+                is LinkEvent.Payload -> onPayload(event)
+                is LinkEvent.Undefined -> Unit
             }
         }
     }
 
-    private fun onConnected(connected: CatalogEvent.Connected) {
-        val list = connected.accounts
-        val arrayList = if (list is ArrayList<FrontAccount>) list else ArrayList(list)
-        val data = Intent().apply { putParcelableArrayListExtra(DATA, arrayList) }
-        setResult(RESULT_OK, data)
+    private fun onPayload(event: LinkEvent.Payload) {
+        when (val payload = event.payload) {
+            is AccessTokenPayload -> callback?.onBrokerConnected(payload)
+            is TransferFinishedPayload -> callback?.onTransferFinished(payload)
+        }
     }
 
     private fun observeThrowable() {
@@ -160,17 +184,18 @@ internal class BrokerCatalogActivity : AppCompatActivity() {
 
     inner class ChromeClient : WebChromeClient() {
 
-        private val target get() = WebView(this@BrokerCatalogActivity).apply {
-            webViewClient = object : WebViewClient() {
-                override fun shouldOverrideUrlLoading(
-                    view: WebView?,
-                    request: WebResourceRequest?
-                ): Boolean {
-                    request?.url?.let { actionView(it) }
-                    return super.shouldOverrideUrlLoading(view, request)
+        private val target
+            get() = WebView(this@FrontCatalogActivity).apply {
+                webViewClient = object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): Boolean {
+                        request?.url?.let { actionView(it) }
+                        return super.shouldOverrideUrlLoading(view, request)
+                    }
                 }
             }
-        }
 
         override fun onCreateWindow(
             view: WebView?,
@@ -185,11 +210,13 @@ internal class BrokerCatalogActivity : AppCompatActivity() {
                     actionView(Uri.parse(url))
                     false
                 }
+
                 resultMsg != null -> {
                     (resultMsg.obj as WebView.WebViewTransport).webView = target
                     resultMsg.sendToTarget()
                     true
                 }
+
                 else -> false
             }
         }
@@ -197,22 +224,5 @@ internal class BrokerCatalogActivity : AppCompatActivity() {
 
     private fun actionView(uri: Uri) {
         startActivity(Intent(Intent.ACTION_VIEW, uri))
-    }
-
-    companion object {
-        private const val DATA = "data"
-        private const val LINK = "link"
-
-        private const val MAX_TOAST_MSG_LENGTH = 38
-
-        fun getIntent(activity: Context, catalogLink: String) =
-            intent<BrokerCatalogActivity>(activity)
-                .putExtra(LINK, catalogLink)
-
-        fun getAccounts(resultCode: Int, data: Intent?): List<FrontAccount>? {
-            return if (resultCode == Activity.RESULT_OK && data != null) {
-                getParcelableList(data, DATA)
-            } else null
-        }
     }
 }

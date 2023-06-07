@@ -6,13 +6,14 @@ import android.os.Parcelable
 import androidx.core.os.BuildCompat
 
 @Suppress("DEPRECATION", "UnsafeOptInUsageError")
-internal inline fun <reified T : Parcelable> getParcelableList(
-    intent: Intent,
+internal inline fun <reified T : Parcelable> Intent.getParcelableExtraCompat(
     key: String
-): ArrayList<T>? {
+): T? {
     return if (BuildCompat.isAtLeastT()) {
-        intent.getParcelableArrayListExtra(key, T::class.java)
-    } else intent.getParcelableArrayListExtra(key)
+        getParcelableExtra(key, T::class.java)
+    } else {
+        getParcelableExtra(key)
+    }
 }
 
 internal inline fun <reified T> intent(context: Context): Intent {

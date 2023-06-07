@@ -7,7 +7,7 @@
     <application
         android:supportsRtl="false">
         <activity
-            android:name="com.getfront.catalog.ui.BrokerCatalogActivity"
+            android:name="com.getfront.catalog.ui.FrontCatalogActivity"
             android:theme="@style/FrontB2BCatalog.Theme.BrokerCatalog" />
 
         <provider
