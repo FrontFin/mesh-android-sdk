@@ -1,7 +1,6 @@
 package com.getfront.catalog.ui
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -21,7 +20,6 @@ import com.getfront.catalog.entity.AccessTokenPayload
 import com.getfront.catalog.entity.LinkEvent
 import com.getfront.catalog.entity.TransferFinishedPayload
 import com.getfront.catalog.utils.alertDialog
-import com.getfront.catalog.utils.intent
 import com.getfront.catalog.utils.lazyNone
 import com.getfront.catalog.utils.observeEvent
 import com.getfront.catalog.utils.onClick
@@ -30,14 +28,6 @@ import com.getfront.catalog.utils.viewBinding
 import com.getfront.catalog.utils.viewModel
 import com.getfront.catalog.utils.windowInsetsController
 import java.net.URL
-
-fun launchCatalog(activity: Context, catalogLink: String, callback: FrontCatalogCallback) {
-    FrontCatalogActivity.callback = callback
-    activity.startActivity(
-        intent<FrontCatalogActivity>(activity)
-            .putExtra(FrontCatalogActivity.LINK, catalogLink)
-    )
-}
 
 internal class FrontCatalogActivity : AppCompatActivity() {
 
