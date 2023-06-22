@@ -3,12 +3,16 @@ package com.getfront.catalog.di
 import android.content.Context
 import androidx.startup.Initializer
 
-internal object DiInitializer : Initializer<Di> {
+internal val di get() = requireNotNull(DiInitializer.diInstanse)
 
-    lateinit var instance: Di; private set
+internal class DiInitializer : Initializer<Di> {
+
+    companion object {
+        internal var diInstanse: Di? = null
+    }
 
     override fun create(context: Context): Di {
-        return DiImpl().also { instance = it }
+        return DiImpl().also { diInstanse = it }
     }
 
     override fun dependencies(): List<Class<out Initializer<*>>> {
