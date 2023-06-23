@@ -7,7 +7,7 @@ Let your users connect brokerage accounts via Front Android SDK.
 Add `catalog` dependency to your `build.gradle`.
 ```gradle
 dependencies {
-    implementation 'com.getfront:catalog:1.0.0-beta03'
+    implementation 'com.getfront:catalog:1.0.0-beta04'
 }
 ```
 
