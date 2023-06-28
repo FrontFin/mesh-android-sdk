@@ -7,19 +7,20 @@ Let your users connect brokerage accounts via Front Android SDK.
 Add `catalog` dependency to your `build.gradle`.
 ```gradle
 dependencies {
-    implementation 'com.getfront:catalog:1.0.0-beta04'
+    implementation 'com.getfront:catalog:1.0.0-rc01'
 }
 ```
 
 ### Launch Catalog
 
 Use `catalogLink` to connect a brokerage account or initiate a crypto transfer.
+
 ```kotlin
 import com.getfront.catalog.entity.AccessTokenPayload
+import com.getfront.catalog.entity.ClosePayload
 import com.getfront.catalog.entity.TransferFinishedErrorPayload
-import com.getfront.catalog.entity.TransferFinishedPayload
 import com.getfront.catalog.entity.TransferFinishedSuccessPayload
-import com.getfront.catalog.ui.FrontCatalogCallback
+import com.getfront.catalog.store.FrontPayloads
 import com.getfront.catalog.ui.launchCatalog
 
 class CatalogExampleActivity : AppCompatActivity() {
@@ -27,35 +28,37 @@ class CatalogExampleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Subscribe for payloads
+        lifecycleScope.launch(Dispatchers.IO) {
+            FrontPayloads.collect { payload ->
+                when (payload) {
+                    is AccessTokenPayload -> {
+                        log("Broker connected. $payload")
+                    }
+                    is TransferFinishedSuccessPayload -> {
+                        log("Transfer succeed. $payload")
+                    }
+                    is TransferFinishedErrorPayload -> {
+                        log("Transfer failed. $payload")
+                    }
+                    is ClosePayload -> {
+                        log("Catalog closed")
+                    }
+                }
+            }
+        }
+
+        // Launch catalog with 'catalogLink'
         connectBtn.setOnClickListener {
             launchCatalog(
                 this,
-                "catalogLink",
-                getCatalogCallback()
+                "catalogLink"
             )
         }
     }
 
-    private fun getCatalogCallback() = object : FrontCatalogCallback {
-
-        override fun onExit() {
-            Log.d("FrontCatalog", "Catalog closed")
-        }
-
-        override fun onBrokerConnected(payload: AccessTokenPayload) {
-            Log.d("FrontCatalog", "Broker connected. $payload")
-        }
-
-        override fun onTransferFinished(payload: TransferFinishedPayload) {
-            when (payload) {
-                is TransferFinishedSuccessPayload -> {
-                    Log.d("FrontCatalog", "Transfer succeed. $payload")
-                }
-                is TransferFinishedErrorPayload -> {
-                    Log.d("FrontCatalog", "Transfer failed. $payload")
-                }
-            }
-        }
+    private fun log(msg: String) {
+        Log.d("FrontSDK", msg)
     }
 }
 ```
