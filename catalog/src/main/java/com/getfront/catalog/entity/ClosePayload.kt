@@ -1,3 +1,3 @@
 package com.getfront.catalog.entity
 
-sealed interface FrontPayload
+object ClosePayload : FrontPayload

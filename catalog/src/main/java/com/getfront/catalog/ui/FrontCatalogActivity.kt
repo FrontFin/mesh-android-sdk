@@ -13,12 +13,14 @@ import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.getfront.catalog.BuildConfig
 import com.getfront.catalog.R
 import com.getfront.catalog.databinding.FrontLinkActivityBinding
-import com.getfront.catalog.entity.AccessTokenPayload
+import com.getfront.catalog.entity.ClosePayload
+import com.getfront.catalog.entity.FrontPayload
 import com.getfront.catalog.entity.LinkEvent
-import com.getfront.catalog.entity.TransferFinishedPayload
+import com.getfront.catalog.store.FrontPaylodReceiver
 import com.getfront.catalog.utils.alertDialog
 import com.getfront.catalog.utils.lazyNone
 import com.getfront.catalog.utils.observeEvent
@@ -27,13 +29,14 @@ import com.getfront.catalog.utils.showToast
 import com.getfront.catalog.utils.viewBinding
 import com.getfront.catalog.utils.viewModel
 import com.getfront.catalog.utils.windowInsetsController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.net.URL
 
 internal class FrontCatalogActivity : AppCompatActivity() {
 
     companion object {
         internal const val LINK = "link"
-        internal var callback: FrontCatalogCallback? = null
         private const val MAX_TOAST_MSG_LENGTH = 38
     }
 
@@ -78,11 +81,6 @@ internal class FrontCatalogActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        callback?.onExit()
-        super.onDestroy()
-    }
-
     private fun showCloseDialog() {
         alertDialog {
             setTitle(R.string.onCloseDialog_title)
@@ -99,16 +97,20 @@ internal class FrontCatalogActivity : AppCompatActivity() {
             when (event) {
                 is LinkEvent.Close, LinkEvent.Done -> finish()
                 is LinkEvent.ShowClose -> showCloseDialog()
-                is LinkEvent.Payload -> onPayload(event)
+                is LinkEvent.Payload -> emit(event.payload)
                 is LinkEvent.Undefined -> Unit
             }
         }
     }
 
-    private fun onPayload(event: LinkEvent.Payload) {
-        when (val payload = event.payload) {
-            is AccessTokenPayload -> callback?.onBrokerConnected(payload)
-            is TransferFinishedPayload -> callback?.onTransferFinished(payload)
+    override fun finish() {
+        emit(ClosePayload)
+        super.finish()
+    }
+
+    private fun emit(payload: FrontPayload) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            FrontPaylodReceiver.emit(payload)
         }
     }
 
