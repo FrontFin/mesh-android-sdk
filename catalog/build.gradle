@@ -39,5 +39,5 @@ task validate(type: GradleBuild) {
 }
 
 task deploy(type: GradleBuild) {
-    tasks = ['validate', 'publish']
+    tasks = ['validate', 'publishReleasePublicationToMavenRepository']
 }

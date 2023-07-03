@@ -23,7 +23,7 @@
 -keep class com.getfront.catalog.entity.** { *; }
 -keep class com.getfront.catalog.store.** { *; }
 -keep class com.getfront.catalog.ui.FrontCatalogKt { *; }
--keep class com.getfront.catalog.ui.FrontCatalogResult { *; }
+-keep class com.getfront.catalog.ui.FrontCatalogResult$** { *; }
 -keep class com.getfront.catalog.ui.FrontCatalogContract { *; }
 
 #--------- Begin: proguard configuration for Gson ------------
