@@ -13,14 +13,10 @@ import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
 import com.getfront.catalog.BuildConfig
 import com.getfront.catalog.R
 import com.getfront.catalog.databinding.FrontLinkActivityBinding
-import com.getfront.catalog.entity.ClosePayload
-import com.getfront.catalog.entity.FrontPayload
 import com.getfront.catalog.entity.LinkEvent
-import com.getfront.catalog.store.FrontPaylodReceiver
 import com.getfront.catalog.utils.alertDialog
 import com.getfront.catalog.utils.lazyNone
 import com.getfront.catalog.utils.observeEvent
@@ -29,14 +25,13 @@ import com.getfront.catalog.utils.showToast
 import com.getfront.catalog.utils.viewBinding
 import com.getfront.catalog.utils.viewModel
 import com.getfront.catalog.utils.windowInsetsController
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.net.URL
 
 internal class FrontCatalogActivity : AppCompatActivity() {
 
     companion object {
         internal const val LINK = "link"
+        internal const val DATA = "data"
         private const val MAX_TOAST_MSG_LENGTH = 38
     }
 
@@ -97,21 +92,23 @@ internal class FrontCatalogActivity : AppCompatActivity() {
             when (event) {
                 is LinkEvent.Close, LinkEvent.Done -> finish()
                 is LinkEvent.ShowClose -> showCloseDialog()
-                is LinkEvent.Payload -> emit(event.payload)
-                is LinkEvent.Undefined -> Unit
+                is LinkEvent.Payload, LinkEvent.Undefined -> Unit
             }
         }
     }
 
     override fun finish() {
-        emit(ClosePayload)
+        val payloads = viewModel.payloads
+        if (payloads.isNotEmpty()) {
+            setResult(RESULT_OK, FrontCatalogResult.Success(payloads))
+        } else {
+            setResult(RESULT_CANCELED, FrontCatalogResult.Cancelled(viewModel.error))
+        }
         super.finish()
     }
 
-    private fun emit(payload: FrontPayload) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            FrontPaylodReceiver.emit(payload)
-        }
+    private fun setResult(resultCode: Int, result: FrontCatalogResult) {
+        setResult(resultCode, Intent().apply { putExtra(DATA, result) })
     }
 
     private fun observeThrowable() {

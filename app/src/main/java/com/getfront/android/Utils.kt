@@ -11,7 +11,7 @@ fun toString(accounts: List<FrontAccount>): String {
             add("brokerType", a.brokerType)
             add("accountId", a.accountId)
             add("accountName", a.accountName)
-            add("accessToken", a.accessToken)
+            add("accessToken", a.accessToken.take(100))
             add("refreshToken", a.refreshToken)
             appendLine()
         }

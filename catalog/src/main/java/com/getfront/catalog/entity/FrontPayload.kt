@@ -1,3 +1,5 @@
 package com.getfront.catalog.entity
 
-sealed interface FrontPayload
+import android.os.Parcelable
+
+sealed interface FrontPayload : Parcelable
