@@ -7,7 +7,7 @@ Let your users connect brokerage accounts via Front Android SDK.
 Add `catalog` dependency to your `build.gradle`.
 ```gradle
 dependencies {
-    implementation 'com.getfront:catalog:1.0.0-rc01'
+    implementation 'com.getfront:catalog:1.0.0-rc02'
 }
 ```
 
@@ -28,32 +28,52 @@ class CatalogExampleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Subscribe for payloads
-        lifecycleScope.launch(Dispatchers.IO) {
-            FrontPayloads.collect { payload ->
-                when (payload) {
-                    is AccessTokenPayload -> {
-                        log("Broker connected. $payload")
-                    }
-                    is TransferFinishedSuccessPayload -> {
-                        log("Transfer succeed. $payload")
-                    }
-                    is TransferFinishedErrorPayload -> {
-                        log("Transfer failed. $payload")
-                    }
-                    is ClosePayload -> {
-                        log("Catalog closed")
-                    }
-                }
-            }
-        }
-
         // Launch catalog with 'catalogLink'
-        connectBtn.setOnClickListener {
-            launchCatalog(
-                this,
+        binding.connectBtn.setOnClickListener {
+            catalogLauncher.launch(
                 "catalogLink"
             )
+        }
+
+        // Subscribe for immediate payloads
+        lifecycleScope.launch(Dispatchers.IO) {
+            FrontPayloads.collect { payload ->
+                log("Payload received. $payload")
+            }
+        }
+    }
+
+    private val catalogLauncher = registerForActivityResult(
+        FrontCatalogContract()
+    ) { result ->
+        when (result) {
+            is FrontCatalogResult.Success -> {
+                handlePayloads(result.payloads)
+            }
+
+            is FrontCatalogResult.Cancelled -> {
+                // user cancelled the flow by clicking on back or close button
+                // probably because of an error
+                log("Cancelled. ${result.error?.message}")
+            }
+        }
+    }
+
+    private fun handlePayloads(payloads: List<FrontPayload>) {
+        payloads.forEach { payload ->
+            when (payload) {
+                is AccessTokenPayload -> {
+                    log("Broker connected. $payload")
+                }
+
+                is TransferFinishedSuccessPayload -> {
+                    log("Transfer succeed. $payload")
+                }
+
+                is TransferFinishedErrorPayload -> {
+                    log("Transfer failed. $payload")
+                }
+            }
         }
     }
 
