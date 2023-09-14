@@ -6,15 +6,15 @@ import androidx.lifecycle.viewModelScope
 import com.getfront.catalog.converter.JsonConverter
 import com.getfront.catalog.entity.FrontPayload
 import com.getfront.catalog.entity.LinkEvent
-import com.getfront.catalog.store.FrontPaylodReceiver
+import com.getfront.catalog.store.SendPayloadToReceiverUseCase
 import com.getfront.catalog.usecase.GetLinkEventUseCase
 import com.getfront.catalog.utils.EventLiveData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 internal class FrontCatalogViewModel(
-    private val getLinkEventUseCase: GetLinkEventUseCase
+    private val getLinkEventUseCase: GetLinkEventUseCase,
+    private val sendPayloadToReceiverUseCase: SendPayloadToReceiverUseCase
 ) : ViewModel(), JSBridge.Callback {
 
     internal val linkEvent = EventLiveData<LinkEvent>()
@@ -30,9 +30,7 @@ internal class FrontCatalogViewModel(
                     if (it is LinkEvent.Payload) {
                         _payloads.add(it.payload)
                         error = null
-                        withContext(Dispatchers.IO) {
-                            FrontPaylodReceiver.emit(it.payload)
-                        }
+                        sendPayloadToReceiverUseCase.launch(it.payload)
                     }
                     linkEvent.emit(it)
                 }
@@ -47,7 +45,8 @@ internal class FrontCatalogViewModel(
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             @Suppress("UNCHECKED_CAST")
             return FrontCatalogViewModel(
-                GetLinkEventUseCase(Dispatchers.IO, JsonConverter)
+                GetLinkEventUseCase(Dispatchers.IO, JsonConverter.get()),
+                SendPayloadToReceiverUseCase(Dispatchers.IO)
             ) as T
         }
     }

@@ -13,8 +13,8 @@ data class AccessTokenPayload(
     val brokerType: String,
     val brokerName: String,
     val brokerBrandInfo: BrandInfo,
-    val expiresInSeconds: Int?,
-    val refreshTokenExpiresInSeconds: Int?,
+    val expiresInSeconds: Int? = null,
+    val refreshTokenExpiresInSeconds: Int? = null,
 ) : FrontPayload
 
 @Parcelize

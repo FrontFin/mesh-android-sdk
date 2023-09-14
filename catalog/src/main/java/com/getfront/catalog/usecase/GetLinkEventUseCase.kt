@@ -1,6 +1,7 @@
 package com.getfront.catalog.usecase
 
-import com.getfront.catalog.converter.JsonConverter
+import androidx.annotation.VisibleForTesting
+import com.getfront.catalog.converter.fromJson
 import com.getfront.catalog.entity.AccessTokenResponse
 import com.getfront.catalog.entity.JsError
 import com.getfront.catalog.entity.JsType
@@ -9,14 +10,15 @@ import com.getfront.catalog.entity.TransferFinishedResponse
 import com.getfront.catalog.entity.Type
 import com.getfront.catalog.utils.printStackTrace
 import com.getfront.catalog.utils.runCatching
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineDispatcher
 
 internal class GetLinkEventUseCase(
     private val dispatcher: CoroutineDispatcher,
-    private val converter: JsonConverter,
+    private val converter: Gson,
 ) {
     suspend fun launch(json: String) = runCatching(dispatcher) {
-        val event = converter.parse<JsType>(json)
+        val event = converter.fromJson<JsType>(json)
 
         when (event.type) {
             Type.done -> LinkEvent.Done
@@ -29,24 +31,27 @@ internal class GetLinkEventUseCase(
         }
     }
 
-    private fun onAccessToken(json: String) = try {
-        val payload = converter.parse<AccessTokenResponse>(json).payload
+    @VisibleForTesting
+    fun onAccessToken(json: String) = try {
+        val payload = converter.fromJson<AccessTokenResponse>(json).payload
         LinkEvent.Payload(payload)
     } catch (expected: Exception) {
         printStackTrace(expected)
         error("Faced an error while parsing access token payload: ${expected.message}")
     }
 
-    private fun onTransferFinished(json: String) = try {
-        val payload = converter.parse<TransferFinishedResponse>(json).payload
+    @VisibleForTesting
+    fun onTransferFinished(json: String) = try {
+        val payload = converter.fromJson<TransferFinishedResponse>(json).payload
         LinkEvent.Payload(payload)
     } catch (expected: Exception) {
         printStackTrace(expected)
         error("Faced an error while parsing transfer finished payload: ${expected.message}")
     }
 
-    private fun onError(json: String): Nothing {
-        val response = converter.parse<JsError>(json)
+    @VisibleForTesting
+    fun onError(json: String): Nothing {
+        val response = converter.fromJson<JsError>(json)
         error(response.errorMessage ?: "Undefined error")
     }
 }

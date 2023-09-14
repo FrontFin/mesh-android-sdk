@@ -19,7 +19,7 @@ class TransferFinishedPayloadDeserializer : JsonDeserializer<TransferFinishedPay
         return when (val status = obj.get("status").asString) {
             "success" -> context.deserialize<TransferFinishedSuccessPayload>(obj)
             "error" -> context.deserialize<TransferFinishedErrorPayload>(obj)
-            else -> error("unknown 'status' $status")
+            else -> error("unknown status '$status'")
         }
     }
 }

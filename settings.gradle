@@ -75,6 +75,26 @@ dependencyResolutionManagement {
                     'androidx-security-crypto',
                     'androidx.security:security-crypto:1.0.0'
             )
+            library(
+                    'junit',
+                    'junit:junit:4.13.2'
+            )
+            library(
+                    'io-mockk',
+                    'io.mockk:mockk:1.13.7'
+            )
+            library(
+                    'kotlinx-coroutines-test',
+                    'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
+            )
+            library(
+                    'kluent',
+                    'org.amshove.kluent:kluent-android:1.73'
+            )
+            library(
+                    'androidx-core-testing',
+                    'androidx.arch.core:core-testing:2.2.0'
+            )
         }
     }
 }
