@@ -4,6 +4,7 @@ apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply from: "$rootDir/gradle/publish.gradle"
+apply from: 'jacoco.gradle'
 
 android {
     namespace 'com.getfront.catalog'
@@ -44,7 +45,7 @@ dependencies {
 }
 
 task validate(type: GradleBuild) {
-    tasks = ['ktlintCheck', 'detekt', 'lintRelease', 'test', 'assembleRelease']
+    tasks = ['ktlintCheck', 'detekt', 'lintRelease', 'jacocoCoverageVerification', 'assembleRelease']
 }
 
 task deploy(type: GradleBuild) {

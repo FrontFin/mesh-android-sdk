@@ -20,7 +20,7 @@ class TransferFinishedPayloadDeserializerTest {
             txId = "234sdf-xxx3902",
             fromAddress = "0923xxx",
             toAddress = "92811yyyy",
-            symbol = "USDT",
+            symbol = "UST",
             amount = 1.0024,
             networkId = "79823981e"
         )

@@ -1,0 +1,59 @@
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion '0.8.10'
+}
+
+tasks.withType(Test) {
+    jacoco.includeNoLocationClasses = true
+    jacoco.excludes = ['jdk.internal.*']
+}
+
+def classDirs = fileTree("$buildDir/tmp/kotlin-classes/release") {
+    exclude(
+            '**/catalog/entity/FrontAccount*.*',
+            '**/catalog/store',
+            '**/catalog/ui/FrontCatalogActivity*.*',
+            '**/catalog/ui/FrontCatalogKt*.*',
+            '**/catalog/ui/FrontCatalogContract*.*',
+            '**/catalog/ui/FrontCatalogResult*.*',
+            '**/catalog/ui/JSBridge*.*',
+            '**/catalog/utils',
+    )
+}
+
+def sourceDirs = files("$projectDir/src/main/java")
+
+def executionDirs = files("$buildDir/jacoco/testReleaseUnitTest.exec")
+
+task jacocoTestReport(type: JacocoReport) {
+    dependsOn 'testReleaseUnitTest'
+    group = "Reporting"
+    description = "Code coverage report for Android & Unit tests."
+
+    reports {
+        html.enabled true
+    }
+
+    classDirectories.from(classDirs)
+    sourceDirectories.from(sourceDirs)
+    executionData.from(executionDirs)
+}
+
+task jacocoCoverageVerification(type: JacocoCoverageVerification) {
+    dependsOn 'testReleaseUnitTest'
+    group = "Verification"
+    description = "Code coverage verification for Android & Unit tests."
+
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.9
+            }
+        }
+    }
+
+    classDirectories.from(classDirs)
+    sourceDirectories.from(sourceDirs)
+    executionData.from(executionDirs)
+}
