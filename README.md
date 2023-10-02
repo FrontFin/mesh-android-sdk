@@ -7,44 +7,50 @@ Let your users connect brokerage accounts via Front Android SDK.
 Add `catalog` dependency to your `build.gradle`.
 ```gradle
 dependencies {
-    implementation 'com.getfront:catalog:1.0.0-rc02'
+    implementation 'com.getfront:catalog:1.0.1'
+}
+```
+
+### Get Link token
+
+Link token should be obtained from the POST `/api/v1/linktoken` endpoint. Api reference for this request is available [here](https://integration-api.getfront.com/apireference#tag/Managed-Account-Authentication/paths/~1api~1v1~1linktoken/post). Request must be preformed from the server side because it requires the client secret. You will get the response in the following format:
+```json
+{
+  "content": {
+    "linkToken": "{linkToken}"
+  },
+  "status": "ok",
+  "message": ""
 }
 ```
 
 ### Launch Catalog
 
-Use `catalogLink` to connect a brokerage account or initiate a crypto transfer.
+Use `linkToken` to connect a brokerage account or initiate a crypto transfer.
 
 ```kotlin
 import com.getfront.catalog.entity.AccessTokenPayload
-import com.getfront.catalog.entity.ClosePayload
+import com.getfront.catalog.entity.FrontPayload
 import com.getfront.catalog.entity.TransferFinishedErrorPayload
 import com.getfront.catalog.entity.TransferFinishedSuccessPayload
-import com.getfront.catalog.store.FrontPayloads
-import com.getfront.catalog.ui.launchCatalog
+import com.getfront.catalog.ui.FrontCatalogResult
+import com.getfront.catalog.ui.FrontLinkContract
 
 class CatalogExampleActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Launch catalog with 'catalogLink'
-        binding.connectBtn.setOnClickListener {
+        // Launch Front Catalog
+        connectBtn.setOnClickListener {
             catalogLauncher.launch(
-                "catalogLink"
+                "linkToken"
             )
-        }
-
-        // Subscribe for immediate payloads
-        lifecycleScope.launch(Dispatchers.IO) {
-            FrontPayloads.collect { payload ->
-                log("Payload received. $payload")
-            }
         }
     }
 
     private val catalogLauncher = registerForActivityResult(
-        FrontCatalogContract()
+        FrontLinkContract()
     ) { result ->
         when (result) {
             is FrontCatalogResult.Success -> {
@@ -52,9 +58,9 @@ class CatalogExampleActivity : AppCompatActivity() {
             }
 
             is FrontCatalogResult.Cancelled -> {
-                // user cancelled the flow by clicking on back or close button
+                // user canceled the flow by clicking on the back or close button
                 // probably because of an error
-                log("Cancelled. ${result.error?.message}")
+                log("Canceled. ${result.error?.message}")
             }
         }
     }
@@ -65,11 +71,11 @@ class CatalogExampleActivity : AppCompatActivity() {
                 is AccessTokenPayload -> {
                     log("Broker connected. $payload")
                 }
-
+                
                 is TransferFinishedSuccessPayload -> {
                     log("Transfer succeed. $payload")
                 }
-
+                
                 is TransferFinishedErrorPayload -> {
                     log("Transfer failed. $payload")
                 }
@@ -77,9 +83,7 @@ class CatalogExampleActivity : AppCompatActivity() {
         }
     }
 
-    private fun log(msg: String) {
-        Log.d("FrontSDK", msg)
-    }
+    private fun log(msg: String) = Log.d("FrontCatalogResult", msg)
 }
 ```
 
