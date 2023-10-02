@@ -11,6 +11,9 @@ android {
         targetSdk target_sdk
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro'
+
+        def buildNumber = System.getenv("BITRISE_BUILD_NUMBER")
+        versionCode buildNumber?.isInteger() ? buildNumber.toInteger() : 1
     }
     buildTypes {
         release {

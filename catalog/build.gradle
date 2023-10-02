@@ -5,6 +5,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply from: "$rootDir/gradle/publish.gradle"
 apply from: 'jacoco.gradle'
+apply from: 'sonar.gradle'
 
 android {
     namespace 'com.getfront.catalog'
@@ -42,12 +43,4 @@ dependencies {
     testImplementation libs.kotlinx.coroutines.test
     testImplementation libs.kluent
     testImplementation libs.androidx.core.testing
-}
-
-task validate(type: GradleBuild) {
-    tasks = ['ktlintCheck', 'detekt', 'lintRelease', 'jacocoCoverageVerification', 'assembleRelease']
-}
-
-task deploy(type: GradleBuild) {
-    tasks = ['validate', 'publishReleasePublicationToMavenRepository']
 }
