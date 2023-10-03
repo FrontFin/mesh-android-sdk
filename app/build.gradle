@@ -13,11 +13,17 @@ android {
 
 dependencies {
     devImplementation project(':catalog')
-    snapshotImplementation 'com.getfront:catalog:1.0.0-SNAPSHOT'
+    snapshotImplementation 'com.getfront:catalog:1.0.1-SNAPSHOT'
     stagingImplementation 'com.getfront:catalog:1.0.0-rc02'
 
     implementation libs.androidx.appcompat
     implementation libs.androidx.core.ktx
     implementation libs.androidx.lifecycle.runtime
     implementation libs.google.material
+}
+
+// Expect the latest snapshot version to be pulled
+configurations.getByName('stagingImplementation') {
+    println(it)
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }

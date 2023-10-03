@@ -19,6 +19,7 @@ sonar {
                 '**/ui/FrontCatalogActivity.kt',
                 '**/ui/FrontCatalog.kt',
                 '**/ui/FrontCatalogContract.kt',
+                '**/ui/FrontLinkContract.kt',
                 '**/ui/JSBridge.kt',
         ]
     }

@@ -16,6 +16,7 @@ def classDirs = fileTree("$buildDir/tmp/kotlin-classes/release") {
             '**/catalog/ui/FrontCatalogActivity*.*',
             '**/catalog/ui/FrontCatalogKt*.*',
             '**/catalog/ui/FrontCatalogContract*.*',
+            '**/catalog/ui/FrontLinkContract*.*',
             '**/catalog/ui/FrontCatalogResult*.*',
             '**/catalog/ui/JSBridge*.*',
             '**/catalog/utils',

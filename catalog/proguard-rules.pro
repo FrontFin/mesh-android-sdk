@@ -25,6 +25,7 @@
 -keep class com.getfront.catalog.ui.FrontCatalogKt { *; }
 -keep class com.getfront.catalog.ui.FrontCatalogResult$** { *; }
 -keep class com.getfront.catalog.ui.FrontCatalogContract { *; }
+-keep class com.getfront.catalog.ui.FrontLinkContract { *; }
 
 #--------- Begin: proguard configuration for Gson ------------
 # https://github.com/google/gson/blob/master/examples/android-proguard-example/proguard.cfg

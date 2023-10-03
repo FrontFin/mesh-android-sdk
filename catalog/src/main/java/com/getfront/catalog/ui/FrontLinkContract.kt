@@ -3,13 +3,14 @@ package com.getfront.catalog.ui
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
+import com.getfront.catalog.utils.decodeLink
 
 /**
  * Implements [ActivityResultContract] to start catalog activity
  * and returns [FrontCatalogResult] in callback.
  * ```
  *  private val catalogLauncher = registerForActivityResult(
- *      FrontCatalogContract()
+ *      FrontLinkContract()
  *  ) { result ->
  *      when(result) {
  *          is FrontCatalogResult.Success -> {
@@ -24,22 +25,18 @@ import androidx.activity.result.contract.ActivityResultContract
  *  }
  *
  *  connectBtn.setOnClickListener {
- *      catalogLauncher.launch("catalogLink")
+ *      catalogLauncher.launch("linkToken")
  *  }
  * ```
  */
 @Suppress("unused")
-@Deprecated(
-    message = "Enhanced 'FrontLinkContract' allows to use 'linkToken'.",
-    replaceWith = ReplaceWith("FrontLinkContract", "com.getfront.catalog.ui.FrontLinkContract")
-)
-class FrontCatalogContract : ActivityResultContract<String, FrontCatalogResult>() {
+class FrontLinkContract : ActivityResultContract<String, FrontCatalogResult>() {
 
     /**
      * Returns intent to start catalog activity.
      */
     override fun createIntent(context: Context, input: String): Intent {
-        return getFrontCatalogIntent(context, input)
+        return getFrontCatalogIntent(context, decodeLink(input))
     }
 
     /**

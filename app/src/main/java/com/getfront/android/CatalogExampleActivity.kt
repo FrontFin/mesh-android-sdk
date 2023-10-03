@@ -11,8 +11,8 @@ import com.getfront.catalog.entity.TransferFinishedSuccessPayload
 import com.getfront.catalog.store.FrontPayloads
 import com.getfront.catalog.store.createPreferenceAccountStore
 import com.getfront.catalog.store.getAccountsFromPayload
-import com.getfront.catalog.ui.FrontCatalogContract
 import com.getfront.catalog.ui.FrontCatalogResult
+import com.getfront.catalog.ui.FrontLinkContract
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -34,10 +34,10 @@ class CatalogExampleActivity : AppCompatActivity() {
             }
         }
 
-        // Launch catalog with 'catalogLink'
+        // Launch Catalog
         binding.connectBtn.setOnClickListener {
             catalogLauncher.launch(
-                "catalogLink"
+                "linkToken"
             )
         }
 
@@ -52,7 +52,7 @@ class CatalogExampleActivity : AppCompatActivity() {
     }
 
     private val catalogLauncher = registerForActivityResult(
-        FrontCatalogContract()
+        FrontLinkContract()
     ) { result ->
         when (result) {
             is FrontCatalogResult.Success -> {
@@ -60,9 +60,9 @@ class CatalogExampleActivity : AppCompatActivity() {
             }
 
             is FrontCatalogResult.Cancelled -> {
-                // user cancelled the flow by clicking on back or close button
+                // user canceled the flow by clicking on the back or close button
                 // probably because of an error
-                log("Cancelled ${result.error?.message}")
+                log("Canceled ${result.error?.message}")
             }
         }
     }
