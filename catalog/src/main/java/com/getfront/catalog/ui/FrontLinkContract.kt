@@ -3,7 +3,6 @@ package com.getfront.catalog.ui
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
-import com.getfront.catalog.utils.decodeLink
 
 /**
  * Implements [ActivityResultContract] to start catalog activity
@@ -36,7 +35,7 @@ class FrontLinkContract : ActivityResultContract<String, FrontCatalogResult>() {
      * Returns intent to start catalog activity.
      */
     override fun createIntent(context: Context, input: String): Intent {
-        return getFrontCatalogIntent(context, decodeLink(input))
+        return getFrontCatalogIntent(context, input)
     }
 
     /**
