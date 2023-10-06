@@ -62,7 +62,7 @@ class CatalogExampleActivity : AppCompatActivity() {
             is FrontCatalogResult.Cancelled -> {
                 // user canceled the flow by clicking on the back or close button
                 // probably because of an error
-                log("Canceled ${result.error?.message}")
+                log("Canceled. ${result.error?.message}")
             }
         }
     }
