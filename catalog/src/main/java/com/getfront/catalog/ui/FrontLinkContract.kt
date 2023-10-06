@@ -13,12 +13,13 @@ import androidx.activity.result.contract.ActivityResultContract
  *  ) { result ->
  *      when(result) {
  *          is FrontCatalogResult.Success -> {
- *              handlePayloads(result.payloads)
+ *              // success transaction
+ *              Log.d("FrontCatalogResult", "Success. ${result.payloads}")
  *          }
  *          is FrontCatalogResult.Cancelled -> {
  *              // user cancelled the flow by clicking on back or close button
  *              // probably because of an error
- *              log("Cancelled ${result.error?.message}")
+ *              Log.d("FrontCatalogResult", "Cancelled. ${result.error?.message}")
  *          }
  *      }
  *  }
