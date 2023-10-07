@@ -18,6 +18,7 @@ import com.getfront.catalog.R
 import com.getfront.catalog.databinding.FrontLinkActivityBinding
 import com.getfront.catalog.entity.LinkEvent
 import com.getfront.catalog.utils.alertDialog
+import com.getfront.catalog.utils.decodeCatching
 import com.getfront.catalog.utils.lazyNone
 import com.getfront.catalog.utils.observeEvent
 import com.getfront.catalog.utils.onClick
@@ -35,13 +36,21 @@ internal class FrontCatalogActivity : AppCompatActivity() {
         private const val MAX_TOAST_MSG_LENGTH = 38
     }
 
-    private val link get() = intent.getStringExtra(LINK)!!
-    private val linkHost by lazyNone { URL(link).host }
+    private val linkResult by lazyNone { decodeCatching(intent.getStringExtra(LINK)) }
+    private val linkHost by lazyNone { URL(linkResult.getOrNull()).host }
     private val binding by viewBinding(FrontLinkActivityBinding::inflate)
     private val viewModel by viewModel<FrontCatalogViewModel>(FrontCatalogViewModel.Factory())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val link = linkResult.getOrNull()
+        if (link == null) {
+            setResult(RESULT_CANCELED, FrontCatalogResult.Cancelled(linkResult.exceptionOrNull()))
+            super.finish()
+            return
+        }
+
         setContentView(binding.root)
 
         windowInsetsController {
