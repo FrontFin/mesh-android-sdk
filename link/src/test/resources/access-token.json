@@ -1,0 +1,16 @@
+{
+    "accountTokens": [{
+      "account": {
+        "accountId": "2wwwc105-5xx-4390x",
+        "accountName": "xx9xxx226",
+        "fund": 5.26,
+        "cash": 5.26
+      },
+      "accessToken": "8/luwjLWf/QxxfilS2r"
+    }],
+    "brokerType": "alpaca",
+    "brokerName": "Alpaca",
+    "brokerBrandInfo": {
+      "brokerLogo": "iVBORwxxxxxSUhEUgAAA"
+    }
+}

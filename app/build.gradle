@@ -1,7 +1,7 @@
 apply from: "$rootDir/android-app.gradle"
 
 android {
-    namespace 'com.getfront.android'
+    namespace 'com.meshconnect.android'
 
     flavorDimensions 'env'
     productFlavors {
@@ -11,7 +11,7 @@ android {
 }
 
 dependencies {
-    devImplementation project(':catalog')
+    devImplementation project(':link')
     liveImplementation ('com.getfront:catalog:1.0.2') { changing = true }
     implementation libs.androidx.appcompat
     implementation libs.androidx.core.ktx

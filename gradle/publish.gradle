@@ -5,15 +5,15 @@ afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
-                groupId = 'com.getfront'
+                groupId = 'com.meshconnect'
                 artifactId = project.name
                 version = publishVersion
 
                 from components.release
 
                 pom {
-                    name = 'Front Finance Android'
-                    description = 'Android library for integrating with Front Finance'
+                    name = 'Mesh Connect Android'
+                    description = 'Android library for integrating with Mesh Connect'
                     url = 'https://github.com/FrontFin/front-b2b-android'
 
                     scm {
@@ -30,8 +30,8 @@ afterEvaluate {
                     }
                     developers {
                         developer {
-                            id = 'frontfin'
-                            name = 'Front Finance, Inc'
+                            id = 'meshconnect'
+                            name = 'Mesh Connect, Inc'
                             url = 'https://github.com/FrontFin'
                         }
                     }

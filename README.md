@@ -1,19 +1,19 @@
-## Front Finance Android SDK
+## Mesh Connect Android SDK
 
-Let your users connect brokerage accounts via Front Android SDK.
+Let your users connect brokerage accounts via Mesh Android SDK.
 
 ### Installation
 
-Add `catalog` dependency to your `build.gradle`.
+Add `link` dependency to your `build.gradle`.
 ```gradle
 dependencies {
-    implementation 'com.getfront:catalog:1.0.2'
+    implementation 'com.meshconnect:link:2.0.0'
 }
 ```
 
 ### Get Link token
 
-Link token should be obtained from the POST `/api/v1/linktoken` endpoint. Api reference for this request is available [here](https://integration-api.getfront.com/apireference#tag/Managed-Account-Authentication/paths/~1api~1v1~1linktoken/post). Request must be preformed from the server side because it requires the client secret. You will get the response in the following format:
+Link token should be obtained from the POST `/api/v1/linktoken` endpoint. Api reference for this request is available [here](https://integration-api.meshconnect.com/apireference#tag/Managed-Account-Authentication/paths/~1api~1v1~1linktoken/post). Request must be preformed from the server side because it requires the client secret. You will get the response in the following format:
 ```json
 {
   "content": {
@@ -24,40 +24,40 @@ Link token should be obtained from the POST `/api/v1/linktoken` endpoint. Api re
 }
 ```
 
-### Launch Catalog
+### Launch Link
 
 Use `linkToken` to connect a brokerage account or initiate a crypto transfer.
 
 ```kotlin
-import com.getfront.catalog.entity.AccessTokenPayload
-import com.getfront.catalog.entity.FrontPayload
-import com.getfront.catalog.entity.TransferFinishedErrorPayload
-import com.getfront.catalog.entity.TransferFinishedSuccessPayload
-import com.getfront.catalog.ui.FrontCatalogResult
-import com.getfront.catalog.ui.FrontLinkContract
+import com.meshconnect.link.entity.AccessTokenPayload
+import com.meshconnect.link.entity.LinkPayload
+import com.meshconnect.link.entity.TransferFinishedErrorPayload
+import com.meshconnect.link.entity.TransferFinishedSuccessPayload
+import com.meshconnect.link.ui.LinkResult
+import com.meshconnect.link.ui.LinkTokenContract
 
-class CatalogExampleActivity : AppCompatActivity() {
+class LinkExampleActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Launch Front Catalog
-        connectBtn.setOnClickListener {
-            catalogLauncher.launch(
+        // launch Link
+        linkButton.setOnClickListener {
+            linkLauncher.launch(
                 "linkToken"
             )
         }
     }
 
-    private val catalogLauncher = registerForActivityResult(
-        FrontLinkContract()
+    private val linkLauncher = registerForActivityResult(
+        LinkTokenContract()
     ) { result ->
         when (result) {
-            is FrontCatalogResult.Success -> {
+            is LinkResult.Success -> {
                 handlePayloads(result.payloads)
             }
 
-            is FrontCatalogResult.Cancelled -> {
+            is LinkResult.Cancelled -> {
                 // user canceled the flow by clicking on the back or close button
                 // probably because of an error
                 log("Canceled. ${result.error?.message}")
@@ -65,31 +65,29 @@ class CatalogExampleActivity : AppCompatActivity() {
         }
     }
 
-    private fun handlePayloads(payloads: List<FrontPayload>) {
+    private fun handlePayloads(payloads: List<LinkPayload>) {
         payloads.forEach { payload ->
             when (payload) {
                 is AccessTokenPayload -> {
-                    log("Broker connected. $payload")
+                    // broker connected. Use 'payload' to get details.
                 }
                 
                 is TransferFinishedSuccessPayload -> {
-                    log("Transfer succeed. $payload")
+                    // transfer succeed. Use 'payload' to get details.
                 }
                 
                 is TransferFinishedErrorPayload -> {
-                    log("Transfer failed. $payload")
+                    // transfer failed. Use 'payload' to get details.
                 }
             }
         }
     }
-
-    private fun log(msg: String) = Log.d("FrontCatalog", msg)
 }
 ```
 
-### Account storage
+### Use account storage
 
-You may keep accounts in built-in encrypted storage.
+Keep accounts in built-in encrypted storage.
 ```kotlin
-private val accountStore: FrontAccountStore = createPreferenceAccountStore(context)
+private val accountStore: MeshAccountStore = createPreferenceAccountStore(context)
 ```
