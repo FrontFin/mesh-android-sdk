@@ -8,17 +8,16 @@ import androidx.activity.result.contract.ActivityResultContract
  * Implements [ActivityResultContract] to start catalog activity
  * and returns [LinkResult] in callback.
  * ```
- *  private val linkLauncher = registerForActivityResult(
- *      LinkTokenContract()
- *  ) { result ->
+ *  private val linkLauncher = registerForActivityResult(LinkContract()) { result ->
  *      when(result) {
  *          is LinkResult.Success -> {
- *              handlePayloads(result.payloads)
+ *              // success transaction
+ *              Log.d("LinkResult", "Success. ${result.payloads}")
  *          }
  *          is LinkResult.Cancelled -> {
  *              // user cancelled the flow by clicking on back or close button
  *              // probably because of an error
- *              log("Cancelled ${result.error?.message}")
+ *              Log.d("LinkResult", "Cancelled. ${result.errorMessage}")
  *          }
  *      }
  *  }

@@ -8,5 +8,7 @@ sealed interface LinkResult : Parcelable {
     @Parcelize
     data class Success(val payloads: List<LinkPayload>) : LinkResult
     @Parcelize
-    data class Cancelled(val error: Throwable? = null) : LinkResult
+    data class Cancelled(val error: Throwable? = null) : LinkResult {
+        val errorMessage: String? get() = error?.message
+    }
 }

@@ -1,4 +1,3 @@
 <resources>
-    <string name="app_name">Front.SDK.Android</string>
-    <string name="connect">Connect</string>
+    <string name="app_name">Mesh Example</string>
 </resources>

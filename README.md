@@ -34,7 +34,7 @@ import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.entity.TransferFinishedErrorPayload
 import com.meshconnect.link.entity.TransferFinishedSuccessPayload
 import com.meshconnect.link.ui.LinkResult
-import com.meshconnect.link.ui.LinkTokenContract
+import com.meshconnect.link.ui.LinkContract
 
 class LinkExampleActivity : AppCompatActivity() {
 
@@ -49,9 +49,7 @@ class LinkExampleActivity : AppCompatActivity() {
         }
     }
 
-    private val linkLauncher = registerForActivityResult(
-        LinkTokenContract()
-    ) { result ->
+    private val linkLauncher = registerForActivityResult(LinkContract()) { result ->
         when (result) {
             is LinkResult.Success -> {
                 handlePayloads(result.payloads)
@@ -59,8 +57,7 @@ class LinkExampleActivity : AppCompatActivity() {
 
             is LinkResult.Cancelled -> {
                 // user canceled the flow by clicking on the back or close button
-                // probably because of an error
-                log("Canceled. ${result.error?.message}")
+                // probably because of an error. Use 'result.errorMessage' to get details.
             }
         }
     }

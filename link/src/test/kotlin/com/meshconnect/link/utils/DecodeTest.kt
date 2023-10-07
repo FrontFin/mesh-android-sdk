@@ -1,4 +1,4 @@
-package com.getfront.catalog.utils
+package com.meshconnect.link.utils
 
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
@@ -9,16 +9,16 @@ import java.net.MalformedURLException
 class DecodeTest {
     @Test
     fun `verify link decoded from linkToken`() {
-        val result = decodeCatching("aHR0cHM6Ly93ZWIuZ2V0ZnJvbnQuY29tL2IyYi1pZnJhbWU=")
+        val result = decodeCatching("aHR0cHM6Ly9jb20uYXdlc29tZXVybC9iMmItaWZyYW1l")
         result.isSuccess shouldBeEqualTo true
-        result.getOrNull() shouldBeEqualTo "https://web.getfront.com/b2b-iframe"
+        result.getOrNull() shouldBeEqualTo "https://com.awesomeurl/b2b-iframe"
     }
 
     @Test
     fun `verify link decoded from url`() {
-        val result = decodeCatching("https://web.getfront.com/b2b-iframe")
+        val result = decodeCatching("https://com.awesomeurl/b2b-iframe")
         result.isSuccess shouldBeEqualTo true
-        result.getOrNull() shouldBeEqualTo "https://web.getfront.com/b2b-iframe"
+        result.getOrNull() shouldBeEqualTo "https://com.awesomeurl/b2b-iframe"
     }
 
     @Test

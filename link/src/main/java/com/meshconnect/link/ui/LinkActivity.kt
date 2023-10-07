@@ -19,6 +19,7 @@ import com.meshconnect.link.R
 import com.meshconnect.link.databinding.LinkActivityBinding
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.utils.alertDialog
+import com.meshconnect.link.utils.decodeCatching
 import com.meshconnect.link.utils.getParcelableExtraCompat
 import com.meshconnect.link.utils.intent
 import com.meshconnect.link.utils.lazyNone
@@ -47,13 +48,21 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
-    private val link get() = intent.getStringExtra(LINK)!!
-    private val linkHost by lazyNone { URL(link).host }
+    private val linkResult by lazyNone { decodeCatching(intent.getStringExtra(LINK)) }
+    private val linkHost by lazyNone { URL(linkResult.getOrNull()).host }
     private val binding by viewBinding(LinkActivityBinding::inflate)
     private val viewModel by viewModel<LinkViewModel>(LinkViewModel.Factory())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val link = linkResult.getOrNull()
+        if (link == null) {
+            setResult(RESULT_CANCELED, LinkResult.Cancelled(linkResult.exceptionOrNull()))
+            super.finish()
+            return
+        }
+
         setContentView(binding.root)
 
         windowInsetsController {

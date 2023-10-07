@@ -11,8 +11,8 @@ import com.meshconnect.link.entity.TransferFinishedSuccessPayload
 import com.meshconnect.link.store.LinkPayloads
 import com.meshconnect.link.store.createPreferenceAccountStore
 import com.meshconnect.link.store.getAccountsFromPayload
-import com.meshconnect.link.ui.LinkResult
 import com.meshconnect.link.ui.LinkContract
+import com.meshconnect.link.ui.LinkResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -35,9 +35,9 @@ class LinkExampleActivity : AppCompatActivity() {
         }
 
         // Launch Catalog
-        binding.connectBtn.setOnClickListener {
+        binding.linkButton.setOnClickListener {
             linkLauncher.launch(
-                "linkToken"
+                "aHR0cHM6Ly93ZWIuZ2V0ZnJvbnQuY29tL2IyYi1pZnJhbWUvYzQ4MDI1YWYtNWJiZC00MjRmLWI5OGUtNDcwMmMzNjgwODVmL2Jyb2tlci1jb25uZWN0P2F1dGhfY29kZT1YRWY2MnFwLWFzVWladjhJSThRQl8tU2F4Vk8wdHVUWXVSZ0pHT25YU1p4bTFfMVBCaEhuMmhpSWJZLTdLdjFxcGthRk9qWXA1UmhwenRHRUMyVl8xUQ=="
             )
         }
 
@@ -51,9 +51,7 @@ class LinkExampleActivity : AppCompatActivity() {
         }
     }
 
-    private val linkLauncher = registerForActivityResult(
-        LinkContract()
-    ) { result ->
+    private val linkLauncher = registerForActivityResult(LinkContract()) { result ->
         when (result) {
             is LinkResult.Success -> {
                 handlePayloads(result.payloads)
@@ -62,7 +60,7 @@ class LinkExampleActivity : AppCompatActivity() {
             is LinkResult.Cancelled -> {
                 // user canceled the flow by clicking on the back or close button
                 // probably because of an error
-                log("Canceled. ${result.error?.message}")
+                log("Canceled. ${result.errorMessage}")
             }
         }
     }
