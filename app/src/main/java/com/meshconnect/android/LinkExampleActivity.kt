@@ -37,7 +37,7 @@ class LinkExampleActivity : AppCompatActivity() {
         // Launch Catalog
         binding.linkButton.setOnClickListener {
             linkLauncher.launch(
-                "aHR0cHM6Ly93ZWIuZ2V0ZnJvbnQuY29tL2IyYi1pZnJhbWUvYzQ4MDI1YWYtNWJiZC00MjRmLWI5OGUtNDcwMmMzNjgwODVmL2Jyb2tlci1jb25uZWN0P2F1dGhfY29kZT1YRWY2MnFwLWFzVWladjhJSThRQl8tU2F4Vk8wdHVUWXVSZ0pHT25YU1p4bTFfMVBCaEhuMmhpSWJZLTdLdjFxcGthRk9qWXA1UmhwenRHRUMyVl8xUQ=="
+                "linkToken"
             )
         }
 

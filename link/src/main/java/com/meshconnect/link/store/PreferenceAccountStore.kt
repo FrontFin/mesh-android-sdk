@@ -49,7 +49,7 @@ internal class PreferenceAccountStore(context: Context) : MeshAccountStore {
         return getAll().find { it.id == id }
     }
 
-    override suspend fun accounts(): Flow<List<MeshAccount>> {
+    override fun accounts(): Flow<List<MeshAccount>> {
         return preferenceFlow(preferences, key) { accounts }
     }
 

@@ -10,7 +10,7 @@ interface MeshAccountStore {
 
     suspend fun getById(id: String): MeshAccount?
 
-    suspend fun accounts(): Flow<List<MeshAccount>>
+    fun accounts(): Flow<List<MeshAccount>>
 
     suspend fun count(): Int
 
