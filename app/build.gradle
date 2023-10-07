@@ -12,9 +12,13 @@ android {
 
 dependencies {
     devImplementation project(':catalog')
-    liveImplementation 'com.getfront:catalog:1.0.1'
+    liveImplementation ('com.getfront:catalog:1.0.2') { changing = true }
     implementation libs.androidx.appcompat
     implementation libs.androidx.core.ktx
     implementation libs.androidx.lifecycle.runtime
     implementation libs.google.material
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
