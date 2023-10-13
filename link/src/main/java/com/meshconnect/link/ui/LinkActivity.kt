@@ -18,6 +18,7 @@ import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
 import com.meshconnect.link.databinding.LinkActivityBinding
 import com.meshconnect.link.entity.LinkEvent
+import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.utils.alertDialog
 import com.meshconnect.link.utils.decodeCatching
 import com.meshconnect.link.utils.getParcelableExtraCompat
@@ -44,7 +45,7 @@ internal class LinkActivity : AppCompatActivity() {
 
         fun getLinkResult(data: Intent?): LinkResult {
             val result = data?.getParcelableExtraCompat<LinkResult>(DATA)
-            return result ?: LinkResult.Exited()
+            return result ?: LinkExit()
         }
     }
 
@@ -58,7 +59,7 @@ internal class LinkActivity : AppCompatActivity() {
 
         val link = linkResult.getOrNull()
         if (link == null) {
-            setResult(RESULT_CANCELED, LinkResult.Exited(linkResult.exceptionOrNull()))
+            setExitResult(linkResult.exceptionOrNull())
             super.finish()
             return
         }
@@ -121,11 +122,19 @@ internal class LinkActivity : AppCompatActivity() {
     override fun finish() {
         val payloads = viewModel.payloads
         if (payloads.isNotEmpty()) {
-            setResult(RESULT_OK, LinkResult.Success(payloads))
+            setSuccessResult(payloads)
         } else {
-            setResult(RESULT_CANCELED, LinkResult.Exited(viewModel.error))
+            setExitResult(viewModel.error)
         }
         super.finish()
+    }
+
+    private fun setSuccessResult(payloads: List<LinkPayload>) {
+        setResult(RESULT_OK, LinkSuccess(payloads))
+    }
+
+    private fun setExitResult(throwable: Throwable?) {
+        setResult(RESULT_CANCELED, LinkExit(throwable))
     }
 
     private fun setResult(resultCode: Int, result: LinkResult) {

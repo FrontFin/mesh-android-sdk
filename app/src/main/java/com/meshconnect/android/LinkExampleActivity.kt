@@ -12,7 +12,8 @@ import com.meshconnect.link.store.LinkPayloads
 import com.meshconnect.link.store.createPreferenceAccountStore
 import com.meshconnect.link.store.getAccountsFromPayload
 import com.meshconnect.link.ui.LinkContract
-import com.meshconnect.link.ui.LinkResult
+import com.meshconnect.link.ui.LinkExit
+import com.meshconnect.link.ui.LinkSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -53,11 +54,11 @@ class LinkExampleActivity : AppCompatActivity() {
 
     private val linkLauncher = registerForActivityResult(LinkContract()) { result ->
         when (result) {
-            is LinkResult.Success -> {
+            is LinkSuccess -> {
                 handlePayloads(result.payloads)
             }
 
-            is LinkResult.Exited -> {
+            is LinkExit -> {
                 // user exited the flow by clicking on the back or close button
                 // probably because of an error
                 log("Exited. ${result.errorMessage}")

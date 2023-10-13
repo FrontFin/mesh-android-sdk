@@ -4,11 +4,12 @@ import android.os.Parcelable
 import com.meshconnect.link.entity.LinkPayload
 import kotlinx.parcelize.Parcelize
 
-sealed interface LinkResult : Parcelable {
-    @Parcelize
-    data class Success(val payloads: List<LinkPayload>) : LinkResult
-    @Parcelize
-    data class Exited(val error: Throwable? = null) : LinkResult {
-        val errorMessage: String? get() = error?.message
-    }
+sealed interface LinkResult : Parcelable
+
+@Parcelize
+data class LinkSuccess(val payloads: List<LinkPayload>) : LinkResult
+
+@Parcelize
+data class LinkExit(val error: Throwable? = null) : LinkResult {
+    val errorMessage: String? get() = error?.message
 }
