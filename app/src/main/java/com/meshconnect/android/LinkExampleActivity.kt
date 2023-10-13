@@ -57,10 +57,10 @@ class LinkExampleActivity : AppCompatActivity() {
                 handlePayloads(result.payloads)
             }
 
-            is LinkResult.Cancelled -> {
-                // user canceled the flow by clicking on the back or close button
+            is LinkResult.Exited -> {
+                // user exited the flow by clicking on the back or close button
                 // probably because of an error
-                log("Canceled. ${result.errorMessage}")
+                log("Exited. ${result.errorMessage}")
             }
         }
     }

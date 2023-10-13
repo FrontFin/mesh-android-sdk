@@ -44,7 +44,7 @@ internal class LinkActivity : AppCompatActivity() {
 
         fun getLinkResult(data: Intent?): LinkResult {
             val result = data?.getParcelableExtraCompat<LinkResult>(DATA)
-            return result ?: LinkResult.Cancelled()
+            return result ?: LinkResult.Exited()
         }
     }
 
@@ -58,7 +58,7 @@ internal class LinkActivity : AppCompatActivity() {
 
         val link = linkResult.getOrNull()
         if (link == null) {
-            setResult(RESULT_CANCELED, LinkResult.Cancelled(linkResult.exceptionOrNull()))
+            setResult(RESULT_CANCELED, LinkResult.Exited(linkResult.exceptionOrNull()))
             super.finish()
             return
         }
@@ -123,7 +123,7 @@ internal class LinkActivity : AppCompatActivity() {
         if (payloads.isNotEmpty()) {
             setResult(RESULT_OK, LinkResult.Success(payloads))
         } else {
-            setResult(RESULT_CANCELED, LinkResult.Cancelled(viewModel.error))
+            setResult(RESULT_CANCELED, LinkResult.Exited(viewModel.error))
         }
         super.finish()
     }

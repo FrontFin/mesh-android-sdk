@@ -14,10 +14,10 @@ import androidx.activity.result.contract.ActivityResultContract
  *              // success transaction
  *              Log.d("LinkResult", "Success. ${result.payloads}")
  *          }
- *          is LinkResult.Cancelled -> {
- *              // user cancelled the flow by clicking on back or close button
+ *          is LinkResult.Exited -> {
+ *              // user exited the flow by clicking on back or close button
  *              // probably because of an error
- *              Log.d("LinkResult", "Cancelled. ${result.errorMessage}")
+ *              Log.d("LinkResult", "Exited. ${result.errorMessage}")
  *          }
  *      }
  *  }
