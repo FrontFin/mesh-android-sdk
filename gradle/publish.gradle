@@ -12,14 +12,14 @@ afterEvaluate {
                 from components.release
 
                 pom {
-                    name = 'Mesh Connect Android'
+                    name = 'Mesh Connect Android SDK'
                     description = 'Android library for integrating with Mesh Connect'
-                    url = 'https://github.com/FrontFin/front-b2b-android'
+                    url = 'https://github.com/FrontFin/mesh-android-sdk'
 
                     scm {
-                        url = 'https://github.com/FrontFin/front-b2b-android'
-                        connection = 'scm:git:git://github.com/FrontFin/front-b2b-android.git'
-                        developerConnection = 'scm:git:ssh://git@github.com/FrontFin/front-b2b-android.git'
+                        url = 'https://github.com/FrontFin/mesh-android-sdk'
+                        connection = 'scm:git:git://github.com/FrontFin/mesh-android-sdk.git'
+                        developerConnection = 'scm:git:ssh://git@github.com/FrontFin/mesh-android-sdk.git'
                         tag = commitHash
                     }
                     licenses {
