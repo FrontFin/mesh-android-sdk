@@ -35,7 +35,7 @@ class LinkExampleActivity : AppCompatActivity() {
             }
         }
 
-        // Launch Catalog
+        // Launch Link
         binding.linkButton.setOnClickListener {
             linkLauncher.launch(
                 "linkToken"
