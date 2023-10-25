@@ -2,18 +2,16 @@ package com.meshconnect.link.utils
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Parcelable
-import androidx.core.os.BuildCompat
 
-@Suppress("DEPRECATION", "UnsafeOptInUsageError")
-internal inline fun <reified T : Parcelable> Intent.getParcelableExtraCompat(
+internal inline fun <reified T : Parcelable> Intent.getParcelable(
     key: String
-): T? {
-    return if (BuildCompat.isAtLeastT()) {
-        getParcelableExtra(key, T::class.java)
-    } else {
-        getParcelableExtra(key)
-    }
+): T? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    getParcelableExtra(key, T::class.java)
+} else {
+    @Suppress("DEPRECATION", "squid:CallToDeprecatedMethod")
+    getParcelableExtra(key)
 }
 
 internal inline fun <reified T> intent(context: Context): Intent {

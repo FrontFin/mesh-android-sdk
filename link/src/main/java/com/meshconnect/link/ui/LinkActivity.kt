@@ -21,7 +21,7 @@ import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.utils.alertDialog
 import com.meshconnect.link.utils.decodeCatching
-import com.meshconnect.link.utils.getParcelableExtraCompat
+import com.meshconnect.link.utils.getParcelable
 import com.meshconnect.link.utils.intent
 import com.meshconnect.link.utils.lazyNone
 import com.meshconnect.link.utils.observeEvent
@@ -44,7 +44,7 @@ internal class LinkActivity : AppCompatActivity() {
         }
 
         fun getLinkResult(data: Intent?): LinkResult {
-            val result = data?.getParcelableExtraCompat<LinkResult>(DATA)
+            val result = data?.getParcelable<LinkResult>(DATA)
             return result ?: LinkExit()
         }
     }
