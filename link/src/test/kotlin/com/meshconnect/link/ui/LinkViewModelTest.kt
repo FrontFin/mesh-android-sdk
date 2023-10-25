@@ -2,7 +2,7 @@ package com.meshconnect.link.ui
 
 import com.meshconnect.link.ViewModelTest
 import com.meshconnect.link.entity.LinkEvent
-import com.meshconnect.link.store.SendPayloadToReceiverUseCase
+import com.meshconnect.link.store.PayloadReceiver
 import com.meshconnect.link.testObserver
 import com.meshconnect.link.usecase.GetLinkEventUseCase
 import io.mockk.Runs
@@ -18,11 +18,11 @@ import org.junit.Test
 class LinkViewModelTest : ViewModelTest() {
 
     private val getLinkEventUseCase = mockk<GetLinkEventUseCase>()
-    private val sendPayloadToReceiverUseCase = mockk<SendPayloadToReceiverUseCase>()
-    private val viewModel = LinkViewModel(getLinkEventUseCase, sendPayloadToReceiverUseCase)
+    private val payloadReceiver = mockk<PayloadReceiver>()
+    private val viewModel = LinkViewModel(getLinkEventUseCase, payloadReceiver)
 
     @Test
-    fun `test onJsonReceived received failure`() = runTest {
+    fun `verify viewModel emits error`() = runTest {
         val th = mockk<Throwable>()
         val errorObserver = viewModel.throwable.testObserver()
         coEvery { getLinkEventUseCase.launch("") } returns Result.failure(th)
@@ -33,13 +33,13 @@ class LinkViewModelTest : ViewModelTest() {
     }
 
     @Test
-    fun `test onJsonReceived received payload`() = runTest {
+    fun `verify viewModel emits payload`() = runTest {
         val payload = mockk<LinkEvent.Payload> {
             every { payload } returns mockk()
         }
         val eventObserver = viewModel.linkEvent.testObserver()
         coEvery { getLinkEventUseCase.launch("") } returns Result.success(payload)
-        coEvery { sendPayloadToReceiverUseCase.launch(payload.payload) } just Runs
+        coEvery { payloadReceiver.emit(payload.payload) } just Runs
         viewModel.onJsonReceived("")
 
         viewModel.payloads.shouldContainSame(listOf(payload.payload))
@@ -48,7 +48,7 @@ class LinkViewModelTest : ViewModelTest() {
     }
 
     @Test
-    fun `test onJsonReceived other event`() {
+    fun `verify viewModel emits 'done' event`() {
         val event = LinkEvent.Done
         val eventObserver = viewModel.linkEvent.testObserver()
         coEvery { getLinkEventUseCase.launch("") } returns Result.success(event)

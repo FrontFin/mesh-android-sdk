@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.meshconnect.link.converter.JsonConverter
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
-import com.meshconnect.link.store.SendPayloadToReceiverUseCase
+import com.meshconnect.link.store.PayloadReceiver
 import com.meshconnect.link.usecase.GetLinkEventUseCase
 import com.meshconnect.link.utils.EventLiveData
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 internal class LinkViewModel(
     private val getLinkEventUseCase: GetLinkEventUseCase,
-    private val sendPayloadToReceiverUseCase: SendPayloadToReceiverUseCase
+    private val payloadReceiver: PayloadReceiver
 ) : ViewModel(), JSBridge.Callback {
 
     internal val linkEvent = EventLiveData<LinkEvent>()
@@ -23,14 +23,14 @@ internal class LinkViewModel(
     internal val payloads: List<LinkPayload> get() = _payloads.toList()
     internal var error: Throwable? = null; private set
 
-    override fun onJsonReceived(payloadJson: String) {
+    override fun onJsonReceived(json: String) {
         viewModelScope.launch {
-            getLinkEventUseCase.launch(payloadJson)
+            getLinkEventUseCase.launch(json)
                 .onSuccess {
                     if (it is LinkEvent.Payload) {
                         _payloads.add(it.payload)
                         error = null
-                        sendPayloadToReceiverUseCase.launch(it.payload)
+                        payloadReceiver.emit(it.payload)
                     }
                     linkEvent.emit(it)
                 }
@@ -46,7 +46,7 @@ internal class LinkViewModel(
             @Suppress("UNCHECKED_CAST")
             return LinkViewModel(
                 GetLinkEventUseCase(Dispatchers.IO, JsonConverter.get()),
-                SendPayloadToReceiverUseCase(Dispatchers.IO)
+                PayloadReceiver(Dispatchers.IO)
             ) as T
         }
     }

@@ -14,6 +14,6 @@ internal class JSBridge(private val callback: Callback) {
     }
 
     interface Callback {
-        fun onJsonReceived(payloadJson: String)
+        fun onJsonReceived(json: String)
     }
 }

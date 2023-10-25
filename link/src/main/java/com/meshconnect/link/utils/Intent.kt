@@ -10,7 +10,7 @@ internal inline fun <reified T : Parcelable> Intent.getParcelable(
 ): T? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
     getParcelableExtra(key, T::class.java)
 } else {
-    @Suppress("DEPRECATION", "squid:CallToDeprecatedMethod")
+    @Suppress("DEPRECATION")
     getParcelableExtra(key)
 }
 

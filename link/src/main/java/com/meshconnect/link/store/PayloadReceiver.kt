@@ -1,19 +1,19 @@
 package com.meshconnect.link.store
 
 import com.meshconnect.link.entity.LinkPayload
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.withContext
 
-val LinkPayloads: Flow<LinkPayload> get() = PayloadReceiver.payloads
+private val payloadFlow = MutableSharedFlow<LinkPayload>()
 
-internal object PayloadReceiver {
+val LinkPayloads: Flow<LinkPayload> get() = payloadFlow.asSharedFlow()
 
-    internal val payloads get() = payloadFlow.asSharedFlow()
+internal class PayloadReceiver(private val dispatcher: CoroutineDispatcher) {
 
-    private val payloadFlow = MutableSharedFlow<LinkPayload>()
-
-    internal suspend fun emit(payload: LinkPayload) {
+    suspend fun emit(payload: LinkPayload) = withContext(dispatcher) {
         payloadFlow.emit(payload)
     }
 }
