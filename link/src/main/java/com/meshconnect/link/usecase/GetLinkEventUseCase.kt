@@ -9,7 +9,6 @@ import com.meshconnect.link.entity.JsType
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.TransferFinishedResponse
 import com.meshconnect.link.entity.Type
-import com.meshconnect.link.utils.printStackTrace
 import com.meshconnect.link.utils.runCatching
 import kotlinx.coroutines.CoroutineDispatcher
 
@@ -36,7 +35,6 @@ internal class GetLinkEventUseCase(
         val payload = converter.fromJson<AccessTokenResponse>(json).payload
         LinkEvent.Payload(payload)
     } catch (expected: Exception) {
-        printStackTrace(expected)
         error("Faced an error while parsing access token payload: ${expected.message}")
     }
 
@@ -45,7 +43,6 @@ internal class GetLinkEventUseCase(
         val payload = converter.fromJson<TransferFinishedResponse>(json).payload
         LinkEvent.Payload(payload)
     } catch (expected: Exception) {
-        printStackTrace(expected)
         error("Faced an error while parsing transfer finished payload: ${expected.message}")
     }
 
