@@ -1,5 +1,5 @@
 // dokka
 dokkaHtml.configure {
-    moduleName.set("mesh-b2b-android")
+    moduleName.set("mesh-android-sdk")
     suppressInheritedMembers.set(true)
 }

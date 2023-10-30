@@ -10,11 +10,11 @@ import androidx.activity.result.contract.ActivityResultContract
  * ```
  *  private val linkLauncher = registerForActivityResult(LinkContract()) { result ->
  *      when(result) {
- *          is LinkResult.Success -> {
+ *          is LinkSuccess -> {
  *              // success transaction
- *              Log.d("LinkResult", "Success. ${result.payloads}")
+ *              Log.d("LinkResult", "Succeed. ${result.payloads}")
  *          }
- *          is LinkResult.Exited -> {
+ *          is LinkExit -> {
  *              // user exited the flow by clicking on back or close button
  *              // probably because of an error
  *              Log.d("LinkResult", "Exited. ${result.errorMessage}")

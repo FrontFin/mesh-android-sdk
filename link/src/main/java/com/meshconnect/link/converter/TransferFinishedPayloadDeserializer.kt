@@ -8,7 +8,7 @@ import com.meshconnect.link.entity.TransferFinishedPayload
 import com.meshconnect.link.entity.TransferFinishedSuccessPayload
 import java.lang.reflect.Type
 
-class TransferFinishedPayloadDeserializer : JsonDeserializer<TransferFinishedPayload> {
+internal class TransferFinishedPayloadDeserializer : JsonDeserializer<TransferFinishedPayload> {
 
     override fun deserialize(
         json: JsonElement,
