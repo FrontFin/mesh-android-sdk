@@ -13,15 +13,15 @@ data class AccessTokenPayload(
     val brokerType: String,
     val brokerName: String,
     val brokerBrandInfo: BrandInfo,
-    val expiresInSeconds: Int? = null,
-    val refreshTokenExpiresInSeconds: Int? = null,
+    val expiresInSeconds: Int?,
+    val refreshTokenExpiresInSeconds: Int?,
 ) : LinkPayload
 
 @Parcelize
 data class AccountToken(
     val account: Account,
     val accessToken: String,
-    val refreshToken: String? = null,
+    val refreshToken: String?,
 ) : Parcelable
 
 @Parcelize
@@ -30,10 +30,11 @@ data class Account(
     val accountName: String,
     val fund: Double?,
     val cash: Double?,
+    val isReconnected: Boolean?
 ) : Parcelable
 
 @Parcelize
 data class BrandInfo(
-    val brokerLogo: String? = null,
-    val brokerPrimaryColor: String? = null
+    val brokerLogo: String?,
+    val brokerPrimaryColor: String?
 ) : Parcelable

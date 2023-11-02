@@ -19,17 +19,22 @@ class AccessTokenPayloadDeserializeTest {
             brokerType = "alpaca",
             brokerName = "Alpaca",
             brokerBrandInfo = BrandInfo(
-                brokerLogo = "iVBORwxxxxxSUhEUgAAA"
+                brokerLogo = "iVBORwxxxxxSUhEUgAAA",
+                brokerPrimaryColor = "#FFF"
             ),
+            expiresInSeconds = 200,
+            refreshTokenExpiresInSeconds = 300,
             accountTokens = listOf(
                 AccountToken(
                     account = Account(
                         accountId = "2wwwc105-5xx-4390x",
                         accountName = "xx9xxx226",
-                        fund = 5.26,
-                        cash = 5.26
+                        fund = 5.36,
+                        cash = 5.26,
+                        isReconnected = false
                     ),
-                    accessToken = "8/luwjLWf/QxxfilS2r"
+                    accessToken = "8/luwjLWf/QxxfilS2r",
+                    refreshToken = "#34381lmefl93"
                 )
             )
         )
