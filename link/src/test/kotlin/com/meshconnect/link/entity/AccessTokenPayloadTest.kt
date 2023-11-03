@@ -52,11 +52,13 @@ class AccessTokenPayloadTest {
         val fund = 1.0
         val cash = 3.0
         val isReconnected = false
+        val frontAccountId = randomString
 
-        val it = Account(id, name, fund, cash, isReconnected)
+        val it = Account(id, name, frontAccountId, fund, cash, isReconnected)
 
         assertEquals(id, it.accountId)
         assertEquals(name, it.accountName)
+        assertEquals(frontAccountId, it.frontAccountId)
         assertEquals(fund, it.fund)
         assertEquals(cash, it.cash)
         assertEquals(isReconnected, it.isReconnected)

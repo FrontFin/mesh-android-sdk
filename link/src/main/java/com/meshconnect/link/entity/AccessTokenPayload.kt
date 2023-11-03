@@ -28,6 +28,7 @@ data class AccountToken(
 data class Account(
     val accountId: String,
     val accountName: String,
+    val frontAccountId: String,
     val fund: Double?,
     val cash: Double?,
     val isReconnected: Boolean?

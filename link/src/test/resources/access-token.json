@@ -5,7 +5,8 @@
         "accountName": "xx9xxx226",
         "fund": 5.36,
         "cash": 5.26,
-        "isReconnected": false
+        "isReconnected": false,
+        "frontAccountId": "wow_id"
       },
       "accessToken": "8/luwjLWf/QxxfilS2r",
       "refreshToken": "#34381lmefl93"
