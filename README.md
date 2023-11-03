@@ -1,10 +1,10 @@
 # Mesh Connect Android SDK
 
-Android library for integrating with Mesh Connect
+Android library for integrating with Mesh Connect.
 
 ## Installation
 
-Add `link` dependency to your `build.gradle`
+Add `link` dependency to your `build.gradle`:
 ```gradle
 dependencies {
     implementation 'com.meshconnect:link:2.0.0'
@@ -26,8 +26,7 @@ Link token should be obtained from the POST `/api/v1/linktoken` endpoint. API re
 
 ## Launch Link
 
-Use `linkToken` to connect a brokerage account or initiate a crypto transfer
-
+Use `linkToken` to connect a brokerage account or initiate a crypto transfer:
 ```kotlin
 import com.meshconnect.link.entity.AccessTokenPayload
 import com.meshconnect.link.entity.LinkPayload
@@ -85,7 +84,7 @@ class LinkExampleActivity : AppCompatActivity() {
 
 ## Account storage
 
-Android SDK provides built-in encrypted storage for connected accounts
+Android SDK provides built-in encrypted storage for connected accounts:
 ```kotlin
 private val accountStore: MeshAccountStore = createPreferenceAccountStore(context)
 ```
