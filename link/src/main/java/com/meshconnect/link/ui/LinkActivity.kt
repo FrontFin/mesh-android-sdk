@@ -175,14 +175,11 @@ internal class LinkActivity : AppCompatActivity() {
     }
 
     inner class WebClient : WebViewClient() {
-        override fun onPageFinished(view: WebView?, url: String?) {
-            super.onPageFinished(view, url)
-            binding.progress.isVisible = false
-        }
 
         override fun onPageCommitVisible(view: WebView?, url: String?) {
             super.onPageCommitVisible(view, url)
             binding.toolbar.isGone = isLinkUrl(url)
+            binding.progress.isVisible = false
         }
 
         private fun isLinkUrl(url: String?): Boolean {
