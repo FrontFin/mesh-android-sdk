@@ -1,0 +1,17 @@
+apply plugin: 'org.sonarqube'
+
+sonar {
+    properties {
+        property 'sonar.skipCompile', true
+        property 'sonar.projectKey', sonarProjectKey
+        property 'sonar.host.url', sonarHostUrl
+        property 'sonar.login', sonarLogin
+        property 'sonar.projectVersion', android.defaultConfig.versionCode
+        property 'sonar.projectName', 'mesh-android-sdk/link'
+        property 'sonar.projectDescription', 'Mesh Connect Android SDK'
+        property 'sonar.tests', 'src/test/kotlin'
+        property 'sonar.coverage.jacoco.xmlReportPaths', '**/jacocoTestReport.xml'
+        property 'sonar.androidLint.reportPaths', 'build/reports/lint-results-release.xml'
+        property 'sonar.junit.reportPaths', 'build/test-results/testReleaseUnitTest'
+    }
+}

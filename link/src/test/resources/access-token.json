@@ -1,0 +1,22 @@
+{
+    "accountTokens": [{
+      "account": {
+        "accountId": "2wwwc105-5xx-4390x",
+        "accountName": "xx9xxx226",
+        "fund": 5.36,
+        "cash": 5.26,
+        "isReconnected": false,
+        "frontAccountId": "wow_id"
+      },
+      "accessToken": "8/luwjLWf/QxxfilS2r",
+      "refreshToken": "#34381lmefl93"
+    }],
+    "brokerType": "alpaca",
+    "brokerName": "Alpaca",
+    "brokerBrandInfo": {
+      "brokerLogo": "iVBORwxxxxxSUhEUgAAA",
+      "brokerPrimaryColor": "#FFF"
+    },
+  "expiresInSeconds": 200,
+  "refreshTokenExpiresInSeconds": 300
+}

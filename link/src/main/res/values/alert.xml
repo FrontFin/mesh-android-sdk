@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="MeshLink.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorPrimary">@color/blue</item>
+        <item name="alertDialogStyle">@style/MeshLink.AlertDialogStyle</item>
+        <item name="materialAlertDialogTitlePanelStyle">
+            @style/MeshLink.MaterialAlertDialog.Title.Panel
+        </item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MeshLink.MaterialAlertDialog.Title
+        </item>
+        <item name="materialAlertDialogBodyTextStyle">@style/MeshLink.MaterialAlertDialog.Body
+        </item>
+        <item name="buttonBarPositiveButtonStyle">
+            @style/MeshLink.MaterialAlertDialog.Button.Positive
+        </item>
+        <item name="buttonBarNegativeButtonStyle">
+            @style/MeshLink.MaterialAlertDialog.Button.Negative
+        </item>
+    </style>
+
+    <style name="MeshLink.AlertDialogStyle" parent="MaterialAlertDialog.MaterialComponents">
+        <item name="shapeAppearance">@style/MeshLink.ShapeAppearance</item>
+        <item name="shapeAppearanceOverlay">@null</item>
+    </style>
+
+    <style name="MeshLink.ShapeAppearance" parent="ShapeAppearance.MaterialComponents">
+        <item name="cornerSize">24dp</item>
+    </style>
+
+    <style name="MeshLink.MaterialAlertDialog.Title.Panel" parent="MaterialAlertDialog.MaterialComponents.Title.Panel">
+        <item name="android:paddingTop">24dp</item>
+    </style>
+
+    <style name="MeshLink.MaterialAlertDialog.Title" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="fontFamily">@font/dm_sans_bold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="MeshLink.MaterialAlertDialog.Body" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="fontFamily">@font/dm_sans_regular</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="MeshLink.MaterialAlertDialog.Button.Positive" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="fontFamily">@font/dm_sans_bold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:insetBottom">16dp</item>
+    </style>
+
+    <style name="MeshLink.MaterialAlertDialog.Button.Negative" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="fontFamily">@font/dm_sans_regular</item>
+        <item name="android:textSize">16sp</item>
+        <item name="textAllCaps">false</item>
+    </style>
+
+</resources>

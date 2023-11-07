@@ -1,0 +1,47 @@
+apply from: "$rootDir/android-library.gradle"
+apply plugin: 'kotlin-parcelize'
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+apply from: "$rootDir/gradle/publish.gradle"
+apply from: 'jacoco.gradle'
+apply from: 'sonar.gradle'
+
+android {
+    namespace 'com.meshconnect.link'
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+    // see https://googlesamples.github.io/android-custom-lint-rules/user-guide.md.html#lintgradleplugindsl
+    // and https://googlesamples.github.io/android-custom-lint-rules/user-guide.md.html#performancetuning
+    lint {
+        abortOnError true
+        ignoreTestSources true
+        warningsAsErrors true
+    }
+    kotlinOptions {
+        freeCompilerArgs += [
+                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+        ]
+    }
+}
+
+dependencies {
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.lifecycle.runtime
+    implementation libs.androidx.lifecycle.viewmodel
+    implementation libs.androidx.security.crypto
+    implementation libs.google.material
+    implementation libs.google.gson
+    implementation libs.kotlinx.coroutines.core
+
+    testImplementation libs.junit
+    testImplementation libs.io.mockk
+    testImplementation libs.kotlinx.coroutines.test
+    testImplementation libs.kluent
+    testImplementation libs.androidx.core.testing
+}

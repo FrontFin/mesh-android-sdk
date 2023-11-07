@@ -99,6 +99,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Front.B2B.Android"
+rootProject.name = "mesh-android-sdk"
 include ':app'
-include ':catalog'
+include ':link'
