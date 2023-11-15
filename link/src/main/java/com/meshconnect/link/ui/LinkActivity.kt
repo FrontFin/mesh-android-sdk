@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.Message
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
@@ -167,12 +168,12 @@ internal class LinkActivity : AppCompatActivity() {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.setSupportMultipleWindows(true)
+            settings.cacheMode = WebSettings.LOAD_NO_CACHE
             addJavascriptInterface(JSBridge(viewModel), JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
             webViewClient = WebClient()
             webChromeClient = ChromeClient()
             loadUrl(url)
-            evaluateJavascript(meshSDKPlatformScript, null)
         }
     }
 
@@ -197,6 +198,12 @@ internal class LinkActivity : AppCompatActivity() {
             request: WebResourceRequest?
         ): Boolean {
             return false
+        }
+
+        override fun onPageFinished(view: WebView?, url: String?) {
+            super.onPageFinished(view, url)
+            // the page has finished loading, execute the JavaScript
+            binding.webView.evaluateJavascript(meshSDKPlatformScript, null)
         }
     }
 
