@@ -24,6 +24,7 @@ import com.meshconnect.link.utils.decodeCatching
 import com.meshconnect.link.utils.getParcelable
 import com.meshconnect.link.utils.intent
 import com.meshconnect.link.utils.lazyNone
+import com.meshconnect.link.utils.meshSDKPlatformScript
 import com.meshconnect.link.utils.observeEvent
 import com.meshconnect.link.utils.onClick
 import com.meshconnect.link.utils.showToast
@@ -171,6 +172,7 @@ internal class LinkActivity : AppCompatActivity() {
             webViewClient = WebClient()
             webChromeClient = ChromeClient()
             loadUrl(url)
+            evaluateJavascript(meshSDKPlatformScript, null)
         }
     }
 

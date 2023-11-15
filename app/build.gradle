@@ -12,7 +12,7 @@ android {
 
 dependencies {
     devImplementation project(':link')
-    liveImplementation ('com.meshconnect:link:2.0.0-SNAPSHOT') { changing = true }
+    liveImplementation ('com.meshconnect:link:2.0.0') { changing = true }
     implementation libs.androidx.appcompat
     implementation libs.androidx.core.ktx
     implementation libs.androidx.lifecycle.runtime
