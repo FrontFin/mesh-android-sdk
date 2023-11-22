@@ -7,7 +7,7 @@ Android library for integrating with Mesh Connect.
 Add `link` dependency to your `build.gradle`:
 ```gradle
 dependencies {
-    implementation 'com.meshconnect:link:2.0.0'
+    implementation 'com.meshconnect:link:2.0.1'
 }
 ```
 
