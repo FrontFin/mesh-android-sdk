@@ -15,6 +15,9 @@ android {
             withJavadocJar()
         }
     }
+    defaultConfig {
+        buildConfigField "String", "VERSION", "\"$publishVersion\""
+    }
     // see https://googlesamples.github.io/android-custom-lint-rules/user-guide.md.html#lintgradleplugindsl
     // and https://googlesamples.github.io/android-custom-lint-rules/user-guide.md.html#performancetuning
     lint {

@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.Message
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +25,7 @@ import com.meshconnect.link.utils.decodeCatching
 import com.meshconnect.link.utils.getParcelable
 import com.meshconnect.link.utils.intent
 import com.meshconnect.link.utils.lazyNone
+import com.meshconnect.link.utils.meshSDKPlatformScript
 import com.meshconnect.link.utils.observeEvent
 import com.meshconnect.link.utils.onClick
 import com.meshconnect.link.utils.showToast
@@ -166,6 +168,7 @@ internal class LinkActivity : AppCompatActivity() {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.setSupportMultipleWindows(true)
+            settings.cacheMode = WebSettings.LOAD_NO_CACHE
             addJavascriptInterface(JSBridge(viewModel), JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
             webViewClient = WebClient()
@@ -195,6 +198,11 @@ internal class LinkActivity : AppCompatActivity() {
             request: WebResourceRequest?
         ): Boolean {
             return false
+        }
+
+        override fun onPageFinished(view: WebView?, url: String?) {
+            super.onPageFinished(view, url)
+            binding.webView.evaluateJavascript(meshSDKPlatformScript, null)
         }
     }
 
