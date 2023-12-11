@@ -5,13 +5,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.meshconnect.android.databinding.LinkExampleActivityBinding
 import com.meshconnect.link.entity.AccessTokenPayload
+import com.meshconnect.link.entity.LinkConfig
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.entity.TransferFinishedErrorPayload
 import com.meshconnect.link.entity.TransferFinishedSuccessPayload
 import com.meshconnect.link.store.LinkPayloads
 import com.meshconnect.link.store.createPreferenceAccountStore
 import com.meshconnect.link.store.getAccountsFromPayload
-import com.meshconnect.link.ui.LinkContract
+import com.meshconnect.link.ui.LaunchLink
 import com.meshconnect.link.ui.LinkExit
 import com.meshconnect.link.ui.LinkSuccess
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +39,9 @@ class LinkExampleActivity : AppCompatActivity() {
         // Launch Link
         binding.linkButton.setOnClickListener {
             linkLauncher.launch(
-                "linkToken"
+                LinkConfig(
+                    token = "linkToken",
+                )
             )
         }
 
@@ -52,7 +55,7 @@ class LinkExampleActivity : AppCompatActivity() {
         }
     }
 
-    private val linkLauncher = registerForActivityResult(LinkContract()) { result ->
+    private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
         when (result) {
             is LinkSuccess -> {
                 handlePayloads(result.payloads)
