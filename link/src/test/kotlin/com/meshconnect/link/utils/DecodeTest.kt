@@ -22,8 +22,15 @@ class DecodeTest {
     }
 
     @Test
-    fun `verify link decode function returns 'Empty linkToken'`() {
+    fun `verify link decode function returns 'Empty linkToken' when empty`() {
         val result = decodeCatching("")
+        val exception = result.exceptionOrNull()
+        exception?.message shouldBe "Empty 'catalogLink' or 'linkToken'"
+    }
+
+    @Test
+    fun `verify link decode function returns 'Empty linkToken' when null`() {
+        val result = decodeCatching(null)
         val exception = result.exceptionOrNull()
         exception?.message shouldBe "Empty 'catalogLink' or 'linkToken'"
     }

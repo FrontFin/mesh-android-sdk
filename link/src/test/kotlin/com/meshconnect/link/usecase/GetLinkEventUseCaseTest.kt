@@ -120,4 +120,23 @@ class GetLinkEventUseCaseTest : UseCaseTest() {
         }
         assert(ex.message!!.startsWith("Faced an error while parsing transfer finished payload"))
     }
+
+    @Test
+    fun `test onError throws with correct message`() {
+        val errorMessage = randomString
+        every { gson.fromJson<JsError>("") } returns JsError(errorMessage)
+        val exception = assertThrows(IllegalStateException::class.java) {
+            useCase.onError("")
+        }
+        assert(exception.message == errorMessage)
+    }
+
+    @Test
+    fun `test onError throws with undefined error message`() {
+        every { gson.fromJson<JsError>("") } returns JsError(null)
+        val exception = assertThrows(IllegalStateException::class.java) {
+            useCase.onError("")
+        }
+        assert(exception.message == "Undefined error")
+    }
 }
