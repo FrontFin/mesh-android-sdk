@@ -1,6 +1,5 @@
 package com.meshconnect.android
 
-import android.util.Log
 import com.meshconnect.link.store.MeshAccount
 
 fun toString(accounts: List<MeshAccount>): String {
@@ -21,8 +20,4 @@ fun toString(accounts: List<MeshAccount>): String {
 
 fun StringBuilder.add(key: String, value: String?) {
     if (value != null) appendLine("$key: $value")
-}
-
-fun log(obj: Any?, TAG: String = "meshLog") {
-    Log.d(TAG, obj.toString())
 }

@@ -27,7 +27,10 @@ import androidx.activity.result.contract.ActivityResultContract
  *  }
  * ```
  */
-@Suppress("unused")
+@Deprecated(
+    "'LaunchLink' is available",
+    ReplaceWith("LaunchLink", "com.meshconnect.link.ui.LaunchLink"),
+)
 class LinkContract : ActivityResultContract<String, LinkResult>() {
 
     /**

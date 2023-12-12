@@ -19,7 +19,7 @@ import com.google.gson.Gson
 import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
 import com.meshconnect.link.databinding.LinkActivityBinding
-import com.meshconnect.link.entity.LinkConfig
+import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.utils.OnPageFinishedScriptBuilder
@@ -50,11 +50,13 @@ internal class LinkActivity : AppCompatActivity() {
             return intent<LinkActivity>(activity).putExtra(LINK, catalogLink)
         }
 
-        fun getLinkIntent(activity: Context, config: LinkConfig): Intent {
-            val (token, accessTokens, transferTokens) = config
-            val intent = intent<LinkActivity>(activity).putExtra(LINK, token)
+        fun getLinkIntent(activity: Context, config: LinkConfiguration): Intent {
+            val intent = intent<LinkActivity>(activity).putExtra(LINK, config.token)
 
-            if (accessTokens != null || transferTokens != null) {
+            val accessTokens = config.accessTokens
+            val transferTokens = config.transferDestinationTokens
+
+            if (!accessTokens.isNullOrEmpty() || !transferTokens.isNullOrEmpty()) {
                 val gson = Gson()
                 if (accessTokens != null) {
                     intent.putExtra(ACCESS_TOKENS, gson.toJson(accessTokens))

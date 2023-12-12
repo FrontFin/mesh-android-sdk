@@ -3,48 +3,40 @@ package com.meshconnect.link.ui
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
-import com.meshconnect.link.entity.LinkConfig
+import com.meshconnect.link.entity.LinkConfiguration
 
 /**
- * Implements [ActivityResultContract] to start catalog activity
+ * Implements [ActivityResultContract] to start the Link Activity
  * and returns [LinkResult] in callback.
  * ```
+ *  // Register an Activity Result callback
  *  private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
  *      when(result) {
- *          is LinkSuccess -> {
- *              // success transaction
- *              Log.d("LinkResult", "Succeed. ${result.payloads}")
- *          }
- *          is LinkExit -> {
- *              // user exited the flow by clicking on back or close button
- *              // probably because of an error
- *              Log.d("LinkResult", "Exited. ${result.errorMessage}")
- *          }
+ *          is LinkSuccess -> /* handle success */
+ *          is LinkExit -> /* handle exit */
  *      }
  *  }
  *
- *  linkButton.setOnClickListener {
- *      linkLauncher.launch(
- *          LinkConfig(
- *              token = "linkToken", // OR catalogLink
- *              accessTokens = listOf(IntegrationAccessToken(..)) // optional
- *              transferDestinationTokens = listOf(IntegrationAccessToken(..)) // optional
- *          )
- *  }
+ *  // Create a LinkConfiguration
+ *  val configuration = LinkConfiguration(
+ *      token = "linkToken"
+ *  )
+ *
+ *  // Launch Link
+ *  linkLauncher.launch(configuration)
  * ```
  */
-@Suppress("unused")
-class LaunchLink : ActivityResultContract<LinkConfig, LinkResult>() {
+class LaunchLink : ActivityResultContract<LinkConfiguration, LinkResult>() {
 
     /**
-     * Returns intent to start catalog activity.
+     * Returns [Intent] to start the Link Activity.
      */
-    override fun createIntent(context: Context, input: LinkConfig): Intent {
+    override fun createIntent(context: Context, input: LinkConfiguration): Intent {
         return LinkActivity.getLinkIntent(context, input)
     }
 
     /**
-     * Extracts [LinkResult] from result intent.
+     * Extracts [LinkResult] from [Intent].
      */
     override fun parseResult(resultCode: Int, intent: Intent?): LinkResult {
         return LinkActivity.getLinkResult(intent)

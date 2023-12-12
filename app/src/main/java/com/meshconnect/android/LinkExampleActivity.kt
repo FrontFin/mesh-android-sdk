@@ -1,11 +1,12 @@
 package com.meshconnect.android
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.meshconnect.android.databinding.LinkExampleActivityBinding
 import com.meshconnect.link.entity.AccessTokenPayload
-import com.meshconnect.link.entity.LinkConfig
+import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.entity.TransferFinishedErrorPayload
 import com.meshconnect.link.entity.TransferFinishedSuccessPayload
@@ -32,20 +33,21 @@ class LinkExampleActivity : AppCompatActivity() {
         // Subscribe for payloads
         lifecycleScope.launch(Dispatchers.IO) {
             LinkPayloads.collect { payload ->
-                log("Payload received. $payload")
+                logD("Payload received. $payload")
             }
         }
 
+        // Create LinkConfiguration
+        val configuration = LinkConfiguration(
+            token = "linkToken"
+        )
+
         // Launch Link
         binding.linkButton.setOnClickListener {
-            linkLauncher.launch(
-                LinkConfig(
-                    token = "linkToken",
-                )
-            )
+            linkLauncher.launch(configuration)
         }
 
-        // Subscribe for accounts saved into secured storage
+        // Subscribe for accounts saved into secure storage
         lifecycleScope.launch(Dispatchers.IO) {
             accountStore.accounts().collect { accounts ->
                 runOnUiThread {
@@ -57,15 +59,8 @@ class LinkExampleActivity : AppCompatActivity() {
 
     private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
         when (result) {
-            is LinkSuccess -> {
-                handlePayloads(result.payloads)
-            }
-
-            is LinkExit -> {
-                // user exited the flow by clicking on the back or close button
-                // probably because of an error
-                log("Exited. ${result.errorMessage}")
-            }
+            is LinkSuccess -> handlePayloads(result.payloads)
+            is LinkExit -> logD("Exit. ${result.errorMessage}")
         }
     }
 
@@ -73,17 +68,17 @@ class LinkExampleActivity : AppCompatActivity() {
         payloads.forEach { payload ->
             when (payload) {
                 is AccessTokenPayload -> {
-                    log("Broker connected. $payload")
+                    logD("Broker connected. $payload")
                     // save accounts into secure storage (optional)
                     saveAccountsFromPayload(payload)
                 }
 
                 is TransferFinishedSuccessPayload -> {
-                    log("Transfer succeed. $payload")
+                    logD("Transfer succeed. $payload")
                 }
 
                 is TransferFinishedErrorPayload -> {
-                    log("Transfer failed. $payload")
+                    logD("Transfer failed. $payload")
                 }
             }
         }
@@ -93,5 +88,9 @@ class LinkExampleActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             accountStore.insert(getAccountsFromPayload(payload))
         }
+    }
+
+    private fun logD(obj: Any?, TAG: String = "meshLog") {
+        Log.d(TAG, obj.toString())
     }
 }
