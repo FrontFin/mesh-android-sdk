@@ -1,7 +1,6 @@
 package com.meshconnect.android
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.meshconnect.android.databinding.LinkExampleActivityBinding
@@ -88,9 +87,5 @@ class LinkExampleActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             accountStore.insert(getAccountsFromPayload(payload))
         }
-    }
-
-    private fun logD(obj: Any?, tag: String = "meshLog") {
-        Log.d(tag, obj.toString())
     }
 }
