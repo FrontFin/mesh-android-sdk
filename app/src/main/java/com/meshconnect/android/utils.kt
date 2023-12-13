@@ -10,7 +10,7 @@ fun toString(accounts: List<MeshAccount>): String {
             add("brokerType", a.brokerType)
             add("accountId", a.accountId)
             add("accountName", a.accountName)
-            add("accessToken", a.accessToken.take(100))
+            add("accessToken", a.accessToken.take(n = 100))
             add("refreshToken", a.refreshToken)
             appendLine()
         }

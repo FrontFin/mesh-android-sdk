@@ -90,7 +90,7 @@ class LinkExampleActivity : AppCompatActivity() {
         }
     }
 
-    private fun logD(obj: Any?, TAG: String = "meshLog") {
-        Log.d(TAG, obj.toString())
+    private fun logD(obj: Any?, tag: String = "meshLog") {
+        Log.d(tag, obj.toString())
     }
 }
