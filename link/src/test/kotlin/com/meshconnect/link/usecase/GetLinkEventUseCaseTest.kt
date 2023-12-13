@@ -139,4 +139,12 @@ class GetLinkEventUseCaseTest : UseCaseTest() {
         }
         assert(exception.message == "Undefined error")
     }
+
+    @Test
+    fun `test loaded event`() = runTest {
+        every { gson.fromJson<JsType>("") } returns JsType(Type.loaded)
+        val result = useCase.launch("")
+        assert(result.isSuccess)
+        assert(result.getOrNull() == LinkEvent.Loaded)
+    }
 }

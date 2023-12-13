@@ -26,6 +26,7 @@ internal class GetLinkEventUseCase(
             Type.brokerageAccountAccessToken -> onAccessToken(json)
             Type.transferFinished -> onTransferFinished(json)
             Type.error -> onError(json)
+            Type.loaded -> LinkEvent.Loaded
             else -> LinkEvent.Undefined
         }
     }

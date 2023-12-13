@@ -4,14 +4,13 @@ import com.meshconnect.link.randomString
 import org.amshove.kluent.internal.assertEquals
 import org.junit.Test
 
-@Suppress("MaxLineLength")
-class OnPageFinishedScriptBuilderTest {
+class OnLoadedScriptBuilderTest {
     @Test
     fun `test default constructor`() {
         val version = randomString
-        val script = OnPageFinishedScriptBuilder(version).build()
+        val script = OnLoadedScriptBuilder(version).build()
         assertEquals(
-            "window.meshSdkPlatform='android';window.meshSdkVersion='$version';if(window.parent) {window.parent.meshSdkPlatform='android';window.parent.meshSdkVersion='$version';}",
+            "window.meshSdkPlatform='android';window.meshSdkVersion='$version'",
             script
         )
     }
@@ -22,14 +21,14 @@ class OnPageFinishedScriptBuilderTest {
         val accessTokens = randomString
         val transferDestinationTokens = randomString
 
-        val script = OnPageFinishedScriptBuilder(
+        val script = OnLoadedScriptBuilder(
             version,
             accessTokens,
             transferDestinationTokens
         ).build()
 
         assertEquals(
-            "window.meshSdkPlatform='android';window.meshSdkVersion='$version';if(window.parent) {window.parent.meshSdkPlatform='android';window.parent.meshSdkVersion='$version';};window.accessTokens='$accessTokens';window.transferDestinationTokens='$transferDestinationTokens'",
+            "window.meshSdkPlatform='android';window.meshSdkVersion='$version';window.accessTokens='$accessTokens';window.transferDestinationTokens='$transferDestinationTokens'",
             script
         )
     }

@@ -22,7 +22,7 @@ import com.meshconnect.link.databinding.LinkActivityBinding
 import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
-import com.meshconnect.link.utils.OnPageFinishedScriptBuilder
+import com.meshconnect.link.utils.OnLoadedScriptBuilder
 import com.meshconnect.link.utils.alertDialog
 import com.meshconnect.link.utils.decodeCatching
 import com.meshconnect.link.utils.getParcelable
@@ -35,7 +35,6 @@ import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
 import com.meshconnect.link.utils.windowInsetsController
 import java.net.URL
-import java.util.concurrent.atomic.AtomicBoolean
 
 internal class LinkActivity : AppCompatActivity() {
 
@@ -140,8 +139,19 @@ internal class LinkActivity : AppCompatActivity() {
                 is LinkEvent.Close, LinkEvent.Done -> finish()
                 is LinkEvent.ShowClose -> showCloseDialog()
                 is LinkEvent.Payload, LinkEvent.Undefined -> Unit
+                is LinkEvent.Loaded -> onLinkLoaded()
             }
         }
+    }
+
+    private fun onLinkLoaded() {
+        val script = OnLoadedScriptBuilder(
+            version = BuildConfig.VERSION,
+            accessTokens = intent.getStringExtra(ACCESS_TOKENS),
+            transferDestinationTokens = intent.getStringExtra(TRANSFER_TOKENS)
+        ).build()
+
+        binding.webView.evaluateJavascript(script, null)
     }
 
     override fun finish() {
@@ -201,8 +211,6 @@ internal class LinkActivity : AppCompatActivity() {
     }
 
     inner class WebClient : WebViewClient() {
-        private var evaluated = AtomicBoolean()
-
         override fun onPageCommitVisible(view: WebView?, url: String?) {
             super.onPageCommitVisible(view, url)
             binding.toolbar.isGone = isLinkUrl(url)
@@ -222,19 +230,6 @@ internal class LinkActivity : AppCompatActivity() {
             request: WebResourceRequest?
         ): Boolean {
             return false
-        }
-
-        override fun onPageFinished(view: WebView?, url: String?) {
-            super.onPageFinished(view, url)
-            if (evaluated.getAndSet(true)) {
-                return
-            }
-            val script = OnPageFinishedScriptBuilder(
-                version = BuildConfig.VERSION,
-                accessTokens = intent.getStringExtra(ACCESS_TOKENS),
-                transferDestinationTokens = intent.getStringExtra(TRANSFER_TOKENS)
-            ).build()
-            view?.evaluateJavascript(script, null)
         }
     }
 
