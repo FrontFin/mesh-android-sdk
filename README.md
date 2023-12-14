@@ -4,16 +4,20 @@ Android library for integrating with Mesh Connect.
 
 ## Installation
 
-Add `link` dependency to your `build.gradle`:
+Add dependency to your `build.gradle`:
+
+![Maven Central](https://img.shields.io/maven-central/v/com.meshconnect/link?color=%23037FFF&link=https%3A%2F%2Fsearch.maven.org%2Fartifact%2Fcom.meshconnect%2Flink)
 ```gradle
 dependencies {
-    implementation 'com.meshconnect:link:2.0.1'
+    implementation 'com.meshconnect:link:$linkVersion'
 }
 ```
 
-## Get Link token
+## Getting Link token
 
-Link token should be obtained from the POST `/api/v1/linktoken` endpoint. API reference for this request is available [here](https://docs.meshconnect.com/reference/post_api-v1-linktoken). The request must be performed from the server side because it requires the client's secret. You will get the response in the following format:
+Link token should be obtained from the POST [`/api/v1/linktoken`](https://docs.meshconnect.com/reference/post_api-v1-linktoken) endpoint.
+The request must be performed from the server side as it risks exposing your API secret.
+You will get the response in the following format:
 ```json
 {
   "content": {
@@ -24,67 +28,68 @@ Link token should be obtained from the POST `/api/v1/linktoken` endpoint. API re
 }
 ```
 
-## Launch Link
+## Launching Link
 
-Use `linkToken` to connect a brokerage account or initiate a crypto transfer:
+### Create a LinkConfiguration
+
+Each time you launch Link, you will need to get a new `linkToken` from your server and create a new
+`LinkConfiguration` object with it:
+
 ```kotlin
-import com.meshconnect.link.entity.AccessTokenPayload
-import com.meshconnect.link.entity.LinkPayload
-import com.meshconnect.link.entity.TransferFinishedErrorPayload
-import com.meshconnect.link.entity.TransferFinishedSuccessPayload
-import com.meshconnect.link.ui.LinkContract
-import com.meshconnect.link.ui.LinkExit
-import com.meshconnect.link.ui.LinkSuccess
+val configuration = LinkConfiguration(
+    token = "linkToken",
+)
+```
 
-class LinkExampleActivity : AppCompatActivity() {
+The `LinkConfiguration` class allows to add:
+- `accessTokens` - list of `IntegrationAccessToken`s that used as an origin for crypto transfer
+  flow;
+- `transferDestinationTokens` - list of `IntegrationAccessToken`s that used as a destination for
+  crypto transfer flow.
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+### Register an Activity Result callback
 
-        // launch Link
-        linkButton.setOnClickListener {
-            linkLauncher.launch(
-                "linkToken"
-            )
+The Link SDK runs as a separate Activity within your app.
+In order to return the result to your app it supports the [Activity Result APIs](https://developer.android.com/training/basics/intents/result).
+
+```kotlin
+private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
+    when (result) {
+        is LinkSuccess -> handlePayloads(result.payloads)
+        is LinkExit -> {
+            // user exited the flow by clicking on the back or close button
+            // or an error occured, check 'result.errorMessage'
         }
     }
+}
 
-    private val linkLauncher = registerForActivityResult(LinkContract()) { result ->
-        when (result) {
-            is LinkSuccess -> {
-                handlePayloads(result.payloads)
-            }
-
-            is LinkExit -> {
-                // user canceled the flow by clicking on the back or close button
-                // probably because of an error. Use 'result.errorMessage' to get details.
-            }
-        }
-    }
-
-    private fun handlePayloads(payloads: List<LinkPayload>) {
-        payloads.forEach { payload ->
-            when (payload) {
-                is AccessTokenPayload -> {
-                    // broker connected. Use 'payload' to get details.
-                }
-                
-                is TransferFinishedSuccessPayload -> {
-                    // transfer succeed. Use 'payload' to get details.
-                }
-                
-                is TransferFinishedErrorPayload -> {
-                    // transfer failed. Use 'payload' to get details.
-                }
-            }
+private fun handlePayloads(payloads: List<LinkPayload>) {
+    payloads.forEach { payload ->
+        when (payload) {
+            is AccessTokenPayload -> /* broker connected */
+            is TransferFinishedSuccessPayload -> /* transfer succeed */
+            is TransferFinishedErrorPayload -> /* transfer failed */
         }
     }
 }
 ```
 
-## Account storage
+### Launch Link
 
-Android SDK provides built-in encrypted storage for connected accounts:
+```kotlin
+linkLauncher.launch(
+    LinkConfig(
+        token = "linkToken"
+    )
+)
+```
+
+At this point, Link will open, and will return the `LinkSuccess` object if the user successfully
+completes the Link flow.
+
+## Storing the linked accounts
+
+Android SDK provides built-in encrypted storage for linked accounts:
 ```kotlin
 private val accountStore: MeshAccountStore = createPreferenceAccountStore(context)
 ```

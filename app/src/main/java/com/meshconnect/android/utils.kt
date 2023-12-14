@@ -11,7 +11,7 @@ fun toString(accounts: List<MeshAccount>): String {
             add("brokerType", a.brokerType)
             add("accountId", a.accountId)
             add("accountName", a.accountName)
-            add("accessToken", a.accessToken.take(100))
+            add("accessToken", a.accessToken.take(n = 100))
             add("refreshToken", a.refreshToken)
             appendLine()
         }
@@ -23,6 +23,6 @@ fun StringBuilder.add(key: String, value: String?) {
     if (value != null) appendLine("$key: $value")
 }
 
-fun log(obj: Any?, TAG: String = "meshLog") {
-    Log.d(TAG, obj.toString())
+fun logD(obj: Any?, tag: String = "meshLog") {
+    Log.d(tag, obj.toString())
 }

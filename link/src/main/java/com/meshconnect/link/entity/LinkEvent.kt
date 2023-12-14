@@ -5,5 +5,6 @@ internal sealed interface LinkEvent {
     object Close : LinkEvent
     object ShowClose : LinkEvent
     object Undefined : LinkEvent
+    object Loaded : LinkEvent
     data class Payload(val payload: LinkPayload) : LinkEvent
 }

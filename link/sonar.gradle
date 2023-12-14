@@ -13,5 +13,10 @@ sonar {
         property 'sonar.coverage.jacoco.xmlReportPaths', '**/jacocoTestReport.xml'
         property 'sonar.androidLint.reportPaths', 'build/reports/lint-results-release.xml'
         property 'sonar.junit.reportPaths', 'build/test-results/testReleaseUnitTest'
+        property 'sonar.branch.name', branchName
     }
+}
+
+static def getBranchName() {
+    return 'git rev-parse --abbrev-ref HEAD'.execute().text.trim()
 }
