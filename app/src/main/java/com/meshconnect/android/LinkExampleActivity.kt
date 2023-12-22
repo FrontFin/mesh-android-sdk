@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.meshconnect.android.databinding.LinkExampleActivityBinding
+import com.meshconnect.link.LinkEvent
 import com.meshconnect.link.entity.AccessTokenPayload
 import com.meshconnect.link.entity.DelayedAuthPayload
 import com.meshconnect.link.entity.LinkConfiguration
@@ -33,6 +34,13 @@ class LinkExampleActivity : AppCompatActivity() {
         // Subscribe for 'LinkPayload's
         lifecycleScope.launch {
             LinkPayloads.collect { logD("Payload received. $it") }
+        }
+
+        // Subscribe for events
+        lifecycleScope.launch(Dispatchers.IO) {
+            LinkEvent.collect { event ->
+                logD("Event received. $event")
+            }
         }
 
         // Create LinkConfiguration
