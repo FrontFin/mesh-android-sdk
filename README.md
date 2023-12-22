@@ -67,6 +67,7 @@ private fun handlePayloads(payloads: List<LinkPayload>) {
     payloads.forEach { payload ->
         when (payload) {
             is AccessTokenPayload -> /* broker connected */
+            is DelayedAuthPayload -> /* delayed authentication */
             is TransferFinishedSuccessPayload -> /* transfer succeed */
             is TransferFinishedErrorPayload -> /* transfer failed */
         }
