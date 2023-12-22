@@ -21,8 +21,11 @@ class LinkViewModelTest : ViewModelTest() {
     private val getLinkEventUseCase = mockk<GetLinkEventUseCase>()
     private val payloadReceiver = mockk<PayloadReceiver>()
     private val broadcastLinkMessageUseCase = mockk<BroadcastLinkMessageUseCase>()
+
     private val viewModel = LinkViewModel(
-        getLinkEventUseCase, payloadReceiver, broadcastLinkMessageUseCase
+        getLinkEventUseCase,
+        payloadReceiver,
+        broadcastLinkMessageUseCase
     )
 
     @Test
