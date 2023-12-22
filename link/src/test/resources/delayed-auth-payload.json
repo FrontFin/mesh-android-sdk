@@ -1,0 +1,10 @@
+{
+  "refreshTokenExpiresInSeconds": 1923849,
+  "brokerType": "alpaca",
+  "refreshToken": "lorem-ipsum",
+  "brokerName": "Alpacas",
+  "brokerBrandInfo": {
+    "brokerLogo": "iVB2RSUhEUgAAA",
+    "brokerPrimaryColor": "#FFF"
+  }
+}

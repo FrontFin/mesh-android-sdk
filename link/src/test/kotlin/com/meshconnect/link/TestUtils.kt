@@ -2,6 +2,7 @@ package com.meshconnect.link
 
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import kotlin.random.Random
 import kotlin.streams.asSequence
 
 fun readFile(fileName: String): String {
@@ -19,3 +20,5 @@ val randomString: String
             .joinToString("")
     }
 
+val randomInt: Int
+    get() = Random.nextInt(100)

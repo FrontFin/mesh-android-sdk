@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.google.gson.Gson
 import com.meshconnect.link.converter.fromJson
 import com.meshconnect.link.entity.AccessTokenResponse
+import com.meshconnect.link.entity.DelayedAuthResponse
 import com.meshconnect.link.entity.JsError
 import com.meshconnect.link.entity.JsType
 import com.meshconnect.link.entity.LinkEvent
@@ -27,6 +28,7 @@ internal class GetLinkEventUseCase(
             Type.transferFinished -> onTransferFinished(json)
             Type.error -> onError(json)
             Type.loaded -> LinkEvent.Loaded
+            Type.delayedAuthentication -> onDelayedAuthentication(json)
             else -> LinkEvent.Undefined
         }
     }
@@ -51,5 +53,13 @@ internal class GetLinkEventUseCase(
     fun onError(json: String): Nothing {
         val response = converter.fromJson<JsError>(json)
         error(response.errorMessage ?: "Undefined error")
+    }
+
+    @VisibleForTesting
+    fun onDelayedAuthentication(json: String) = try {
+        val payload = converter.fromJson<DelayedAuthResponse>(json).payload
+        LinkEvent.Payload(payload)
+    } catch (expected: Exception) {
+        error("Faced an error while parsing delayed auth payload: ${expected.message}")
     }
 }
