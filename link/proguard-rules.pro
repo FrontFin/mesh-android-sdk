@@ -23,9 +23,11 @@
 -keep class com.meshconnect.link.entity.** { *; }
 -keep class com.meshconnect.link.store.** { *; }
 -keep class com.meshconnect.link.ui.LinkContract { *; }
+-keep class com.meshconnect.link.ui.LaunchLink { *; }
 -keep class com.meshconnect.link.ui.LinkExit { *; }
 -keep class com.meshconnect.link.ui.LinkResult { *; }
 -keep class com.meshconnect.link.ui.LinkSuccess { *; }
+-keep class com.meshconnect.link.LinkEventKt { *; }
 
 #--------- Begin: proguard configuration for Gson ------------
 # https://github.com/google/gson/blob/master/examples/android-proguard-example/proguard.cfg
