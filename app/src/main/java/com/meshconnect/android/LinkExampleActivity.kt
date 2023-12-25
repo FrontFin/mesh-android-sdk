@@ -37,9 +37,9 @@ class LinkExampleActivity : AppCompatActivity() {
         }
 
         // Subscribe for events
-        lifecycleScope.launch(Dispatchers.IO) {
-            LinkEvent.collect { event ->
-                logD("Event received. $event")
+        lifecycleScope.launch {
+            LinkEvent.collect {
+                logD("Event received. $it")
             }
         }
 
