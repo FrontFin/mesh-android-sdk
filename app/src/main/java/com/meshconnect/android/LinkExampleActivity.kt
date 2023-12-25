@@ -30,11 +30,9 @@ class LinkExampleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        // Subscribe for payloads
-        lifecycleScope.launch(Dispatchers.IO) {
-            LinkPayloads.collect { payload ->
-                logD("Payload received. $payload")
-            }
+        // Subscribe for 'LinkPayload's
+        lifecycleScope.launch {
+            LinkPayloads.collect { logD("Payload received. $it") }
         }
 
         // Create LinkConfiguration
