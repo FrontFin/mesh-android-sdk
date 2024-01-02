@@ -27,7 +27,7 @@
 -keep class com.meshconnect.link.ui.LinkExit { *; }
 -keep class com.meshconnect.link.ui.LinkResult { *; }
 -keep class com.meshconnect.link.ui.LinkSuccess { *; }
--keep class com.meshconnect.link.LinkEventKt { *; }
+-keep class com.meshconnect.link.LinkEventsKt { *; }
 
 #--------- Begin: proguard configuration for Gson ------------
 # https://github.com/google/gson/blob/master/examples/android-proguard-example/proguard.cfg

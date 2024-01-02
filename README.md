@@ -82,7 +82,7 @@ completes the Link flow.
 ### LinkSuccess
 
 When a user successfully links an account or completes the transfer, the `LinkSuccess` object is
-received. It contains a list of `LinkPayload`s that represents the linked items:
+received. It contains a list of payloads that represents the linked items:
 
 ```kotlin
 
@@ -101,7 +101,7 @@ private fun onLinkSuccess(result: LinkSuccess) {
 ### LinkExit
 
 When a user exits Link without successfully linking an account or an error occurs, the `LinkExit`
-object is received. It contains an optional `errorMessage`:
+object is received:
 
 ```kotlin
 
@@ -114,12 +114,22 @@ private fun onLinkExit(result: LinkExit) {
 
 ### LinkPayloads
 
-When a user successfully links an account or completes the transfer, the `LinkPayloads` returns
-a linked item immediately:
+A `SharedFlow` emits payloads immediately, 
+when a user successfully links an account or completes the transfer:
 
 ```kotlin
 lifecycleScope.launch {
     LinkPayloads.collect { /* use hayloads */ }
+}
+```
+
+### LinkEvents
+
+A `SharedFlow` emits events that happen at certain points in the Link flow:
+
+```kotlin
+lifecycleScope.launch {
+  LinkEvents.collect { /* use event */ }
 }
 ```
 
