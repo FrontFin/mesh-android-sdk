@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.meshconnect.android.databinding.LinkExampleActivityBinding
 import com.meshconnect.link.entity.AccessTokenPayload
+import com.meshconnect.link.entity.DelayedAuthPayload
 import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.entity.TransferFinishedErrorPayload
@@ -29,11 +30,9 @@ class LinkExampleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        // Subscribe for payloads
-        lifecycleScope.launch(Dispatchers.IO) {
-            LinkPayloads.collect { payload ->
-                logD("Payload received. $payload")
-            }
+        // Subscribe for 'LinkPayload's
+        lifecycleScope.launch {
+            LinkPayloads.collect { logD("Payload received. $it") }
         }
 
         // Create LinkConfiguration
@@ -70,6 +69,10 @@ class LinkExampleActivity : AppCompatActivity() {
                     logD("Broker connected. $payload")
                     // save accounts into secure storage (optional)
                     saveAccountsFromPayload(payload)
+                }
+
+                is DelayedAuthPayload -> {
+                    logD("Delayed authentication. $payload")
                 }
 
                 is TransferFinishedSuccessPayload -> {

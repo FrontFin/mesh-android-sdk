@@ -2,11 +2,12 @@
 
 Android library for integrating with Mesh Connect.
 
+![Maven Central](https://img.shields.io/maven-central/v/com.meshconnect/link?color=%23037FFF&link=https%3A%2F%2Fsearch.maven.org%2Fartifact%2Fcom.meshconnect%2Flink)
+
 ## Installation
 
 Add dependency to your `build.gradle`:
 
-![Maven Central](https://img.shields.io/maven-central/v/com.meshconnect/link?color=%23037FFF&link=https%3A%2F%2Fsearch.maven.org%2Fartifact%2Fcom.meshconnect%2Flink)
 ```gradle
 dependencies {
     implementation 'com.meshconnect:link:$linkVersion'
@@ -15,9 +16,11 @@ dependencies {
 
 ## Getting Link token
 
-Link token should be obtained from the POST [`/api/v1/linktoken`](https://docs.meshconnect.com/reference/post_api-v1-linktoken) endpoint.
+Link token should be obtained from
+the [`/api/v1/linktoken`](https://docs.meshconnect.com/reference/post_api-v1-linktoken) endpoint.
 The request must be performed from the server side as it risks exposing your API secret.
 You will get the response in the following format:
+
 ```json
 {
   "content": {
@@ -42,6 +45,7 @@ val configuration = LinkConfiguration(
 ```
 
 The `LinkConfiguration` class allows to add:
+
 - `accessTokens` - list of `IntegrationAccessToken`s that used as an origin for crypto transfer
   flow;
 - `transferDestinationTokens` - list of `IntegrationAccessToken`s that used as a destination for
@@ -50,26 +54,14 @@ The `LinkConfiguration` class allows to add:
 ### Register an Activity Result callback
 
 The Link SDK runs as a separate Activity within your app.
-In order to return the result to your app it supports the [Activity Result APIs](https://developer.android.com/training/basics/intents/result).
+In order to return the result to your app it supports
+the [Activity Result APIs](https://developer.android.com/training/basics/intents/result).
 
 ```kotlin
 private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
     when (result) {
-        is LinkSuccess -> handlePayloads(result.payloads)
-        is LinkExit -> {
-            // user exited the flow by clicking on the back or close button
-            // or an error occured, check 'result.errorMessage'
-        }
-    }
-}
-
-private fun handlePayloads(payloads: List<LinkPayload>) {
-    payloads.forEach { payload ->
-        when (payload) {
-            is AccessTokenPayload -> /* broker connected */
-            is TransferFinishedSuccessPayload -> /* transfer succeed */
-            is TransferFinishedErrorPayload -> /* transfer failed */
-        }
+        is LinkSuccess -> /* handle success */
+        is LinkExit -> /* handle exit */
     }
 }
 ```
@@ -87,9 +79,54 @@ linkLauncher.launch(
 At this point, Link will open, and will return the `LinkSuccess` object if the user successfully
 completes the Link flow.
 
+### LinkSuccess
+
+When a user successfully links an account or completes the transfer, the `LinkSuccess` object is
+received. It contains a list of `LinkPayload`s that represents the linked items:
+
+```kotlin
+
+private fun onLinkSuccess(result: LinkSuccess) {
+    result.payloads.forEach { payload ->
+        when (payload) {
+            is AccessTokenPayload -> /* broker connected */
+            is DelayedAuthPayload -> /* delayed authentication */
+            is TransferFinishedSuccessPayload -> /* transfer succeed */
+            is TransferFinishedErrorPayload -> /* transfer failed */
+        }
+    }
+}
+```
+
+### LinkExit
+
+When a user exits Link without successfully linking an account or an error occurs, the `LinkExit`
+object is received. It contains an optional `errorMessage`:
+
+```kotlin
+
+private fun onLinkExit(result: LinkExit) {
+    if (result.errorMessage != null) {
+        /* use error message */
+    }
+}
+```
+
+### LinkPayloads
+
+When a user successfully links an account or completes the transfer, the `LinkPayloads` returns
+a linked item immediately:
+
+```kotlin
+lifecycleScope.launch {
+    LinkPayloads.collect { /* use hayloads */ }
+}
+```
+
 ## Storing the linked accounts
 
 Android SDK provides built-in encrypted storage for linked accounts:
+
 ```kotlin
 private val accountStore: MeshAccountStore = createPreferenceAccountStore(context)
 ```

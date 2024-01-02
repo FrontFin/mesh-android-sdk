@@ -12,6 +12,8 @@ import com.meshconnect.link.entity.TransferFinishedResponse
 import com.meshconnect.link.entity.Type
 import com.meshconnect.link.randomString
 import com.google.gson.Gson
+import com.meshconnect.link.entity.DelayedAuthPayload
+import com.meshconnect.link.entity.DelayedAuthResponse
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -146,5 +148,28 @@ class GetLinkEventUseCaseTest : UseCaseTest() {
         val result = useCase.launch("")
         assert(result.isSuccess)
         assert(result.getOrNull() == LinkEvent.Loaded)
+    }
+
+    @Test
+    fun `test delayedAuthentication`() = runTest {
+        val jsType = JsType(Type.delayedAuthentication)
+        val payload = mockk<DelayedAuthPayload>()
+        val response = DelayedAuthResponse(payload)
+
+        every { gson.fromJson<JsType>("") } returns jsType
+        every { gson.fromJson<DelayedAuthResponse>("") } returns response
+
+        val result = useCase.launch("")
+        assert(result.isSuccess)
+        assert((result.getOrNull() as LinkEvent.Payload).payload == payload)
+    }
+
+    @Test
+    fun `test exception catch for onDelayedAuthentication function`() {
+        every { gson.fromJson<AccessTokenResponse>("") } throws Exception()
+        val ex = assertThrows(IllegalStateException::class.java) {
+            useCase.onDelayedAuthentication("")
+        }
+        assert(ex.message!!.startsWith("Faced an error while parsing delayed auth payload"))
     }
 }

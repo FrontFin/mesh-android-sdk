@@ -12,7 +12,8 @@ internal enum class Type {
     done,
     showClose,
     transferFinished,
-    loaded
+    loaded,
+    delayedAuthentication
 }
 
 internal data class JsError(
