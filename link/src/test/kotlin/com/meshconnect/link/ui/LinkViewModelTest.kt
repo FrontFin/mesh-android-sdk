@@ -4,6 +4,7 @@ import com.meshconnect.link.ViewModelTest
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.store.PayloadReceiver
 import com.meshconnect.link.testObserver
+import com.meshconnect.link.usecase.BroadcastLinkMessageUseCase
 import com.meshconnect.link.usecase.GetLinkEventUseCase
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -19,13 +20,20 @@ class LinkViewModelTest : ViewModelTest() {
 
     private val getLinkEventUseCase = mockk<GetLinkEventUseCase>()
     private val payloadReceiver = mockk<PayloadReceiver>()
-    private val viewModel = LinkViewModel(getLinkEventUseCase, payloadReceiver)
+    private val broadcastLinkMessageUseCase = mockk<BroadcastLinkMessageUseCase>()
+
+    private val viewModel = LinkViewModel(
+        getLinkEventUseCase,
+        payloadReceiver,
+        broadcastLinkMessageUseCase
+    )
 
     @Test
     fun `verify viewModel emits error`() = runTest {
         val th = mockk<Throwable>()
         val errorObserver = viewModel.throwable.testObserver()
         coEvery { getLinkEventUseCase.launch("") } returns Result.failure(th)
+        coEvery { broadcastLinkMessageUseCase.launch(any()) } returns Result.success(Unit)
         viewModel.onJsonReceived("")
 
         errorObserver.shouldContainEvents(th)
@@ -40,6 +48,7 @@ class LinkViewModelTest : ViewModelTest() {
         val eventObserver = viewModel.linkEvent.testObserver()
         coEvery { getLinkEventUseCase.launch("") } returns Result.success(payload)
         coEvery { payloadReceiver.emit(payload.payload) } just Runs
+        coEvery { broadcastLinkMessageUseCase.launch(any()) } returns Result.success(Unit)
         viewModel.onJsonReceived("")
 
         viewModel.payloads.shouldContainSame(listOf(payload.payload))
@@ -52,6 +61,7 @@ class LinkViewModelTest : ViewModelTest() {
         val event = LinkEvent.Done
         val eventObserver = viewModel.linkEvent.testObserver()
         coEvery { getLinkEventUseCase.launch("") } returns Result.success(event)
+        coEvery { broadcastLinkMessageUseCase.launch(any()) } returns Result.success(Unit)
         viewModel.onJsonReceived("")
 
         viewModel.payloads.shouldBeEmpty()

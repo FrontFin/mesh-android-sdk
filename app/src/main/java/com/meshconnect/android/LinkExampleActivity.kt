@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.meshconnect.android.databinding.LinkExampleActivityBinding
+import com.meshconnect.link.LinkEvents
 import com.meshconnect.link.entity.AccessTokenPayload
 import com.meshconnect.link.entity.DelayedAuthPayload
 import com.meshconnect.link.entity.LinkConfiguration
@@ -30,9 +31,18 @@ class LinkExampleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        // Subscribe for 'LinkPayload's
+        // Subscribe for payloads
         lifecycleScope.launch {
-            LinkPayloads.collect { logD("Payload received. $it") }
+            LinkPayloads.collect {
+                logD("Payload received. $it")
+            }
+        }
+
+        // Subscribe for events
+        lifecycleScope.launch {
+            LinkEvents.collect {
+                logD("Event received. $it")
+            }
         }
 
         // Create LinkConfiguration
@@ -55,6 +65,7 @@ class LinkExampleActivity : AppCompatActivity() {
         }
     }
 
+    // Register an Activity Result callback
     private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
         when (result) {
             is LinkSuccess -> handlePayloads(result.payloads)
