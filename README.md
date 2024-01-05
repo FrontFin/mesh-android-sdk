@@ -16,7 +16,7 @@ dependencies {
 
 ## Getting Link token
 
-Link token should be obtained from
+The `linkToken` should be obtained from
 the [`/api/v1/linktoken`](https://docs.meshconnect.com/reference/post_api-v1-linktoken) endpoint.
 The request must be performed from the server side as it risks exposing your API secret.
 You will get the response in the following format:
@@ -46,15 +46,16 @@ val configuration = LinkConfiguration(
 
 The `LinkConfiguration` class allows to add:
 
-- `accessTokens` - list of `IntegrationAccessToken`s that used as an origin for crypto transfer
-  flow;
-- `transferDestinationTokens` - list of `IntegrationAccessToken`s that used as a destination for
-  crypto transfer flow.
+- `accessTokens` to initialize crypto transfers flow at the 'Select asset step’ using previously obtained integration `auth_token`. 
+It can be used if you have a valid `auth_token` and want to bypass authentication to jump right into a transfer.
+
+- `transferDestinationTokens` for crypto transfers flow. 
+It is an alternative way of providing target addresses for crypto transfers by using previously obtained integration `auth_tokens`.
 
 ### Register an Activity Result callback
 
 The Link SDK runs as a separate Activity within your app.
-In order to return the result to your app it supports
+To return the result to your app it supports
 the [Activity Result APIs](https://developer.android.com/training/basics/intents/result).
 
 ```kotlin
@@ -76,16 +77,15 @@ linkLauncher.launch(
 )
 ```
 
-At this point, Link will open, and will return the `LinkSuccess` object if the user successfully
+At this point, Link will open and return the `LinkSuccess` object if the user successfully
 completes the Link flow.
 
 ### LinkSuccess
 
 When a user successfully links an account or completes the transfer, the `LinkSuccess` object is
-received. It contains a list of payloads that represents the linked items:
+received. It contains a list of payloads that represent the linked items:
 
 ```kotlin
-
 private fun onLinkSuccess(result: LinkSuccess) {
     result.payloads.forEach { payload ->
         when (payload) {
@@ -100,8 +100,8 @@ private fun onLinkSuccess(result: LinkSuccess) {
 
 ### LinkExit
 
-When a user exits Link without successfully linking an account or an error occurs, the `LinkExit`
-object is received:
+When a user exits Link without successfully linking an account or an error occurs, 
+the `LinkExit` object is received:
 
 ```kotlin
 
