@@ -15,7 +15,10 @@ internal class TransferFinishedPayloadDeserializer : JsonDeserializer<TransferFi
         typeOfT: Type,
         context: JsonDeserializationContext
     ): TransferFinishedPayload {
-        val obj = json.asJsonObject
+        val obj = json.asJsonObject.apply {
+            if (!has("fromAddress")) addProperty("fromAddress", "")
+            if (!has("toAddress")) addProperty("toAddress", "")
+        }
         return when (val status = obj.get("status").asString) {
             "success" -> context.deserialize<TransferFinishedSuccessPayload>(obj)
             "error" -> context.deserialize<TransferFinishedErrorPayload>(obj)

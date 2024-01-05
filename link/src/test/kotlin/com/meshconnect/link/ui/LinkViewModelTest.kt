@@ -32,7 +32,7 @@ class LinkViewModelTest : ViewModelTest() {
     fun `verify viewModel emits error`() = runTest {
         val th = mockk<Throwable>()
         val errorObserver = viewModel.throwable.testObserver()
-        coEvery { getLinkEventUseCase.launch("") } returns Result.failure(th)
+        coEvery { getLinkEventUseCase.launch(any()) } returns Result.failure(th)
         coEvery { broadcastLinkMessageUseCase.launch(any()) } returns Result.success(Unit)
         viewModel.onJsonReceived("")
 
@@ -46,7 +46,7 @@ class LinkViewModelTest : ViewModelTest() {
             every { payload } returns mockk()
         }
         val eventObserver = viewModel.linkEvent.testObserver()
-        coEvery { getLinkEventUseCase.launch("") } returns Result.success(payload)
+        coEvery { getLinkEventUseCase.launch(any()) } returns Result.success(payload)
         coEvery { payloadReceiver.emit(payload.payload) } just Runs
         coEvery { broadcastLinkMessageUseCase.launch(any()) } returns Result.success(Unit)
         viewModel.onJsonReceived("")
@@ -60,7 +60,7 @@ class LinkViewModelTest : ViewModelTest() {
     fun `verify viewModel emits 'done' event`() {
         val event = LinkEvent.Done
         val eventObserver = viewModel.linkEvent.testObserver()
-        coEvery { getLinkEventUseCase.launch("") } returns Result.success(event)
+        coEvery { getLinkEventUseCase.launch(any()) } returns Result.success(event)
         coEvery { broadcastLinkMessageUseCase.launch(any()) } returns Result.success(Unit)
         viewModel.onJsonReceived("")
 
