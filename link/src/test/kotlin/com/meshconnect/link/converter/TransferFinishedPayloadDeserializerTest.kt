@@ -13,7 +13,7 @@ class TransferFinishedPayloadDeserializerTest {
     private val gson = JsonConverter.get()
 
     @Test
-    fun testSuccess() {
+    fun `test success payload`() {
         val json = readFile("transfer-success.json")
         val actual = gson.fromJson<TransferFinishedPayload>(json)
         val expected = TransferFinishedSuccessPayload(
@@ -28,7 +28,22 @@ class TransferFinishedPayloadDeserializerTest {
     }
 
     @Test
-    fun testError() {
+    fun `test success payload with empty address`() {
+        val json = readFile("transfer-success-empty-address.json")
+        val actual = gson.fromJson<TransferFinishedPayload>(json)
+        val expected = TransferFinishedSuccessPayload(
+            txId = "234sdf-xxx3902",
+            fromAddress = "",
+            toAddress = "",
+            symbol = "UST",
+            amount = 1.0024,
+            networkId = "79823981e"
+        )
+        assert(actual == expected)
+    }
+
+    @Test
+    fun `test error payload`() {
         val json = readFile("transfer-error.json")
         val actual = gson.fromJson<TransferFinishedPayload>(json)
         val expected = TransferFinishedErrorPayload(
@@ -38,7 +53,7 @@ class TransferFinishedPayloadDeserializerTest {
     }
 
     @Test
-    fun testNull() {
+    fun `test invalid status`() {
         val json = "{status:'lorem'}"
         val ex = assertThrows(JsonSyntaxException::class.java) {
             gson.fromJson<TransferFinishedPayload>(json)
