@@ -15,17 +15,19 @@ import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.google.gson.Gson
 import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
 import com.meshconnect.link.databinding.LinkActivityBinding
+import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
+import com.meshconnect.link.utils.OnLoadedScriptBuilder
 import com.meshconnect.link.utils.alertDialog
 import com.meshconnect.link.utils.decodeCatching
 import com.meshconnect.link.utils.getParcelable
 import com.meshconnect.link.utils.intent
 import com.meshconnect.link.utils.lazyNone
-import com.meshconnect.link.utils.meshSDKPlatformScript
 import com.meshconnect.link.utils.observeEvent
 import com.meshconnect.link.utils.onClick
 import com.meshconnect.link.utils.showToast
@@ -38,11 +40,31 @@ internal class LinkActivity : AppCompatActivity() {
 
     companion object {
         private const val LINK = "link"
+        private const val ACCESS_TOKENS = "access_tokens"
+        private const val TRANSFER_TOKENS = "transfer_tokens"
         private const val DATA = "data"
         private const val MAX_TOAST_MSG_LENGTH = 38
 
         fun getLinkIntent(activity: Context, catalogLink: String): Intent {
             return intent<LinkActivity>(activity).putExtra(LINK, catalogLink)
+        }
+
+        fun getLinkIntent(activity: Context, config: LinkConfiguration): Intent {
+            val intent = intent<LinkActivity>(activity).putExtra(LINK, config.token)
+
+            val accessTokens = config.accessTokens
+            val transferTokens = config.transferDestinationTokens
+
+            if (!accessTokens.isNullOrEmpty() || !transferTokens.isNullOrEmpty()) {
+                val gson = Gson()
+                if (accessTokens != null) {
+                    intent.putExtra(ACCESS_TOKENS, gson.toJson(accessTokens))
+                }
+                if (transferTokens != null) {
+                    intent.putExtra(TRANSFER_TOKENS, gson.toJson(transferTokens))
+                }
+            }
+            return intent
         }
 
         fun getLinkResult(data: Intent?): LinkResult {
@@ -117,8 +139,19 @@ internal class LinkActivity : AppCompatActivity() {
                 is LinkEvent.Close, LinkEvent.Done -> finish()
                 is LinkEvent.ShowClose -> showCloseDialog()
                 is LinkEvent.Payload, LinkEvent.Undefined -> Unit
+                is LinkEvent.Loaded -> onLinkLoaded()
             }
         }
+    }
+
+    private fun onLinkLoaded() {
+        val script = OnLoadedScriptBuilder(
+            version = BuildConfig.VERSION,
+            accessTokens = intent.getStringExtra(ACCESS_TOKENS),
+            transferDestinationTokens = intent.getStringExtra(TRANSFER_TOKENS)
+        ).build()
+
+        binding.webView.evaluateJavascript(script, null)
     }
 
     override fun finish() {
@@ -178,7 +211,6 @@ internal class LinkActivity : AppCompatActivity() {
     }
 
     inner class WebClient : WebViewClient() {
-
         override fun onPageCommitVisible(view: WebView?, url: String?) {
             super.onPageCommitVisible(view, url)
             binding.toolbar.isGone = isLinkUrl(url)
@@ -198,11 +230,6 @@ internal class LinkActivity : AppCompatActivity() {
             request: WebResourceRequest?
         ): Boolean {
             return false
-        }
-
-        override fun onPageFinished(view: WebView?, url: String?) {
-            super.onPageFinished(view, url)
-            binding.webView.evaluateJavascript(meshSDKPlatformScript, null)
         }
     }
 

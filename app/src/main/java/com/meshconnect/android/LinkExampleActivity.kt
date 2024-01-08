@@ -4,14 +4,17 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.meshconnect.android.databinding.LinkExampleActivityBinding
+import com.meshconnect.link.LinkEvents
 import com.meshconnect.link.entity.AccessTokenPayload
+import com.meshconnect.link.entity.DelayedAuthPayload
+import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.entity.TransferFinishedErrorPayload
 import com.meshconnect.link.entity.TransferFinishedSuccessPayload
 import com.meshconnect.link.store.LinkPayloads
 import com.meshconnect.link.store.createPreferenceAccountStore
 import com.meshconnect.link.store.getAccountsFromPayload
-import com.meshconnect.link.ui.LinkContract
+import com.meshconnect.link.ui.LaunchLink
 import com.meshconnect.link.ui.LinkExit
 import com.meshconnect.link.ui.LinkSuccess
 import kotlinx.coroutines.Dispatchers
@@ -29,20 +32,30 @@ class LinkExampleActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Subscribe for payloads
-        lifecycleScope.launch(Dispatchers.IO) {
-            LinkPayloads.collect { payload ->
-                log("Payload received. $payload")
+        lifecycleScope.launch {
+            LinkPayloads.collect {
+                logD("Payload received. $it")
             }
         }
 
-        // Launch Link
-        binding.linkButton.setOnClickListener {
-            linkLauncher.launch(
-                "linkToken"
-            )
+        // Subscribe for events
+        lifecycleScope.launch {
+            LinkEvents.collect {
+                logD("Event received. $it")
+            }
         }
 
-        // Subscribe for accounts saved into secured storage
+        // Create LinkConfiguration
+        val configuration = LinkConfiguration(
+            token = "linkToken"
+        )
+
+        // Launch Link
+        binding.linkButton.setOnClickListener {
+            linkLauncher.launch(configuration)
+        }
+
+        // Subscribe for accounts saved into secure storage
         lifecycleScope.launch(Dispatchers.IO) {
             accountStore.accounts().collect { accounts ->
                 runOnUiThread {
@@ -52,17 +65,11 @@ class LinkExampleActivity : AppCompatActivity() {
         }
     }
 
-    private val linkLauncher = registerForActivityResult(LinkContract()) { result ->
+    // Register an Activity Result callback
+    private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
         when (result) {
-            is LinkSuccess -> {
-                handlePayloads(result.payloads)
-            }
-
-            is LinkExit -> {
-                // user exited the flow by clicking on the back or close button
-                // probably because of an error
-                log("Exited. ${result.errorMessage}")
-            }
+            is LinkSuccess -> handlePayloads(result.payloads)
+            is LinkExit -> logD("Exit. ${result.errorMessage}")
         }
     }
 
@@ -70,17 +77,21 @@ class LinkExampleActivity : AppCompatActivity() {
         payloads.forEach { payload ->
             when (payload) {
                 is AccessTokenPayload -> {
-                    log("Broker connected. $payload")
+                    logD("Broker connected. $payload")
                     // save accounts into secure storage (optional)
                     saveAccountsFromPayload(payload)
                 }
 
+                is DelayedAuthPayload -> {
+                    logD("Delayed authentication. $payload")
+                }
+
                 is TransferFinishedSuccessPayload -> {
-                    log("Transfer succeed. $payload")
+                    logD("Transfer succeed. $payload")
                 }
 
                 is TransferFinishedErrorPayload -> {
-                    log("Transfer failed. $payload")
+                    logD("Transfer failed. $payload")
                 }
             }
         }
