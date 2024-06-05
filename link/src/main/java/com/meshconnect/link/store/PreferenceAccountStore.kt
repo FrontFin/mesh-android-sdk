@@ -3,28 +3,14 @@ package com.meshconnect.link.store
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
-
-@Suppress("unused")
-fun createPreferenceAccountStore(context: Context): MeshAccountStore =
-    PreferenceAccountStore(context)
+import kotlin.LazyThreadSafetyMode.NONE
 
 internal class PreferenceAccountStore(context: Context) : MeshAccountStore {
-
-    private val gson by lazy { Gson() }
-    private val preferences by lazy {
-        EncryptedSharedPreferences.create(
-            "front_accounts_shared_prefs",
-            MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
-            context,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-    }
+    private val gson by lazy(NONE) { Gson() }
+    private val preferences by lazy(NONE) { createPreferencesSafe(context) }
     private val key = "accounts"
 
     @SuppressLint("ApplySharedPref")

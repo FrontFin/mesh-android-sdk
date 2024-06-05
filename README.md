@@ -35,16 +35,16 @@ You will get the response in the following format:
 
 ### Create a LinkConfiguration
 
-Each time you launch Link, you will need to get a new `linkToken` from your server and create a new
-`LinkConfiguration` object with it:
+Each time you launch Link, you have to get a new `linkToken` from your backend and build a new
+`LinkConfiguration` object:
 
 ```kotlin
 val configuration = LinkConfiguration(
-    token = "linkToken",
+    token = "linkToken"
 )
 ```
 
-The `LinkConfiguration` class allows to add:
+Additional `LinkConfiguration` object parameters:
 
 - `accessTokens` to initialize crypto transfers flow at the 'Select asset step’ using previously obtained integration `auth_token`. 
 It can be used if you have a valid `auth_token` and want to bypass authentication to jump right into a transfer.
@@ -54,9 +54,8 @@ It is an alternative way of providing target addresses for crypto transfers by u
 
 ### Register an Activity Result callback
 
-The Link SDK runs as a separate Activity within your app.
-To return the result to your app it supports
-the [Activity Result APIs](https://developer.android.com/training/basics/intents/result).
+The Link UI runs in a separate Activity within your app.
+To return the result you can use [Activity Result APIs](https://developer.android.com/training/basics/intents/result).
 
 ```kotlin
 private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
@@ -70,15 +69,11 @@ private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
 ### Launch Link
 
 ```kotlin
-linkLauncher.launch(
-    LinkConfig(
-        token = "linkToken"
-    )
-)
+linkLauncher.launch(configuration)
 ```
 
-At this point, Link will open and return the `LinkSuccess` object if the user successfully
-completes the Link flow.
+At this point, Link UI will open and return the `LinkSuccess` object if the user successfully
+completes the flow.
 
 ### LinkSuccess
 
@@ -114,12 +109,11 @@ private fun onLinkExit(result: LinkExit) {
 
 ### LinkPayloads
 
-A `SharedFlow` emits payloads immediately, 
-when a user successfully links an account or completes the transfer:
+A `SharedFlow` emits payloads immediately:
 
 ```kotlin
 lifecycleScope.launch {
-    LinkPayloads.collect { /* use hayloads */ }
+    LinkPayloads.collect { /* use payloads */ }
 }
 ```
 
