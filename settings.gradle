@@ -85,7 +85,7 @@ dependencyResolutionManagement {
             )
             library(
                     'kotlinx-coroutines-test',
-                    'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
+                    'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.3'
             )
             library(
                     'kluent',
@@ -94,6 +94,13 @@ dependencyResolutionManagement {
             library(
                     'androidx-core-testing',
                     'androidx.arch.core:core-testing:2.2.0'
+            )
+            library(
+                    'androidx.test.runner',
+                    'androidx.test:runner:1.5.2'
+            )
+            library('androidx.test.rules',
+                    'androidx.test:rules:1.5.0'
             )
         }
     }

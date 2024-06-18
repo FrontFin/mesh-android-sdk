@@ -4,6 +4,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface MeshAccountStore {
 
+    suspend fun insert(account: MeshAccount)
+
     suspend fun insert(accounts: List<MeshAccount>)
 
     suspend fun getAll(): List<MeshAccount>
