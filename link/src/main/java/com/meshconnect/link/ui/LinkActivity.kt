@@ -3,16 +3,21 @@ package com.meshconnect.link.ui
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Message
+import android.util.Base64
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.google.gson.Gson
@@ -34,6 +39,7 @@ import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
 import com.meshconnect.link.utils.windowInsetsController
+import org.json.JSONObject
 import java.net.URL
 
 internal class LinkActivity : AppCompatActivity() {
@@ -78,6 +84,10 @@ internal class LinkActivity : AppCompatActivity() {
     private val binding by viewBinding(LinkActivityBinding::inflate)
     private val viewModel by viewModel<LinkViewModel>(LinkViewModel.Factory())
 
+    private var isDarkTheme = false
+    private var themeColorTop: Int = 0
+    private var themeColorBottom: Int = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -88,11 +98,22 @@ internal class LinkActivity : AppCompatActivity() {
             return
         }
 
+        updateThemeVars(link)
+
+        val content = findViewById<ViewGroup>(android.R.id.content)
+        content.setBackgroundColor(themeColorBottom)
+
+        val window = this.window
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = themeColorTop
+        window.navigationBarColor = themeColorBottom
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isDarkTheme
+
         setContentView(binding.root)
 
         windowInsetsController {
-            isAppearanceLightNavigationBars = true
-            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = !isDarkTheme
+            isAppearanceLightStatusBars = !isDarkTheme
         }
 
         binding.back.onClick { onBack() }
@@ -104,6 +125,57 @@ internal class LinkActivity : AppCompatActivity() {
         openWebView(link)
 
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
+    }
+
+    private fun updateThemeVars(linkUrl: String) {
+        var th = "light"
+
+        val linkStyle = getQueryParamFromUrl(linkUrl, "link_style");
+
+        if (!linkStyle.isNullOrBlank()){
+            try {
+                val linkStyleJsonString = String(Base64.decode(linkStyle, Base64.URL_SAFE))
+                val jsonObject = JSONObject(linkStyleJsonString)
+                th = jsonObject.optString("th", "light")
+            } catch (_: Exception) { }
+        }
+
+        isDarkTheme = when (th){
+            "dark" -> true
+            "system" -> isSystemDarkTheme(this)
+            else -> false
+        }
+
+        themeColorTop = when (isDarkTheme){
+            true -> getColor(R.color.darkThemeColorTop)
+            false -> getColor(R.color.lightThemeColorTop)
+        }
+
+        themeColorBottom = when (isDarkTheme){
+            true -> getColor(R.color.darkThemeColorBottom)
+            false -> getColor(R.color.lightThemeColorBottom)
+        }
+    }
+
+    private fun isSystemDarkTheme(context: Context): Boolean {
+        return when (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+            Configuration.UI_MODE_NIGHT_YES -> true
+            Configuration.UI_MODE_NIGHT_NO -> false
+            else -> false
+        }
+    }
+
+    private fun getQueryParamFromUrl(url: String?, paramName: String): String? {
+        return try {
+            if (url.isNullOrEmpty()) {
+                null
+            } else {
+                val uri = Uri.parse(url)
+                uri.getQueryParameter(paramName)
+            }
+        } catch (_: Exception) {
+            null
+        }
     }
 
     override fun onBackPressed() {

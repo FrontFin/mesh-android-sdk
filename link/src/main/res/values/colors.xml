@@ -2,4 +2,8 @@
 <resources>
     <color name="background">#FBFBFB</color>
     <color name="blue">#037FFF</color>
+    <color name="darkThemeColorTop">#1E1E24</color>
+    <color name="lightThemeColorTop">#F3F4F5</color>
+    <color name="darkThemeColorBottom">#0E0D0D</color>
+    <color name="lightThemeColorBottom">#FBFBFB</color>
 </resources>
