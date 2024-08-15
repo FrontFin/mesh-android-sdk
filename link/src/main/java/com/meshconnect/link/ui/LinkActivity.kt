@@ -29,9 +29,12 @@ import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.utils.OnLoadedScriptBuilder
 import com.meshconnect.link.utils.alertDialog
+import com.meshconnect.link.utils.decodeBase64
 import com.meshconnect.link.utils.decodeCatching
 import com.meshconnect.link.utils.getParcelable
+import com.meshconnect.link.utils.getQueryParamFromUrl
 import com.meshconnect.link.utils.intent
+import com.meshconnect.link.utils.isSystemDarkTheme
 import com.meshconnect.link.utils.lazyNone
 import com.meshconnect.link.utils.observeEvent
 import com.meshconnect.link.utils.onClick
@@ -84,10 +87,6 @@ internal class LinkActivity : AppCompatActivity() {
     private val binding by viewBinding(LinkActivityBinding::inflate)
     private val viewModel by viewModel<LinkViewModel>(LinkViewModel.Factory())
 
-    private var isDarkTheme = false
-    private var themeColorTop: Int = 0
-    private var themeColorBottom: Int = 0
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -98,23 +97,7 @@ internal class LinkActivity : AppCompatActivity() {
             return
         }
 
-        updateThemeVars(link)
-
-        val content = findViewById<ViewGroup>(android.R.id.content)
-        content.setBackgroundColor(themeColorBottom)
-
-        val window = this.window
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.statusBarColor = themeColorTop
-        window.navigationBarColor = themeColorBottom
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isDarkTheme
-
-        setContentView(binding.root)
-
-        windowInsetsController {
-            isAppearanceLightNavigationBars = !isDarkTheme
-            isAppearanceLightStatusBars = !isDarkTheme
-        }
+        applyTheme(link)
 
         binding.back.onClick { onBack() }
         binding.close.onClick { showCloseDialog() }
@@ -127,54 +110,47 @@ internal class LinkActivity : AppCompatActivity() {
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
     }
 
-    private fun updateThemeVars(linkUrl: String) {
+    private fun applyTheme(linkUrl: String) {
         var th = "light"
 
         val linkStyle = getQueryParamFromUrl(linkUrl, "link_style");
 
         if (!linkStyle.isNullOrBlank()){
             try {
-                val linkStyleJsonString = String(Base64.decode(linkStyle, Base64.URL_SAFE))
-                val jsonObject = JSONObject(linkStyleJsonString)
+                val jsonObject = JSONObject(decodeBase64(linkStyle))
                 th = jsonObject.optString("th", "light")
             } catch (_: Exception) { }
         }
 
-        isDarkTheme = when (th){
+        val isDarkTheme = when (th){
             "dark" -> true
-            "system" -> isSystemDarkTheme(this)
+            "system" -> isSystemDarkTheme()
             else -> false
         }
 
-        themeColorTop = when (isDarkTheme){
+        val themeColorTop = when (isDarkTheme){
             true -> getColor(R.color.darkThemeColorTop)
             false -> getColor(R.color.lightThemeColorTop)
         }
 
-        themeColorBottom = when (isDarkTheme){
+        val themeColorBottom = when (isDarkTheme){
             true -> getColor(R.color.darkThemeColorBottom)
             false -> getColor(R.color.lightThemeColorBottom)
         }
-    }
 
-    private fun isSystemDarkTheme(context: Context): Boolean {
-        return when (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-            Configuration.UI_MODE_NIGHT_YES -> true
-            Configuration.UI_MODE_NIGHT_NO -> false
-            else -> false
-        }
-    }
+        val content = findViewById<ViewGroup>(android.R.id.content)
+        content.setBackgroundColor(themeColorBottom)
 
-    private fun getQueryParamFromUrl(url: String?, paramName: String): String? {
-        return try {
-            if (url.isNullOrEmpty()) {
-                null
-            } else {
-                val uri = Uri.parse(url)
-                uri.getQueryParameter(paramName)
-            }
-        } catch (_: Exception) {
-            null
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = themeColorTop
+        window.navigationBarColor = themeColorBottom
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isDarkTheme
+
+        setContentView(binding.root)
+
+        windowInsetsController {
+            isAppearanceLightNavigationBars = !isDarkTheme
+            isAppearanceLightStatusBars = !isDarkTheme
         }
     }
 
