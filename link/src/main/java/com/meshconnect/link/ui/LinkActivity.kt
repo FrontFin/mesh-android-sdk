@@ -3,12 +3,10 @@ package com.meshconnect.link.ui
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Message
-import android.util.Base64
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.WebChromeClient
@@ -97,6 +95,8 @@ internal class LinkActivity : AppCompatActivity() {
             return
         }
 
+        setContentView(binding.root)
+
         applyTheme(link)
 
         binding.back.onClick { onBack() }
@@ -113,7 +113,7 @@ internal class LinkActivity : AppCompatActivity() {
     private fun applyTheme(linkUrl: String) {
         var th = "light"
 
-        val linkStyle = getQueryParamFromUrl(linkUrl, "link_style");
+        val linkStyle = getQueryParamFromUrl(linkUrl, "link_style")
 
         if (!linkStyle.isNullOrBlank()){
             try {
@@ -145,8 +145,6 @@ internal class LinkActivity : AppCompatActivity() {
         window.statusBarColor = themeColorTop
         window.navigationBarColor = themeColorBottom
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isDarkTheme
-
-        setContentView(binding.root)
 
         windowInsetsController {
             isAppearanceLightNavigationBars = !isDarkTheme
