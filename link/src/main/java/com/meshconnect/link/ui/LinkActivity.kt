@@ -115,25 +115,25 @@ internal class LinkActivity : AppCompatActivity() {
 
         val linkStyle = getQueryParamFromUrl(linkUrl, "link_style")
 
-        if (!linkStyle.isNullOrBlank()){
+        if (!linkStyle.isNullOrBlank()) {
             try {
                 val jsonObject = JSONObject(decodeBase64(linkStyle))
                 th = jsonObject.optString("th", "light")
             } catch (_: Exception) { }
         }
 
-        val isDarkTheme = when (th){
+        val isDarkTheme = when (th) {
             "dark" -> true
             "system" -> isSystemDarkTheme()
             else -> false
         }
 
-        val themeColorTop = when (isDarkTheme){
+        val themeColorTop = when (isDarkTheme) {
             true -> getColor(R.color.darkThemeColorTop)
             false -> getColor(R.color.lightThemeColorTop)
         }
 
-        val themeColorBottom = when (isDarkTheme){
+        val themeColorBottom = when (isDarkTheme) {
             true -> getColor(R.color.darkThemeColorBottom)
             false -> getColor(R.color.lightThemeColorBottom)
         }
