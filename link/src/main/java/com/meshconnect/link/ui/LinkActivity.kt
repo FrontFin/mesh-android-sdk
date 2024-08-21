@@ -229,7 +229,9 @@ internal class LinkActivity : AppCompatActivity() {
             view: WebView?,
             request: WebResourceRequest?
         ): Boolean {
-            return false
+            val url = request?.url
+            val isHttp = url?.scheme?.startsWith("http") == true
+            return !isHttp
         }
     }
 
