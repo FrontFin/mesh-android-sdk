@@ -2,7 +2,7 @@
 <resources>
 
     <style name="MeshLink.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
-        <item name="colorPrimary">@color/blue</item>
+        <item name="colorPrimary">@color/meshBlue40</item>
         <item name="alertDialogStyle">@style/MeshLink.AlertDialogStyle</item>
         <item name="materialAlertDialogTitlePanelStyle">
             @style/MeshLink.MaterialAlertDialog.Title.Panel

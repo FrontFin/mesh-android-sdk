@@ -15,7 +15,6 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.google.gson.Gson
@@ -27,10 +26,9 @@ import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.utils.OnLoadedScriptBuilder
 import com.meshconnect.link.utils.alertDialog
-import com.meshconnect.link.utils.decodeBase64
 import com.meshconnect.link.utils.decodeCatching
+import com.meshconnect.link.utils.getLinkStyleFromLinkUrl
 import com.meshconnect.link.utils.getParcelable
-import com.meshconnect.link.utils.getQueryParamFromUrl
 import com.meshconnect.link.utils.intent
 import com.meshconnect.link.utils.isSystemDarkTheme
 import com.meshconnect.link.utils.lazyNone
@@ -40,7 +38,6 @@ import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
 import com.meshconnect.link.utils.windowInsetsController
-import org.json.JSONObject
 import java.net.URL
 
 internal class LinkActivity : AppCompatActivity() {
@@ -111,40 +108,28 @@ internal class LinkActivity : AppCompatActivity() {
     }
 
     private fun applyTheme(linkUrl: String) {
-        var th = "light"
-
-        val linkStyle = getQueryParamFromUrl(linkUrl, "link_style")
-
-        if (!linkStyle.isNullOrBlank()) {
-            try {
-                val jsonObject = JSONObject(decodeBase64(linkStyle))
-                th = jsonObject.optString("th", "light")
-            } catch (_: Exception) { }
-        }
-
-        val isDarkTheme = when (th) {
+        val linkStyle = getLinkStyleFromLinkUrl(linkUrl)
+        val isDarkTheme = when (linkStyle?.th) {
             "dark" -> true
             "system" -> isSystemDarkTheme()
             else -> false
         }
 
-        val themeColorTop = when (isDarkTheme) {
-            true -> getColor(R.color.darkThemeColorTop)
-            false -> getColor(R.color.lightThemeColorTop)
+        val topColor = when {
+            isDarkTheme -> getColor(R.color.coldGray70)
+            else -> getColor(R.color.coldGray0)
         }
 
-        val themeColorBottom = when (isDarkTheme) {
-            true -> getColor(R.color.darkThemeColorBottom)
-            false -> getColor(R.color.lightThemeColorBottom)
+        val bottomColor = when {
+            isDarkTheme -> getColor(R.color.gray80)
+            else -> getColor(R.color.gray0)
         }
 
-        val content = findViewById<ViewGroup>(android.R.id.content)
-        content.setBackgroundColor(themeColorBottom)
+        findViewById<ViewGroup>(android.R.id.content).setBackgroundColor(bottomColor)
 
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.statusBarColor = themeColorTop
-        window.navigationBarColor = themeColorBottom
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isDarkTheme
+        window.statusBarColor = topColor
+        window.navigationBarColor = bottomColor
 
         windowInsetsController {
             isAppearanceLightNavigationBars = !isDarkTheme

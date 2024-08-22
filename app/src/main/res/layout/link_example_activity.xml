@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="32dp"
-        android:backgroundTint="@color/blue"
+        android:backgroundTint="@color/meshBlue40"
         android:src="@drawable/ic_add"
         app:tint="@android:color/white"
         tools:ignore="ContentDescription" />
