@@ -7,6 +7,8 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Message
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -25,8 +27,10 @@ import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.utils.OnLoadedScriptBuilder
 import com.meshconnect.link.utils.alertDialog
 import com.meshconnect.link.utils.decodeCatching
+import com.meshconnect.link.utils.getLinkStyleFromLinkUrl
 import com.meshconnect.link.utils.getParcelable
 import com.meshconnect.link.utils.intent
+import com.meshconnect.link.utils.isSystemDarkTheme
 import com.meshconnect.link.utils.lazyNone
 import com.meshconnect.link.utils.observeEvent
 import com.meshconnect.link.utils.onClick
@@ -90,10 +94,7 @@ internal class LinkActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        windowInsetsController {
-            isAppearanceLightNavigationBars = true
-            isAppearanceLightStatusBars = true
-        }
+        applyTheme(link)
 
         binding.back.onClick { onBack() }
         binding.close.onClick { showCloseDialog() }
@@ -104,6 +105,36 @@ internal class LinkActivity : AppCompatActivity() {
         openWebView(link)
 
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
+    }
+
+    private fun applyTheme(linkUrl: String) {
+        val linkStyle = getLinkStyleFromLinkUrl(linkUrl)
+        val isDarkTheme = when (linkStyle?.th) {
+            "dark" -> true
+            "system" -> isSystemDarkTheme()
+            else -> false
+        }
+
+        val topColor = when {
+            isDarkTheme -> getColor(R.color.coldGray70)
+            else -> getColor(R.color.coldGray0)
+        }
+
+        val bottomColor = when {
+            isDarkTheme -> getColor(R.color.gray80)
+            else -> getColor(R.color.gray0)
+        }
+
+        findViewById<ViewGroup>(android.R.id.content).setBackgroundColor(bottomColor)
+
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = topColor
+        window.navigationBarColor = bottomColor
+
+        windowInsetsController {
+            isAppearanceLightNavigationBars = !isDarkTheme
+            isAppearanceLightStatusBars = !isDarkTheme
+        }
     }
 
     override fun onBackPressed() {
