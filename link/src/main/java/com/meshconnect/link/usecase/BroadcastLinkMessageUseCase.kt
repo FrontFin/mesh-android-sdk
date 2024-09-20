@@ -41,6 +41,8 @@ internal object FilterLinkMessageImpl : FilterLinkMessage {
         "integrationSelected",
         "credentialsEntered",
         "transferStarted",
+        "transferExecuted",
+        "transferInitiated",
         "transferPreviewed",
         "transferPreviewError",
         "transferExecutionError",
