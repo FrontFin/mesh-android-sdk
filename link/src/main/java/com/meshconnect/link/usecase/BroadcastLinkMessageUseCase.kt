@@ -46,6 +46,7 @@ internal object FilterLinkMessageImpl : FilterLinkMessage {
         "transferPreviewed",
         "transferPreviewError",
         "transferExecutionError",
+        "transferNoEligibleAssets"
     )
 
     override fun invoke(map: Map<String, *>): Map<String, *>? {
