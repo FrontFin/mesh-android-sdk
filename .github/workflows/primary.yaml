@@ -1,0 +1,37 @@
+name: Build & Test Link module
+
+on: push
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout 🎾
+        uses: actions/checkout@v4
+
+      - name: Setup Java ♨️
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Android SDK 🎁
+        uses: android-actions/setup-android@v3
+
+      - name: Run code quality checks 🧹
+        run: ./gradlew link:ktlintCheck link:detekt link:lintRelease
+
+      - name: Run tests & coverage 🥁
+        run: ./gradlew link:jacocoTestReport link:jacocoCoverageVerification
+
+      - name: Build 🧩
+        run: ./gradlew link:assembleRelease
+
+      - name: Run sonar ✅
+        run: ./gradlew link:sonar
+        env:
+          sonarProjectKey: ${{ secrets.SONAR_PROJECT_KEY }}
+          sonarHostUrl: ${{ secrets.SONAR_HOST_URL }}
+          sonarLogin: ${{ secrets.SONAR_LOGIN }}
