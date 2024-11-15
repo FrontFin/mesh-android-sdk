@@ -35,14 +35,14 @@ jobs:
       - name: Build 🧩
         run: ./gradlew link:assembleRelease
 
-      - name: Publish release 🎉
-        run: ./gradlew link:publishReleasePublicationToMavenRepository
-        env:
-          signingKey: ${{ secrets.SIGNING_KEY }}
-          signingPassword: ${{ secrets.SIGNING_PASSWORD }}
-          ossrhPassword: ${{ secrets.OSSRH_PASSWORD }}
-          ossrhUsername: ${{ secrets.OSSRHUSER_NAME }}
-          publishVersion: ${{ inputs.publish_version }}
+#      - name: Publish release 🎉
+#        run: ./gradlew link:publishReleasePublicationToMavenRepository
+#        env:
+#          signingKey: ${{ secrets.SIGNING_KEY }}
+#          signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+#          ossrhPassword: ${{ secrets.OSSRH_PASSWORD }}
+#          ossrhUsername: ${{ secrets.OSSRHUSER_NAME }}
+#          publishVersion: ${{ inputs.publish_version }}
 
       - name: Run sonar ✅
         run: ./gradlew link:sonar
@@ -50,3 +50,11 @@ jobs:
           sonarProjectKey: ${{ secrets.SONAR_PROJECT_KEY }}
           sonarHostUrl: ${{ secrets.SONAR_HOST_URL }}
           sonarLogin: ${{ secrets.SONAR_LOGIN }}
+
+      - name: Push Git Tag
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          NEW_TAG=${{ inputs.publish_version }}
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
