@@ -3,7 +3,7 @@ name: Deploy Link SDK
 on:
   workflow_dispatch:
     inputs:
-      publishVersion:
+      publish_version:
         description: Deploy version
         type: string
         required: true
@@ -42,6 +42,7 @@ jobs:
           signingPassword: ${{ secrets.SIGNING_PASSWORD }}
           ossrhPassword: ${{ secrets.OSSRH_PASSWORD }}
           ossrhUsername: ${{ secrets.OSSRHUSER_NAME }}
+          publishVersion: ${{ inputs.publish_version }}
 
       - name: Run sonar ✅
         run: ./gradlew link:sonar
