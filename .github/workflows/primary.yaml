@@ -1,4 +1,4 @@
-name: Build & Test Link module
+name: Build & Test Link SDK
 
 on:
   pull_request:
