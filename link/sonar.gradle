@@ -2,7 +2,7 @@ apply plugin: 'org.sonarqube'
 
 sonar {
     properties {
-        property 'sonar.skipCompile', true
+        property 'sonar.gradle.skipCompile', true
         property 'sonar.projectKey', sonarProjectKey
         property 'sonar.host.url', sonarHostUrl
         property 'sonar.login', sonarLogin

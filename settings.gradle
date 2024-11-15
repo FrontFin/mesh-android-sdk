@@ -109,3 +109,5 @@ dependencyResolutionManagement {
 rootProject.name = "mesh-android-sdk"
 include ':app'
 include ':link'
+
+System.setProperty("sonar.gradle.skipCompile", "true")
