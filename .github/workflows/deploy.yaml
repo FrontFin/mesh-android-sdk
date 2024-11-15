@@ -1,0 +1,51 @@
+name: Deploy Link SDK
+
+on:
+  workflow_dispatch:
+    inputs:
+      publishVersion:
+        description: Deploy version
+        type: string
+        required: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout 🎾
+        uses: actions/checkout@v4
+
+      - name: Setup Java ♨️
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Android SDK 🎁
+        uses: android-actions/setup-android@v3
+
+      - name: Run code quality checks 🧹
+        run: ./gradlew link:ktlintCheck link:detekt link:lintRelease
+
+      - name: Run tests & coverage 🥁
+        run: ./gradlew link:jacocoTestReport link:jacocoCoverageVerification
+
+      - name: Build 🧩
+        run: ./gradlew link:assembleRelease
+
+      - name: Publish release 🎉
+        run: ./gradlew link:publishReleasePublicationToMavenRepository
+        env:
+          signingKey: ${{ secrets.SIGNING_KEY }}
+          signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+          ossrhPassword: ${{ secrets.OSSRH_PASSWORD }}
+          ossrhUsername: ${{ secrets.OSSRHUSER_NAME }}
+
+      - name: Run sonar ✅
+        run: ./gradlew link:sonar
+        env:
+          sonarProjectKey: ${{ secrets.SONAR_PROJECT_KEY }}
+          sonarHostUrl: ${{ secrets.SONAR_HOST_URL }}
+          sonarLogin: ${{ secrets.SONAR_LOGIN }}
