@@ -4,16 +4,13 @@ apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply from: "$rootDir/detekt.gradle"
 
 android {
-    compileSdk compile_sdk
-
+    compileSdk 33
     defaultConfig {
-        minSdk min_sdk
-        targetSdk target_sdk
+        minSdk 24
+        targetSdk 33
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro'
-
-        def buildNumber = System.getenv("BITRISE_BUILD_NUMBER")
-        versionCode buildNumber?.isInteger() ? buildNumber.toInteger() : 1
+        versionCode 1
     }
     buildTypes {
         release {

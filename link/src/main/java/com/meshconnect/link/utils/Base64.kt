@@ -1,10 +1,13 @@
 package com.meshconnect.link.utils
 
 import java.net.URL
-import java.util.Base64
 
 internal fun decodeBase64(source: String): String {
-    return String(Base64.getDecoder().decode(source))
+    return if (isAtLeastOreo) {
+        String(java.util.Base64.getDecoder().decode(source))
+    } else {
+        String(android.util.Base64.decode(source, android.util.Base64.DEFAULT))
+    }
 }
 
 internal fun decodeCatching(source: String?) = runCatching {

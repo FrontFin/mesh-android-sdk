@@ -1,12 +1,22 @@
 package com.meshconnect.link.utils
 
+import io.mockk.every
+import io.mockk.mockkStatic
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeInstanceOf
+import org.junit.Before
 import org.junit.Test
 import java.net.MalformedURLException
 
 class DecodeTest {
+
+    @Before
+    fun setUp() {
+        mockkStatic(::isAtLeastOreo)
+        every { isAtLeastOreo } returns true
+    }
+
     @Test
     fun `verify link decoded from linkToken`() {
         val result = decodeCatching("aHR0cHM6Ly9jb20uYXdlc29tZXVybC9iMmItaWZyYW1l")
