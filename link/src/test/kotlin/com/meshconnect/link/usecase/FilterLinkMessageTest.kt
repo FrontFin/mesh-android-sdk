@@ -24,6 +24,8 @@ class FilterLinkMessageTest {
         verifyTypeExists("transferPreviewError")
         verifyTypeExists("transferExecutionError")
         verifyTypeExists("walletMessageSigned")
+        verifyTypeExists("verifyWalletRejected")
+        verifyTypeExists("verifyDonePage")
         verifyTypeNotExist(randomString)
         verifyTypeNotExist("")
     }
