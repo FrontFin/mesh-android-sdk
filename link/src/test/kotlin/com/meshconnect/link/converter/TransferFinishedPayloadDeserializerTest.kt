@@ -22,14 +22,18 @@ class TransferFinishedPayloadDeserializerTest {
             toAddress = "92811yyyy",
             symbol = "UST",
             amount = 1.0024,
-            networkId = "79823981e"
+            networkId = "79823981e",
+            amountInFiat = 10.55,
+            totalAmountInFiat = 11.2,
+            networkName = "Polygon",
+            txHash = "1-9340-194350432-21123232"
         )
         assert(actual == expected)
     }
 
     @Test
     fun `test success payload with empty address`() {
-        val json = readFile("transfer-success-empty-address.json")
+        val json = readFile("transfer-success-empty-fields.json")
         val actual = gson.fromJson<TransferFinishedPayload>(json)
         val expected = TransferFinishedSuccessPayload(
             txId = "234sdf-xxx3902",
@@ -37,7 +41,11 @@ class TransferFinishedPayloadDeserializerTest {
             toAddress = "",
             symbol = "UST",
             amount = 1.0024,
-            networkId = "79823981e"
+            networkId = "79823981e",
+            txHash = "",
+            networkName = "",
+            amountInFiat = 0.0,
+            totalAmountInFiat = 0.0
         )
         assert(actual == expected)
     }
