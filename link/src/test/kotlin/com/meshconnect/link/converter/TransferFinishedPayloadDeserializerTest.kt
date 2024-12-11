@@ -42,10 +42,10 @@ class TransferFinishedPayloadDeserializerTest {
             symbol = "UST",
             amount = 1.0024,
             networkId = "79823981e",
-            txHash = "",
-            networkName = "",
-            amountInFiat = 0.0,
-            totalAmountInFiat = 0.0
+            txHash = null,
+            networkName = null,
+            amountInFiat = null,
+            totalAmountInFiat = null
         )
         assert(actual == expected)
     }

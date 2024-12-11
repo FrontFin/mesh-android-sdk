@@ -19,10 +19,6 @@ internal class TransferFinishedPayloadDeserializer : JsonDeserializer<TransferFi
         val obj = json.asJsonObject.apply {
             addPropertyIfAbsent("fromAddress", "")
             addPropertyIfAbsent("toAddress", "")
-            addPropertyIfAbsent("networkName", "")
-            addPropertyIfAbsent("txHash", "")
-            addPropertyIfAbsent("amountInFiat", 0)
-            addPropertyIfAbsent("totalAmountInFiat", 0)
         }
         return when (val status = obj.get("status").asString) {
             "success" -> context.deserialize<TransferFinishedSuccessPayload>(obj)
@@ -31,10 +27,9 @@ internal class TransferFinishedPayloadDeserializer : JsonDeserializer<TransferFi
         }
     }
 
-    private fun JsonObject.addPropertyIfAbsent(name: String, value: Any) {
+    private fun JsonObject.addPropertyIfAbsent(name: String, value: Any?) {
         when {
             value is String && !has(name) -> addProperty(name, value)
-            value is Number && !has(name) -> addProperty(name, value)
         }
     }
 }

@@ -64,11 +64,11 @@ data class TransferFinishedSuccessPayload(
     val toAddress: String,
     val symbol: String,
     val amount: Double,
-    val amountInFiat: Double,
-    val totalAmountInFiat: Double,
     val networkId: String,
-    val networkName: String,
-    val txHash: String,
+    val amountInFiat: Double?,
+    val totalAmountInFiat: Double?,
+    val networkName: String?,
+    val txHash: String?,
 ) : TransferFinishedPayload
 
 @Parcelize
