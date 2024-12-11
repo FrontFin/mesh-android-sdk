@@ -3,6 +3,7 @@ package com.meshconnect.link.converter
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.meshconnect.link.entity.TransferFinishedErrorPayload
 import com.meshconnect.link.entity.TransferFinishedPayload
 import com.meshconnect.link.entity.TransferFinishedSuccessPayload
@@ -16,13 +17,19 @@ internal class TransferFinishedPayloadDeserializer : JsonDeserializer<TransferFi
         context: JsonDeserializationContext
     ): TransferFinishedPayload {
         val obj = json.asJsonObject.apply {
-            if (!has("fromAddress")) addProperty("fromAddress", "")
-            if (!has("toAddress")) addProperty("toAddress", "")
+            addPropertyIfAbsent("fromAddress", "")
+            addPropertyIfAbsent("toAddress", "")
         }
         return when (val status = obj.get("status").asString) {
             "success" -> context.deserialize<TransferFinishedSuccessPayload>(obj)
             "error" -> context.deserialize<TransferFinishedErrorPayload>(obj)
             else -> error("unknown status '$status'")
+        }
+    }
+
+    private fun JsonObject.addPropertyIfAbsent(name: String, value: Any?) {
+        when {
+            value is String && !has(name) -> addProperty(name, value)
         }
     }
 }

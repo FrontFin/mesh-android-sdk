@@ -5,5 +5,10 @@
     "toAddress": "92811yyyy",
     "symbol": "UST",
     "amount": 1.0024,
-    "networkId": "79823981e"
+    "networkId": "79823981e",
+    "amountInFiat": 10.55,
+    "totalAmountInFiat": 11.2,
+    "networkName": "Polygon",
+    "txHash": "1-9340-194350432-21123232"
+
 }
