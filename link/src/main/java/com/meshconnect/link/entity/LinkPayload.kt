@@ -69,6 +69,7 @@ data class TransferFinishedSuccessPayload(
     val totalAmountInFiat: Double?,
     val networkName: String?,
     val txHash: String?,
+    val transferId: String?,
 ) : TransferFinishedPayload
 
 @Parcelize
