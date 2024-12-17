@@ -1,6 +1,7 @@
 package com.meshconnect.link.ui
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -17,6 +18,7 @@ import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
@@ -147,6 +149,7 @@ internal class LinkActivity : AppCompatActivity() {
                 url?.endsWith("broker-connect/done") == true -> {
                     showToast(getString(R.string.back_not_allowed))
                 }
+
                 canGoBack() -> evaluateJavascript("window.history.go(-1)", null)
                 else -> finish()
             }
@@ -306,7 +309,9 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
-    private fun actionView(uri: Uri) {
+    private fun actionView(uri: Uri) = try {
         startActivity(Intent(Intent.ACTION_VIEW, uri))
+    } catch (expected: ActivityNotFoundException) {
+        Snackbar.make(binding.root, R.string.not_able_to_perform, Snackbar.LENGTH_SHORT).show()
     }
 }

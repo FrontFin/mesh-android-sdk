@@ -6,4 +6,5 @@
     <string name="onCloseDialog_exit">Exit</string>
     <string name="onCloseDialog_cancel">Cancel</string>
     <string name="back_not_allowed">Back not allowed.</string>
+    <string name="not_able_to_perform">Not able to perform an operation</string>
 </resources>
