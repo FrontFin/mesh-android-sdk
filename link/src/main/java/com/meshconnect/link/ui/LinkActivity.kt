@@ -18,7 +18,6 @@ import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
@@ -147,7 +146,7 @@ internal class LinkActivity : AppCompatActivity() {
         binding.webView.run {
             when {
                 url?.endsWith("broker-connect/done") == true -> {
-                    showToast(getString(R.string.back_not_allowed))
+                    showToast(R.string.back_not_allowed)
                 }
 
                 canGoBack() -> evaluateJavascript("window.history.go(-1)", null)
@@ -312,6 +311,6 @@ internal class LinkActivity : AppCompatActivity() {
     private fun actionView(uri: Uri) = try {
         startActivity(Intent(Intent.ACTION_VIEW, uri))
     } catch (expected: ActivityNotFoundException) {
-        Snackbar.make(binding.root, R.string.not_able_to_perform, Snackbar.LENGTH_SHORT).show()
+        showToast(R.string.not_able_to_perform)
     }
 }
