@@ -1,6 +1,7 @@
 package com.meshconnect.link.ui
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -145,8 +146,9 @@ internal class LinkActivity : AppCompatActivity() {
         binding.webView.run {
             when {
                 url?.endsWith("broker-connect/done") == true -> {
-                    showToast(getString(R.string.back_not_allowed))
+                    showToast(R.string.back_not_allowed)
                 }
+
                 canGoBack() -> evaluateJavascript("window.history.go(-1)", null)
                 else -> finish()
             }
@@ -306,7 +308,9 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
-    private fun actionView(uri: Uri) {
+    private fun actionView(uri: Uri) = try {
         startActivity(Intent(Intent.ACTION_VIEW, uri))
+    } catch (expected: ActivityNotFoundException) {
+        showToast(R.string.not_able_to_perform)
     }
 }
