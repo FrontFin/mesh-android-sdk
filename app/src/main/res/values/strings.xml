@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Mesh Example</string>
+    <string name="link_token_hint">Link Token</string>
+    <string name="link_btn">Link</string>
 </resources>
