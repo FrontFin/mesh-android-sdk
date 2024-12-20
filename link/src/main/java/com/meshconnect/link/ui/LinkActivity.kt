@@ -277,7 +277,9 @@ internal class LinkActivity : AppCompatActivity() {
                         view: WebView?,
                         request: WebResourceRequest?
                     ): Boolean {
-                        request?.url?.let { actionView(it) }
+                        if (request != null && !request.isRedirect) {
+                            actionView(request.url)
+                        }
                         return super.shouldOverrideUrlLoading(view, request)
                     }
                 }
