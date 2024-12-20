@@ -19,7 +19,7 @@ import android.webkit.WebViewClient
 private const val TAG = "DebugWebViewClient"
 
 @Suppress("unused")
-internal class DebugWebViewClient: WebViewClient() {
+internal open class DebugWebViewClient: WebViewClient() {
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         Log.d(TAG, "shouldOverrideUrlLoading: ${request?.url}")
