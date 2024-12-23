@@ -19,6 +19,6 @@ dependencies {
     implementation libs.google.material
 }
 
-configurations.all {
+configurations.configureEach {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
