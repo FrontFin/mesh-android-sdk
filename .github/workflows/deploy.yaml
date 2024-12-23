@@ -2,11 +2,6 @@ name: Deploy Link SDK
 
 on:
   workflow_dispatch:
-    inputs:
-      publish_version:
-        description: Deploy version
-        type: string
-        required: true
 
 jobs:
   build-test-and-deploy:
@@ -36,20 +31,19 @@ jobs:
         run: ./gradlew link:assembleRelease
 
       - name: Publish release 🎉
-        run: ./gradlew link:publishReleasePublicationToMavenRepository
+        run: ./gradlew link:publishToMavenCentral --no-configuration-cache
         env:
-          signingKey: ${{ secrets.SIGNING_KEY }}
-          signingPassword: ${{ secrets.SIGNING_PASSWORD }}
-          ossrhPassword: ${{ secrets.OSSRH_PASSWORD }}
-          ossrhUsername: ${{ secrets.OSSRHUSER_NAME }}
-          publishVersion: ${{ inputs.publish_version }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
 
       - name: Run sonar ✅
         run: ./gradlew link:sonar
         env:
-          sonarProjectKey: ${{ secrets.SONAR_PROJECT_KEY }}
-          sonarHostUrl: ${{ secrets.SONAR_HOST_URL }}
-          sonarLogin: ${{ secrets.SONAR_LOGIN }}
+          ORG_GRADLE_PROJECT_sonarProjectKey: ${{ secrets.SONAR_PROJECT_KEY }}
+          ORG_GRADLE_PROJECT_sonarHostUrl: ${{ secrets.SONAR_HOST_URL }}
+          ORG_GRADLE_PROJECT_sonarLogin: ${{ secrets.SONAR_LOGIN }}
 
       - name: Push git tag ☀️
         run: |
