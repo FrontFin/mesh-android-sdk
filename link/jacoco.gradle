@@ -4,10 +4,12 @@ jacoco {
     toolVersion '0.8.10'
 }
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
     jacoco.includeNoLocationClasses = true
     jacoco.excludes = ['jdk.internal.*']
 }
+
+def buildDir = layout.buildDirectory
 
 def classDirs = fileTree("$buildDir/tmp/kotlin-classes/release")
 
@@ -15,14 +17,14 @@ def sourceDirs = files("$projectDir/src/main/java")
 
 def executionDirs = files("$buildDir/jacoco/testReleaseUnitTest.exec")
 
-task jacocoTestReport(type: JacocoReport) {
+tasks.register('jacocoTestReport', JacocoReport) {
     dependsOn 'testReleaseUnitTest'
     group = "Reporting"
     description = "Code coverage report for Android & Unit tests."
 
     reports {
-        html.enabled true
-        xml.enabled true
+        html.required = true
+        xml.required = true
     }
 
     classDirectories.from(classDirs)
@@ -30,7 +32,7 @@ task jacocoTestReport(type: JacocoReport) {
     executionData.from(executionDirs)
 }
 
-task jacocoCoverageVerification(type: JacocoCoverageVerification) {
+tasks.register('jacocoCoverageVerification', JacocoCoverageVerification) {
     dependsOn 'testReleaseUnitTest'
     group = "Verification"
     description = "Code coverage verification for Android & Unit tests."

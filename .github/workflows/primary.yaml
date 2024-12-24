@@ -35,6 +35,6 @@ jobs:
       - name: Run sonar ✅
         run: ./gradlew link:sonar
         env:
-          sonarProjectKey: ${{ secrets.SONAR_PROJECT_KEY }}
-          sonarHostUrl: ${{ secrets.SONAR_HOST_URL }}
-          sonarLogin: ${{ secrets.SONAR_LOGIN }}
+          ORG_GRADLE_PROJECT_sonarProjectKey: ${{ secrets.SONAR_PROJECT_KEY }}
+          ORG_GRADLE_PROJECT_sonarHostUrl: ${{ secrets.SONAR_HOST_URL }}
+          ORG_GRADLE_PROJECT_sonarLogin: ${{ secrets.SONAR_LOGIN }}
