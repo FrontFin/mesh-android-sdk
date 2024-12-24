@@ -51,7 +51,9 @@ dependencies {
     androidTestImplementation libs.kotlinx.coroutines.test
     androidTestImplementation libs.kluent
 }
-
+/**
+ * Publication setup to Maven Central
+ */
 import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 import com.vanniktech.maven.publish.SonatypeHost
 
@@ -60,9 +62,13 @@ mavenPublishing {
     // the second whether to publish a sources jar
     // the third whether to publish a javadoc jar
     configure(new AndroidSingleVariantLibrary('release', true, true))
+    // the first parameter represents the repository to publish
+    // the second whether to publish automatically
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, false)
+    // sing publication
     signAllPublications()
-
+    // define group, artifact and version
+    // the version is taken from `link/version.gradle` file
     coordinates('com.meshconnect', 'link', publishVersion)
 
     pom {
@@ -74,7 +80,8 @@ mavenPublishing {
             url = 'https://github.com/FrontFin/mesh-android-sdk'
             connection = 'scm:git:git://github.com/FrontFin/mesh-android-sdk.git'
             developerConnection = 'scm:git:ssh://git@github.com/FrontFin/mesh-android-sdk.git'
-            tag = 'git rev-parse --verify HEAD'.execute().text.trim() // commit hash
+            // set commit hash as a tag to track the release source
+            tag = 'git rev-parse --verify HEAD'.execute().text.trim()
         }
         licenses {
             license {
@@ -91,4 +98,3 @@ mavenPublishing {
         }
     }
 }
-
