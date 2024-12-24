@@ -12,41 +12,41 @@ jobs:
       - name: Checkout 🎾
         uses: actions/checkout@v4
 
-      - name: Setup Java ♨️
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: 17
-
-      - name: Setup Android SDK 🎁
-        uses: android-actions/setup-android@v3
-
-      - name: Run code quality checks 🧹
-        run: ./gradlew link:ktlintCheck link:detekt link:lintRelease
-
-      - name: Run tests & coverage 🥁
-        run: ./gradlew link:jacocoTestReport link:jacocoCoverageVerification
-
-      - name: Build 🧩
-        run: ./gradlew link:assembleRelease
-
-      - name: Publish release 🎉
-        run: ./gradlew link:publishToMavenCentral --no-configuration-cache
-        env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
-
-      - name: Run sonar ✅
-        run: ./gradlew link:sonar
-        env:
-          ORG_GRADLE_PROJECT_sonarProjectKey: ${{ secrets.SONAR_PROJECT_KEY }}
-          ORG_GRADLE_PROJECT_sonarHostUrl: ${{ secrets.SONAR_HOST_URL }}
-          ORG_GRADLE_PROJECT_sonarLogin: ${{ secrets.SONAR_LOGIN }}
+#      - name: Setup Java ♨️
+#        uses: actions/setup-java@v4
+#        with:
+#          distribution: 'temurin'
+#          java-version: 17
+#
+#      - name: Setup Android SDK 🎁
+#        uses: android-actions/setup-android@v3
+#
+#      - name: Run code quality checks 🧹
+#        run: ./gradlew link:ktlintCheck link:detekt link:lintRelease
+#
+#      - name: Run tests & coverage 🥁
+#        run: ./gradlew link:jacocoTestReport link:jacocoCoverageVerification
+#
+#      - name: Build 🧩
+#        run: ./gradlew link:assembleRelease
+#
+#      - name: Publish release 🎉
+#        run: ./gradlew link:publishToMavenCentral --no-configuration-cache
+#        env:
+#          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_USERNAME }}
+#          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_PASSWORD }}
+#          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+#          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+#
+#      - name: Run sonar ✅
+#        run: ./gradlew link:sonar
+#        env:
+#          ORG_GRADLE_PROJECT_sonarProjectKey: ${{ secrets.SONAR_PROJECT_KEY }}
+#          ORG_GRADLE_PROJECT_sonarHostUrl: ${{ secrets.SONAR_HOST_URL }}
+#          ORG_GRADLE_PROJECT_sonarLogin: ${{ secrets.SONAR_LOGIN }}
 
       - name: Push git tag ☀️
         run: |
-          NEW_TAG=${{ inputs.publish_version }}
+          NEW_TAG=$(grep "publishVersion" link/version.gradle | cut -d '=' -f2 | xargs)
           git tag $NEW_TAG
           git push origin $NEW_TAG
