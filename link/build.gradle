@@ -1,20 +1,15 @@
 apply from: "$rootDir/android-library.gradle"
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'org.jetbrains.dokka'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
-apply from: "$rootDir/gradle/publish.gradle"
+apply plugin: 'com.vanniktech.maven.publish'
 apply from: 'jacoco.gradle'
 apply from: 'sonar.gradle'
+apply from: "secrets.gradle"
+apply from: 'version.gradle'
 
 android {
     namespace 'com.meshconnect.link'
-    publishing {
-        singleVariant("release") {
-            withSourcesJar()
-            withJavadocJar()
-        }
-    }
+
     defaultConfig {
         buildConfigField "String", "VERSION", "\"$publishVersion\""
     }
@@ -29,6 +24,9 @@ android {
         freeCompilerArgs += [
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
         ]
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 
@@ -52,4 +50,51 @@ dependencies {
     androidTestImplementation libs.androidx.test.rules
     androidTestImplementation libs.kotlinx.coroutines.test
     androidTestImplementation libs.kluent
+}
+/**
+ * Publication setup to Maven Central
+ */
+import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
+import com.vanniktech.maven.publish.SonatypeHost
+
+mavenPublishing {
+    // the first parameter represents which variant is published
+    // the second whether to publish a sources jar
+    // the third whether to publish a javadoc jar
+    configure(new AndroidSingleVariantLibrary('release', true, true))
+    // the first parameter represents the repository to publish
+    // the second whether to publish automatically
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, false)
+    // sing publication
+    signAllPublications()
+    // define group, artifact and version
+    // the version is taken from `link/version.gradle` file
+    coordinates('com.meshconnect', 'link', publishVersion)
+
+    pom {
+        name = 'Mesh Connect Android SDK'
+        description = 'Android library for integrating with Mesh Connect'
+        url = 'https://github.com/FrontFin/mesh-android-sdk'
+
+        scm {
+            url = 'https://github.com/FrontFin/mesh-android-sdk'
+            connection = 'scm:git:git://github.com/FrontFin/mesh-android-sdk.git'
+            developerConnection = 'scm:git:ssh://git@github.com/FrontFin/mesh-android-sdk.git'
+            // set commit hash as a tag to track the release source
+            tag = 'git rev-parse --verify HEAD'.execute().text.trim()
+        }
+        licenses {
+            license {
+                name = 'MIT License'
+                url = 'https://opensource.org/licenses/MIT'
+            }
+        }
+        developers {
+            developer {
+                id = 'meshconnect'
+                name = 'Mesh Connect, Inc'
+                url = 'https://github.com/FrontFin'
+            }
+        }
+    }
 }
