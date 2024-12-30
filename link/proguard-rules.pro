@@ -22,7 +22,6 @@
 
 -keep class com.meshconnect.link.entity.** { *; }
 -keep class com.meshconnect.link.store.** { *; }
--keep class com.meshconnect.link.ui.LinkContract { *; }
 -keep class com.meshconnect.link.ui.LaunchLink { *; }
 -keep class com.meshconnect.link.ui.LinkExit { *; }
 -keep class com.meshconnect.link.ui.LinkResult { *; }

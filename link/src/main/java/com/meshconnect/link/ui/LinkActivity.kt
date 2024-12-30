@@ -55,10 +55,6 @@ internal class LinkActivity : AppCompatActivity() {
         private const val CBW_HOST = "wallet.coinbase.com"
         private const val CBW_PACKAGE_NAME = "org.toshi"
 
-        fun getLinkIntent(activity: Context, catalogLink: String): Intent {
-            return intent<LinkActivity>(activity).putExtra(TOKEN, catalogLink)
-        }
-
         fun getLinkIntent(activity: Context, config: LinkConfiguration): Intent {
             val intent = intent<LinkActivity>(activity)
                 .putExtra(TOKEN, config.token)
