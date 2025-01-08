@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Message
+import android.util.Log
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.WebChromeClient
@@ -15,6 +16,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -27,6 +29,7 @@ import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.utils.OnLoadedScriptBuilder
 import com.meshconnect.link.utils.alertDialog
+import com.meshconnect.link.utils.decodeBase64
 import com.meshconnect.link.utils.decodeCatching
 import com.meshconnect.link.utils.getLinkStyleFromLinkUrl
 import com.meshconnect.link.utils.getParcelable
@@ -39,6 +42,7 @@ import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
 import com.meshconnect.link.utils.windowInsetsController
+import org.json.JSONObject
 import java.net.URL
 
 internal class LinkActivity : AppCompatActivity() {
@@ -259,8 +263,7 @@ internal class LinkActivity : AppCompatActivity() {
         }
 
         override fun shouldOverrideUrlLoading(
-            view: WebView?,
-            request: WebResourceRequest?
+            view: WebView?, request: WebResourceRequest?
         ): Boolean {
             val url = request?.url
             val isHttp = url?.scheme?.startsWith("http") == true
@@ -274,8 +277,7 @@ internal class LinkActivity : AppCompatActivity() {
             get() = WebView(this@LinkActivity).apply {
                 webViewClient = object : WebViewClient() {
                     override fun shouldOverrideUrlLoading(
-                        view: WebView?,
-                        request: WebResourceRequest?
+                        view: WebView?, request: WebResourceRequest?
                     ): Boolean {
                         if (request != null && !request.isRedirect) {
                             actionView(request.url)
@@ -286,10 +288,7 @@ internal class LinkActivity : AppCompatActivity() {
             }
 
         override fun onCreateWindow(
-            view: WebView?,
-            isDialog: Boolean,
-            isUserGesture: Boolean,
-            resultMsg: Message?
+            view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message?
         ): Boolean {
             val url = view?.hitTestResult?.extra
 
@@ -310,9 +309,52 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
+    private val coinbaseLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            result?.data?.data?.let { uri ->
+                //binding.webView.loadUrl(uri.toString())
+                getData(uri).onSuccess { p ->
+                    val newUri =
+                        uri.buildUpon().clearQuery().appendQueryParameter("p", p).build().toString()
+                    Log.d("3qq", "LinkActivity newUri: $newUri")
+                    binding.webView.loadUrl(newUri)
+                }
+            }
+        }
+
+
     private fun actionView(uri: Uri) = try {
-        startActivity(Intent(Intent.ACTION_VIEW, uri))
+        fun startViewIntent() = startActivity(Intent(Intent.ACTION_VIEW, uri))
+
+        if (uri.host == "wallet.coinbase.com") {
+            val intent = packageManager.getLaunchIntentForPackage("org.toshi")
+            if (intent != null) {
+                intent.type = Intent.ACTION_VIEW
+                intent.flags = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK.inv()
+                intent.data = uri
+                coinbaseLauncher.launch(intent)
+            } else {
+                Log.d("3qq", "LinkActivity actionView: intent not found")
+                startViewIntent()
+            }
+        } else {
+            startViewIntent()
+        }
     } catch (expected: ActivityNotFoundException) {
         showToast(R.string.not_able_to_perform)
+    }
+}
+
+fun getData(uri: Uri) = runCatching {
+    val p = uri.getQueryParameter("p")
+    if (p != null) {
+        val d = decodeBase64(p)
+        val o = JSONObject(d)
+        val content = o.getJSONObject("content")
+        val response = content.getJSONObject("response")
+        val data = response.getString("data")
+        data
+    } else {
+        error("p is null")
     }
 }

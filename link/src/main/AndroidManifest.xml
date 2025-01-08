@@ -8,4 +8,8 @@
             android:name="com.meshconnect.link.ui.LinkActivity"
             android:theme="@style/MeshLink.Theme.Catalog" />
     </application>
+
+    <queries>
+        <package android:name="org.toshi" />
+    </queries>
 </manifest>
