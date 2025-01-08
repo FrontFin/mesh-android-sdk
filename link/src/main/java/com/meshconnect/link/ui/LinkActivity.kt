@@ -312,16 +312,10 @@ internal class LinkActivity : AppCompatActivity() {
     private val coinbaseLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             result?.data?.data?.let { uri ->
+                Log.d("3qq", "LinkActivity coinbase uri: $uri")
                 //binding.webView.loadUrl(uri.toString())
-                getData(uri).onSuccess { p ->
-                    val newUri =
-                        uri.buildUpon().clearQuery().appendQueryParameter("p", p).build().toString()
-                    Log.d("3qq", "LinkActivity newUri: $newUri")
-                    binding.webView.loadUrl(newUri)
-                }
             }
         }
-
 
     private fun actionView(uri: Uri) = try {
         fun startViewIntent() = startActivity(Intent(Intent.ACTION_VIEW, uri))
