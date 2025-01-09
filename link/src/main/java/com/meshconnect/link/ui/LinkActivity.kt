@@ -36,7 +36,6 @@ import com.meshconnect.link.utils.isSystemDarkTheme
 import com.meshconnect.link.utils.isUrlWhitelisted
 import com.meshconnect.link.utils.lazyNone
 import com.meshconnect.link.utils.observeEvent
-import com.meshconnect.link.utils.onClick
 import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
@@ -100,8 +99,8 @@ internal class LinkActivity : AppCompatActivity() {
 
         applyTheme(link)
 
-        binding.back.onClick { onBack() }
-        binding.close.onClick { showCloseDialog() }
+        binding.back.setOnClickListener { onBack() }
+        binding.close.setOnClickListener { showCloseDialog() }
         binding.toolbar.isVisible = false
 
         observeLinkEvent()

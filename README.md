@@ -129,11 +129,3 @@ lifecycleScope.launch {
   LinkEvents.collect { /* use event */ }
 }
 ```
-
-## Storing the linked accounts
-
-Android SDK provides built-in encrypted storage for linked accounts:
-
-```kotlin
-private val accountStore: MeshAccountStore = createPreferenceAccountStore(context)
-```
