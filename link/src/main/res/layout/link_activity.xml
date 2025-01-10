@@ -49,8 +49,15 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        tools:visibility="invisible" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
+    <WebView
+        android:id="@+id/web_view2"
+        android:layout_width="300dp"
+        android:layout_height="400dp"
+        android:alpha="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ProgressBar
         android:id="@+id/progress"

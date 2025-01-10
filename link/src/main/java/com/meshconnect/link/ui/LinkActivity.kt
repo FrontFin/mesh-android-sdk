@@ -29,7 +29,6 @@ import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.utils.OnLoadedScriptBuilder
 import com.meshconnect.link.utils.alertDialog
-import com.meshconnect.link.utils.decodeBase64
 import com.meshconnect.link.utils.decodeCatching
 import com.meshconnect.link.utils.getLinkStyleFromLinkUrl
 import com.meshconnect.link.utils.getParcelable
@@ -42,7 +41,6 @@ import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
 import com.meshconnect.link.utils.windowInsetsController
-import org.json.JSONObject
 import java.net.URL
 
 internal class LinkActivity : AppCompatActivity() {
@@ -309,11 +307,18 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private val coinbaseLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             result?.data?.data?.let { uri ->
                 Log.d("3qq", "LinkActivity coinbase uri: $uri")
-                //binding.webView.loadUrl(uri.toString())
+                binding.webView2.apply {
+                    settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
+                    settings.cacheMode = WebSettings.LOAD_NO_CACHE
+                    setBackgroundColor(Color.TRANSPARENT)
+                    loadUrl(uri.toString())
+                }
             }
         }
 
@@ -336,19 +341,5 @@ internal class LinkActivity : AppCompatActivity() {
         }
     } catch (expected: ActivityNotFoundException) {
         showToast(R.string.not_able_to_perform)
-    }
-}
-
-fun getData(uri: Uri) = runCatching {
-    val p = uri.getQueryParameter("p")
-    if (p != null) {
-        val d = decodeBase64(p)
-        val o = JSONObject(d)
-        val content = o.getJSONObject("content")
-        val response = content.getJSONObject("response")
-        val data = response.getString("data")
-        data
-    } else {
-        error("p is null")
     }
 }
