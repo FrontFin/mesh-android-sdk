@@ -327,8 +327,6 @@ internal class LinkActivity : AppCompatActivity() {
         }
 
     private fun actionView(uri: Uri) = try {
-        fun startViewIntent() = startActivity(Intent(Intent.ACTION_VIEW, uri))
-
         if (uri.host == CBW_HOST) {
             val intent = packageManager.getLaunchIntentForPackage(CBW_PACKAGE_NAME)
             if (intent != null) {
@@ -337,12 +335,16 @@ internal class LinkActivity : AppCompatActivity() {
                 intent.data = uri
                 coinbaseLauncher.launch(intent)
             } else {
-                startViewIntent()
+                startViewIntent(uri)
             }
         } else {
-            startViewIntent()
+            startViewIntent(uri)
         }
     } catch (expected: ActivityNotFoundException) {
         showToast(R.string.not_able_to_perform)
+    }
+
+    private fun startViewIntent(uri: Uri) {
+        startActivity(Intent(Intent.ACTION_VIEW, uri))
     }
 }
