@@ -8,7 +8,6 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Message
-import android.util.Log
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.WebChromeClient
@@ -51,6 +50,8 @@ internal class LinkActivity : AppCompatActivity() {
         private const val TRANSFER_TOKENS = "transfer_tokens"
         private const val DATA = "data"
         private const val MAX_TOAST_MSG_LENGTH = 38
+        private const val CBW_HOST = "wallet.coinbase.com"
+        private const val CBW_PACKAGE_NAME = "org.toshi"
 
         fun getLinkIntent(activity: Context, catalogLink: String): Intent {
             return intent<LinkActivity>(activity).putExtra(LINK, catalogLink)
@@ -237,7 +238,7 @@ internal class LinkActivity : AppCompatActivity() {
             settings.domStorageEnabled = true
             settings.setSupportMultipleWindows(true)
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
-            addJavascriptInterface(JSBridge(viewModel), JSBridge.NAME)
+            addJavascriptInterface(JSBridge { viewModel.onJsonReceived(it) }, JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
             webViewClient = WebClient()
             webChromeClient = ChromeClient()
@@ -261,7 +262,8 @@ internal class LinkActivity : AppCompatActivity() {
         }
 
         override fun shouldOverrideUrlLoading(
-            view: WebView?, request: WebResourceRequest?
+            view: WebView?,
+            request: WebResourceRequest?
         ): Boolean {
             val url = request?.url
             val isHttp = url?.scheme?.startsWith("http") == true
@@ -275,7 +277,8 @@ internal class LinkActivity : AppCompatActivity() {
             get() = WebView(this@LinkActivity).apply {
                 webViewClient = object : WebViewClient() {
                     override fun shouldOverrideUrlLoading(
-                        view: WebView?, request: WebResourceRequest?
+                        view: WebView?,
+                        request: WebResourceRequest?
                     ): Boolean {
                         if (request != null && !request.isRedirect) {
                             actionView(request.url)
@@ -286,7 +289,10 @@ internal class LinkActivity : AppCompatActivity() {
             }
 
         override fun onCreateWindow(
-            view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message?
+            view: WebView?,
+            isDialog: Boolean,
+            isUserGesture: Boolean,
+            resultMsg: Message?
         ): Boolean {
             val url = view?.hitTestResult?.extra
 
@@ -311,12 +317,10 @@ internal class LinkActivity : AppCompatActivity() {
     private val coinbaseLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             result?.data?.data?.let { uri ->
-                Log.d("3qq", "LinkActivity coinbase uri: $uri")
                 binding.webView2.apply {
                     settings.javaScriptEnabled = true
                     settings.domStorageEnabled = true
                     settings.cacheMode = WebSettings.LOAD_NO_CACHE
-                    setBackgroundColor(Color.TRANSPARENT)
                     loadUrl(uri.toString())
                 }
             }
@@ -325,15 +329,14 @@ internal class LinkActivity : AppCompatActivity() {
     private fun actionView(uri: Uri) = try {
         fun startViewIntent() = startActivity(Intent(Intent.ACTION_VIEW, uri))
 
-        if (uri.host == "wallet.coinbase.com") {
-            val intent = packageManager.getLaunchIntentForPackage("org.toshi")
+        if (uri.host == CBW_HOST) {
+            val intent = packageManager.getLaunchIntentForPackage(CBW_PACKAGE_NAME)
             if (intent != null) {
                 intent.type = Intent.ACTION_VIEW
                 intent.flags = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK.inv()
                 intent.data = uri
                 coinbaseLauncher.launch(intent)
             } else {
-                Log.d("3qq", "LinkActivity actionView: intent not found")
                 startViewIntent()
             }
         } else {

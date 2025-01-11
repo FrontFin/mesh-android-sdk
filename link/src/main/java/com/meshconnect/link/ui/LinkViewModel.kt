@@ -19,8 +19,8 @@ import kotlinx.coroutines.launch
 internal class LinkViewModel(
     private val getLinkEventUseCase: GetLinkEventUseCase,
     private val payloadReceiver: PayloadReceiver,
-    private val broadcastLinkMessageUseCase: BroadcastLinkMessageUseCase,
-) : ViewModel(), JSBridge.Callback {
+    private val broadcastLinkMessageUseCase: BroadcastLinkMessageUseCase
+) : ViewModel() {
 
     internal val linkEvent = EventLiveData<LinkEvent>()
     internal val throwable = EventLiveData<Throwable>()
@@ -28,7 +28,7 @@ internal class LinkViewModel(
     internal val payloads: List<LinkPayload> get() = _payloads.toList()
     internal var error: Throwable? = null; private set
 
-    override fun onJsonReceived(json: String) {
+    fun onJsonReceived(json: String) {
         viewModelScope.launch {
             getLinkEventUseCase.launch(json)
                 .onSuccess {

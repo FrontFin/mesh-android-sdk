@@ -2,18 +2,15 @@ package com.meshconnect.link.ui
 
 import android.webkit.JavascriptInterface
 
-internal class JSBridge(private val callback: Callback) {
-
+internal class JSBridge(
+    private val onJsonReceived: (String) -> Unit
+) {
     @JavascriptInterface
     fun sendNativeMessage(payloadJson: String) {
-        callback.onJsonReceived(payloadJson)
+        onJsonReceived(payloadJson)
     }
 
     companion object {
         const val NAME = "JSBridge"
-    }
-
-    interface Callback {
-        fun onJsonReceived(json: String)
     }
 }
