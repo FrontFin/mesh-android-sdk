@@ -2,7 +2,7 @@
 
 Android library for integrating with Mesh Connect.
 
-![Maven Central](https://img.shields.io/maven-central/v/com.meshconnect/link?color=%23037FFF&link=https%3A%2F%2Fsearch.maven.org%2Fartifact%2Fcom.meshconnect%2Flink)
+[![Maven Central](https://img.shields.io/maven-central/v/com.meshconnect/link?color=%23037FFF&link=https%3A%2F%2Fsearch.maven.org%2Fartifact%2Fcom.meshconnect%2Flink)](https://central.sonatype.com/artifact/com.meshconnect/link)
 
 ## Installation
 
@@ -53,7 +53,7 @@ It can be used if you have a valid `auth_token` and want to bypass authenticatio
 It is an alternative way of providing target addresses for crypto transfers by using previously obtained integration `auth_tokens`.
 
 - `disableDomainWhiteList` is a flag that allows to disable origin whitelisting.
-By default, it's enabled with the predefined [domains](link/src/main/java/com/meshconnect/link/utils/WhitelistedOrigins.kt).
+By default, it's enabled with the predefined [domains](link/src/main/java/com/meshconnect/link/utils/WhitelistedvOrigins.kt).
 
 ### Register an Activity Result callback
 
