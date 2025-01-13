@@ -52,6 +52,9 @@ It can be used if you have a valid `auth_token` and want to bypass authenticatio
 - `transferDestinationTokens` for crypto transfers flow. 
 It is an alternative way of providing target addresses for crypto transfers by using previously obtained integration `auth_tokens`.
 
+- `disableDomainWhiteList` is a boolean flag that allows to disable origin whitelisting. 
+By default, the origin is whitelisted, with the predefined [domains set](WhitelistedOrigins.kt)
+
 ### Register an Activity Result callback
 
 The Link UI runs in a separate Activity within your app.
