@@ -15,6 +15,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -49,6 +50,8 @@ internal class LinkActivity : AppCompatActivity() {
         private const val TRANSFER_TOKENS = "transfer_tokens"
         private const val DATA = "data"
         private const val MAX_TOAST_MSG_LENGTH = 38
+        private const val CBW_HOST = "wallet.coinbase.com"
+        private const val CBW_PACKAGE_NAME = "org.toshi"
 
         fun getLinkIntent(activity: Context, catalogLink: String): Intent {
             return intent<LinkActivity>(activity).putExtra(LINK, catalogLink)
@@ -235,7 +238,7 @@ internal class LinkActivity : AppCompatActivity() {
             settings.domStorageEnabled = true
             settings.setSupportMultipleWindows(true)
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
-            addJavascriptInterface(JSBridge(viewModel), JSBridge.NAME)
+            addJavascriptInterface(JSBridge { viewModel.onJsonReceived(it) }, JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
             webViewClient = WebClient()
             webChromeClient = ChromeClient()
@@ -310,9 +313,38 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
+    private val coinbaseLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            result?.data?.data?.let { uri ->
+                binding.webView2.apply {
+                    settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
+                    settings.cacheMode = WebSettings.LOAD_NO_CACHE
+                    loadUrl(uri.toString())
+                }
+            }
+        }
+
     private fun actionView(uri: Uri) = try {
-        startActivity(Intent(Intent.ACTION_VIEW, uri))
+        if (uri.host == CBW_HOST) {
+            val intent = packageManager.getLaunchIntentForPackage(CBW_PACKAGE_NAME)
+            if (intent != null) {
+                intent.type = Intent.ACTION_VIEW
+                intent.flags = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK.inv()
+                intent.data = uri
+                coinbaseLauncher.launch(intent)
+            } else {
+                startViewIntent(uri)
+            }
+        } else {
+            startViewIntent(uri)
+        }
     } catch (expected: ActivityNotFoundException) {
         showToast(R.string.not_able_to_perform)
+    }
+
+    private fun startViewIntent(uri: Uri) {
+        startActivity(Intent(Intent.ACTION_VIEW, uri))
     }
 }
