@@ -33,6 +33,7 @@ import com.meshconnect.link.utils.getLinkStyleFromLinkUrl
 import com.meshconnect.link.utils.getParcelable
 import com.meshconnect.link.utils.intent
 import com.meshconnect.link.utils.isSystemDarkTheme
+import com.meshconnect.link.utils.isUrlWhitelisted
 import com.meshconnect.link.utils.lazyNone
 import com.meshconnect.link.utils.observeEvent
 import com.meshconnect.link.utils.onClick
@@ -45,20 +46,23 @@ import java.net.URL
 internal class LinkActivity : AppCompatActivity() {
 
     companion object {
-        private const val LINK = "link"
+        private const val TOKEN = "token"
         private const val ACCESS_TOKENS = "access_tokens"
         private const val TRANSFER_TOKENS = "transfer_tokens"
+        private const val DISABLE_WHITELIST = "disable_whitelist"
         private const val DATA = "data"
         private const val MAX_TOAST_MSG_LENGTH = 38
         private const val CBW_HOST = "wallet.coinbase.com"
         private const val CBW_PACKAGE_NAME = "org.toshi"
 
         fun getLinkIntent(activity: Context, catalogLink: String): Intent {
-            return intent<LinkActivity>(activity).putExtra(LINK, catalogLink)
+            return intent<LinkActivity>(activity).putExtra(TOKEN, catalogLink)
         }
 
         fun getLinkIntent(activity: Context, config: LinkConfiguration): Intent {
-            val intent = intent<LinkActivity>(activity).putExtra(LINK, config.token)
+            val intent = intent<LinkActivity>(activity)
+                .putExtra(TOKEN, config.token)
+                .putExtra(DISABLE_WHITELIST, config.disableDomainWhiteList)
 
             val accessTokens = config.accessTokens
             val transferTokens = config.transferDestinationTokens
@@ -81,7 +85,7 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
-    private val linkResult by lazyNone { decodeCatching(intent.getStringExtra(LINK)) }
+    private val linkResult by lazyNone { decodeCatching(intent.getStringExtra(TOKEN)) }
     private val linkHost by lazyNone { URL(linkResult.getOrNull()).host }
     private val binding by viewBinding(LinkActivityBinding::inflate)
     private val viewModel by viewModel<LinkViewModel>(LinkViewModel.Factory())
@@ -233,6 +237,8 @@ internal class LinkActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun openWebView(url: String) {
+        val disableWhiteList = intent.getBooleanExtra(DISABLE_WHITELIST, false)
+
         binding.webView.apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
@@ -240,13 +246,13 @@ internal class LinkActivity : AppCompatActivity() {
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
             addJavascriptInterface(JSBridge { viewModel.onJsonReceived(it) }, JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
-            webViewClient = WebClient()
+            webViewClient = WebClient(disableWhiteList)
             webChromeClient = ChromeClient()
             loadUrl(url)
         }
     }
 
-    inner class WebClient : WebViewClient() {
+    inner class WebClient(private val disableWhiteList: Boolean) : WebViewClient() {
         override fun onPageCommitVisible(view: WebView?, url: String?) {
             super.onPageCommitVisible(view, url)
             binding.toolbar.isGone = isLinkUrl(url)
@@ -265,9 +271,13 @@ internal class LinkActivity : AppCompatActivity() {
             view: WebView?,
             request: WebResourceRequest?
         ): Boolean {
-            val url = request?.url
-            val isHttp = url?.scheme?.startsWith("http") == true
-            return !isHttp
+            val override = when {
+                request == null -> true
+                disableWhiteList -> request.url.scheme != "https"
+                else -> !isUrlWhitelisted(request.url.toString(), request.url.host.orEmpty())
+            }
+            // return 'true' to reject loading the url by WebView
+            return override
         }
     }
 
@@ -283,7 +293,8 @@ internal class LinkActivity : AppCompatActivity() {
                         if (request != null && !request.isRedirect) {
                             actionView(request.url)
                         }
-                        return super.shouldOverrideUrlLoading(view, request)
+                        // return 'true' to reject loading the url by WebView
+                        return true
                     }
                 }
             }
