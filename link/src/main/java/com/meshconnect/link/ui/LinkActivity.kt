@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Message
+import android.util.Log
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.WebChromeClient
@@ -28,13 +29,12 @@ import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.utils.OnLoadedScriptBuilder
 import com.meshconnect.link.utils.alertDialog
-import com.meshconnect.link.utils.decodeCatching
+import com.meshconnect.link.utils.decodeToURL
 import com.meshconnect.link.utils.getLinkStyleFromLinkUrl
 import com.meshconnect.link.utils.getParcelable
 import com.meshconnect.link.utils.intent
 import com.meshconnect.link.utils.isSystemDarkTheme
 import com.meshconnect.link.utils.isUrlWhitelisted
-import com.meshconnect.link.utils.lazyNone
 import com.meshconnect.link.utils.observeEvent
 import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
@@ -80,24 +80,25 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
-    private val linkResult by lazyNone { decodeCatching(intent.getStringExtra(TOKEN)) }
-    private val linkHost by lazyNone { URL(linkResult.getOrNull()).host }
     private val binding by viewBinding(LinkActivityBinding::inflate)
     private val viewModel by viewModel<LinkViewModel>(LinkViewModel.Factory())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val link = linkResult.getOrNull()
-        if (link == null) {
-            setExitResult(linkResult.exceptionOrNull())
+        val urlResult = decodeToURL(intent.getStringExtra(TOKEN))
+        val url = urlResult.getOrNull()
+        if (url == null) {
+            val e = urlResult.exceptionOrNull()
+            Log.e("SDK", "Failed to decode token", e)
+            setExitResult(e)
             super.finish()
             return
         }
 
         setContentView(binding.root)
 
-        applyTheme(link)
+        applyTheme(url.toString())
 
         binding.back.setOnClickListener { onBack() }
         binding.close.setOnClickListener { showCloseDialog() }
@@ -105,13 +106,13 @@ internal class LinkActivity : AppCompatActivity() {
 
         observeLinkEvent()
         observeThrowable()
-        openWebView(link)
+        openWebView(url)
 
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
     }
 
-    private fun applyTheme(linkUrl: String) {
-        val linkStyle = getLinkStyleFromLinkUrl(linkUrl)
+    private fun applyTheme(url: String) {
+        val linkStyle = getLinkStyleFromLinkUrl(url)
         val isDarkTheme = when (linkStyle?.th) {
             "dark" -> true
             "system" -> isSystemDarkTheme()
@@ -231,9 +232,7 @@ internal class LinkActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private fun openWebView(url: String) {
-        val disableWhiteList = intent.getBooleanExtra(DISABLE_WHITELIST, false)
-
+    private fun openWebView(url: URL) {
         binding.webView.apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
@@ -241,13 +240,19 @@ internal class LinkActivity : AppCompatActivity() {
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
             addJavascriptInterface(JSBridge { viewModel.onJsonReceived(it) }, JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
-            webViewClient = WebClient(disableWhiteList)
+            webViewClient = WebClient(
+                disableWhiteList = intent.getBooleanExtra(DISABLE_WHITELIST, false),
+                linkHost = url.host
+            )
             webChromeClient = ChromeClient()
-            loadUrl(url)
+            loadUrl(url.toString())
         }
     }
 
-    inner class WebClient(private val disableWhiteList: Boolean) : WebViewClient() {
+    inner class WebClient(
+        private val disableWhiteList: Boolean,
+        private val linkHost: String,
+    ) : WebViewClient() {
         override fun onPageCommitVisible(view: WebView?, url: String?) {
             super.onPageCommitVisible(view, url)
             binding.toolbar.isGone = isLinkUrl(url)

@@ -1,8 +1,8 @@
 package com.meshconnect.link.ui
 
+import com.meshconnect.link.PayloadEmitter
 import com.meshconnect.link.ViewModelTest
 import com.meshconnect.link.entity.LinkEvent
-import com.meshconnect.link.store.PayloadReceiver
 import com.meshconnect.link.testObserver
 import com.meshconnect.link.usecase.BroadcastLinkMessageUseCase
 import com.meshconnect.link.usecase.GetLinkEventUseCase
@@ -19,12 +19,12 @@ import org.junit.Test
 class LinkViewModelTest : ViewModelTest() {
 
     private val getLinkEventUseCase = mockk<GetLinkEventUseCase>()
-    private val payloadReceiver = mockk<PayloadReceiver>()
+    private val payloadEmitter = mockk<PayloadEmitter>()
     private val broadcastLinkMessageUseCase = mockk<BroadcastLinkMessageUseCase>()
 
     private val viewModel = LinkViewModel(
         getLinkEventUseCase,
-        payloadReceiver,
+        payloadEmitter,
         broadcastLinkMessageUseCase
     )
 
@@ -47,7 +47,7 @@ class LinkViewModelTest : ViewModelTest() {
         }
         val eventObserver = viewModel.linkEvent.testObserver()
         coEvery { getLinkEventUseCase.launch(any()) } returns Result.success(payload)
-        coEvery { payloadReceiver.emit(payload.payload) } just Runs
+        coEvery { payloadEmitter.emit(payload.payload) } just Runs
         coEvery { broadcastLinkMessageUseCase.launch(any()) } returns Result.success(Unit)
         viewModel.onJsonReceived("")
 

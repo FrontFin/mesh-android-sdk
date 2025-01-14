@@ -6,13 +6,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.meshconnect.android.databinding.LinkExampleActivityBinding
 import com.meshconnect.link.LinkEvents
+import com.meshconnect.link.LinkPayloads
 import com.meshconnect.link.entity.AccessTokenPayload
 import com.meshconnect.link.entity.DelayedAuthPayload
 import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.entity.TransferFinishedErrorPayload
 import com.meshconnect.link.entity.TransferFinishedSuccessPayload
-import com.meshconnect.link.LinkPayloads
 import com.meshconnect.link.ui.LaunchLink
 import com.meshconnect.link.ui.LinkExit
 import com.meshconnect.link.ui.LinkSuccess
