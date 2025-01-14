@@ -1,6 +1,7 @@
 package com.meshconnect.android
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.meshconnect.android.databinding.LinkExampleActivityBinding
@@ -11,7 +12,7 @@ import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.entity.TransferFinishedErrorPayload
 import com.meshconnect.link.entity.TransferFinishedSuccessPayload
-import com.meshconnect.link.store.LinkPayloads
+import com.meshconnect.link.LinkPayloads
 import com.meshconnect.link.ui.LaunchLink
 import com.meshconnect.link.ui.LinkExit
 import com.meshconnect.link.ui.LinkSuccess
@@ -81,5 +82,9 @@ class LinkExampleActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun logD(obj: Any?) {
+        Log.d("meshLog", obj.toString())
     }
 }

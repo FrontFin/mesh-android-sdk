@@ -20,7 +20,7 @@ internal class LinkViewModel(
     private val getLinkEventUseCase: GetLinkEventUseCase,
     private val payloadEmitter: PayloadEmitter,
     private val broadcastLinkMessageUseCase: BroadcastLinkMessageUseCase,
-) : ViewModel(), JSBridge.Callback {
+) : ViewModel() {
 
     internal val linkEvent = EventLiveData<LinkEvent>()
     internal val throwable = EventLiveData<Throwable>()
