@@ -10,10 +10,10 @@ internal fun decodeBase64(source: String): String {
     }
 }
 
-internal fun decodeCatching(source: String?) = runCatching {
+internal fun decodeToURL(source: String?) = runCatching {
     when {
-        source.isNullOrEmpty() -> error("Empty 'catalogLink' or 'linkToken'")
-        source.startsWith("http") -> source
-        else -> URL(decodeBase64(source)).toString()
+        source.isNullOrEmpty() -> error("Empty source")
+        source.startsWith("http") -> URL(source)
+        else -> URL(decodeBase64(source))
     }
 }

@@ -1,5 +1,14 @@
 package com.meshconnect.link
 
-import com.meshconnect.link.broadcast.BroadcastLinkMessageImpl
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
-val LinkEvents get() = BroadcastLinkMessageImpl.sharedMessageFlow
+private val events = MutableSharedFlow<Map<String, *>>()
+
+val LinkEvents get() = events.asSharedFlow()
+
+internal class EventEmitter {
+    suspend fun emit(event: Map<String, *>) {
+        events.emit(event)
+    }
+}

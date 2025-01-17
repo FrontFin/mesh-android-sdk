@@ -3,12 +3,12 @@ package com.meshconnect.link.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.meshconnect.link.broadcast.BroadcastLinkMessageImpl
+import com.meshconnect.link.EventEmitter
+import com.meshconnect.link.PayloadEmitter
 import com.meshconnect.link.converter.JsonConverter
 import com.meshconnect.link.deserializer.DeserializeToMapImpl
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
-import com.meshconnect.link.store.PayloadReceiver
 import com.meshconnect.link.usecase.BroadcastLinkMessageUseCase
 import com.meshconnect.link.usecase.FilterLinkMessageImpl
 import com.meshconnect.link.usecase.GetLinkEventUseCase
@@ -18,8 +18,8 @@ import kotlinx.coroutines.launch
 
 internal class LinkViewModel(
     private val getLinkEventUseCase: GetLinkEventUseCase,
-    private val payloadReceiver: PayloadReceiver,
-    private val broadcastLinkMessageUseCase: BroadcastLinkMessageUseCase
+    private val payloadEmitter: PayloadEmitter,
+    private val broadcastLinkMessageUseCase: BroadcastLinkMessageUseCase,
 ) : ViewModel() {
 
     internal val linkEvent = EventLiveData<LinkEvent>()
@@ -35,7 +35,7 @@ internal class LinkViewModel(
                     if (it is LinkEvent.Payload) {
                         _payloads.add(it.payload)
                         error = null
-                        payloadReceiver.emit(it.payload)
+                        payloadEmitter.emit(it.payload)
                     }
                     linkEvent.emit(it)
                 }
@@ -54,12 +54,12 @@ internal class LinkViewModel(
             @Suppress("UNCHECKED_CAST")
             return LinkViewModel(
                 GetLinkEventUseCase(Dispatchers.IO, JsonConverter.get()),
-                PayloadReceiver(Dispatchers.IO),
+                PayloadEmitter(),
                 BroadcastLinkMessageUseCase(
                     dispatcher = Dispatchers.IO,
                     deserializeToMap = DeserializeToMapImpl,
                     filterLinkMessage = FilterLinkMessageImpl,
-                    broadcastLinkMessage = BroadcastLinkMessageImpl
+                    eventEmitter = EventEmitter()
                 )
             ) as T
         }

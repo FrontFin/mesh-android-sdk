@@ -1,5 +1,6 @@
 package com.meshconnect.link.usecase
 
+import com.meshconnect.link.EventEmitter
 import com.meshconnect.link.utils.runCatching
 import kotlinx.coroutines.CoroutineDispatcher
 
@@ -7,11 +8,11 @@ internal class BroadcastLinkMessageUseCase(
     private val dispatcher: CoroutineDispatcher,
     private val deserializeToMap: DeserializeToMap,
     private val filterLinkMessage: FilterLinkMessage,
-    private val broadcastLinkMessage: BroadcastLinkMessage
+    private val eventEmitter: EventEmitter
 ) {
     suspend fun launch(json: String) = runCatching(dispatcher) {
         val map = filterLinkMessage(deserializeToMap(json))
-        if (map != null) broadcastLinkMessage(map)
+        if (map != null) eventEmitter.emit(map)
     }
 }
 
@@ -21,10 +22,6 @@ internal interface DeserializeToMap {
 
 internal interface FilterLinkMessage {
     operator fun invoke(map: Map<String, *>): Map<String, *>?
-}
-
-internal interface BroadcastLinkMessage {
-    suspend operator fun invoke(map: Map<String, *>)
 }
 
 internal object FilterLinkMessageImpl : FilterLinkMessage {
