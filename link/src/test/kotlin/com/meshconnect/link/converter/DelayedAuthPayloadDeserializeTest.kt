@@ -8,12 +8,12 @@ import org.junit.Test
 
 class DelayedAuthPayloadDeserializeTest {
 
-    private val gson = JsonConverter.get()
+    private val jsonConverter = JsonConverter
 
     @Test
     fun `deserialize 'delayedAuthentication'`() {
         val json = readFile("delayed-auth-payload.json")
-        val actual = gson.fromJson<DelayedAuthPayload>(json)
+        val actual = jsonConverter.fromJson(json, DelayedAuthPayload::class.java)
         val expected = DelayedAuthPayload(
             refreshTokenExpiresInSeconds = 1923849,
             brokerType = "alpaca",

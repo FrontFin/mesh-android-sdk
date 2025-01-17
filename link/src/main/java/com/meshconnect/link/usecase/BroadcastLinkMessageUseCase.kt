@@ -1,30 +1,20 @@
 package com.meshconnect.link.usecase
 
 import com.meshconnect.link.EventEmitter
-import com.meshconnect.link.utils.runCatching
-import kotlinx.coroutines.CoroutineDispatcher
+import com.meshconnect.link.converter.JsonConverter
 
 internal class BroadcastLinkMessageUseCase(
-    private val dispatcher: CoroutineDispatcher,
-    private val deserializeToMap: DeserializeToMap,
+    private val jsonConverter: JsonConverter,
     private val filterLinkMessage: FilterLinkMessage,
     private val eventEmitter: EventEmitter
 ) {
-    suspend fun launch(json: String) = runCatching(dispatcher) {
-        val map = filterLinkMessage(deserializeToMap(json))
+    suspend fun launch(json: String) {
+        val map = filterLinkMessage.filter(jsonConverter.toMap(json))
         if (map != null) eventEmitter.emit(map)
     }
 }
 
-internal interface DeserializeToMap {
-    operator fun invoke(json: String): Map<String, *>
-}
-
-internal interface FilterLinkMessage {
-    operator fun invoke(map: Map<String, *>): Map<String, *>?
-}
-
-internal object FilterLinkMessageImpl : FilterLinkMessage {
+internal object FilterLinkMessage {
 
     private val typesMap = mapOf(
         "brokerageAccountAccessToken" to "integrationConnected",
@@ -62,7 +52,7 @@ internal object FilterLinkMessageImpl : FilterLinkMessage {
         "transferDeclined"
     )
 
-    override fun invoke(map: Map<String, *>): Map<String, *>? {
+    fun filter(map: Map<String, *>): Map<String, *>? {
         val type = map["type"]
         val typeChange = typesMap[type]
         return when {

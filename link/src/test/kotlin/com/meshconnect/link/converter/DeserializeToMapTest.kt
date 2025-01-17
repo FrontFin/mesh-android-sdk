@@ -1,4 +1,4 @@
-package com.meshconnect.link.deserializer
+package com.meshconnect.link.converter
 
 import org.amshove.kluent.internal.assertFailsWith
 import org.amshove.kluent.shouldContainSame
@@ -6,15 +6,15 @@ import org.junit.Test
 
 class DeserializeToMapTest {
 
-    private val deserializeToMap = DeserializeToMapImpl
+    private val jsonConverter = JsonConverter
 
     @Test
     fun `test deserialization to map`() {
-        deserializeToMap("{type: loaded}") shouldContainSame mapOf("type" to "loaded")
+        jsonConverter.toMap("{type: loaded}") shouldContainSame mapOf("type" to "loaded")
     }
 
     @Test
     fun `test empty json throws an exception`() {
-        assertFailsWith<NullPointerException> { deserializeToMap("") }
+        assertFailsWith<NullPointerException> { jsonConverter.toMap("") }
     }
 }

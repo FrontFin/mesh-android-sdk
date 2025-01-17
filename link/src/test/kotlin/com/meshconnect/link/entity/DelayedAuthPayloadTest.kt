@@ -10,7 +10,6 @@ class DelayedAuthPayloadTest {
 
     @Test
     fun `test 'DelayedAuthPayload' entity`() {
-
         val refreshTokenExpiresInSeconds: Int = randomInt
         val brokerType: String = randomString
         val refreshToken: String = randomString
