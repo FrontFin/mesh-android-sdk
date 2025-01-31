@@ -32,7 +32,7 @@ internal class DeserializeLinkMessageUseCase(
                 toPayload(json, DelayedAuthPayload::class.java)
             }
             Type.error -> {
-                val errorMessage = jsonConverter.fromJson(json, JsError::class.java).errorMessage
+                val errorMessage = toError(json).errorMessage
                 error(errorMessage ?: "Error is not defined")
             }
         }
@@ -40,4 +40,6 @@ internal class DeserializeLinkMessageUseCase(
 
     private inline fun <reified T : LinkPayload> toPayload(json: String, classOfT: Class<T>) =
         LinkEvent.Payload(jsonConverter.fromJson(json, classOfT))
+
+    private fun toError(json: String) = jsonConverter.fromJson(json, JsError::class.java)
 }

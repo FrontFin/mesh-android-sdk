@@ -21,6 +21,3 @@ internal object JsonConverter {
         return gson.fromJson(json, object : TypeToken<Map<String, *>>() {}.type)
     }
 }
-
-internal inline fun <reified T> Gson.fromJson(json: String): T =
-    fromJson(json, object : TypeToken<T>() {}.type)
