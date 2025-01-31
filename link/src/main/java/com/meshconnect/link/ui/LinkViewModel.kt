@@ -13,6 +13,7 @@ import com.meshconnect.link.usecase.DeserializeLinkMessageUseCase
 import com.meshconnect.link.usecase.FilterLinkMessage
 import com.meshconnect.link.utils.EventLiveData
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,24 +31,26 @@ internal class LinkViewModel(
     internal val payloads: List<LinkPayload> get() = _payloads.toList()
     internal var error: Throwable? = null; private set
 
+    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        error = exception
+        throwable.emit(exception)
+    }
+
     fun onJsonReceived(json: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             withContext(dispatcher) {
                 runCatching { broadcastLinkMessageUseCase.launch(json) }
                 runCatching { deserializeLinkMessageUseCase.launch(json) }
-                    .onSuccess {
-                        if (it is LinkEvent.Payload) {
-                            _payloads.add(it.payload)
-                            error = null
-                            payloadEmitter.emit(it.payload)
-                        }
-                        linkEvent.emit(it)
-                    }
-                    .onFailure {
-                        error = it
-                        throwable.emit(it)
-                    }
-            }
+            }.onSuccess {
+                if (it is LinkEvent.Payload) {
+                    _payloads.add(it.payload)
+                    error = null
+                    payloadEmitter.emit(it.payload)
+                }
+                if (it != null) {
+                    linkEvent.emit(it)
+                }
+            }.onFailure { throw it }
         }
     }
 

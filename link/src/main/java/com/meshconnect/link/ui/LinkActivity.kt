@@ -173,8 +173,8 @@ internal class LinkActivity : AppCompatActivity() {
             when (event) {
                 is LinkEvent.Close, LinkEvent.Done -> finish()
                 is LinkEvent.ShowClose -> showCloseDialog()
-                is LinkEvent.Payload, LinkEvent.Undefined -> Unit
                 is LinkEvent.Loaded -> onLinkLoaded()
+                is LinkEvent.Payload -> Unit
             }
         }
     }

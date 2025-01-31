@@ -1,45 +1,42 @@
 package com.meshconnect.link.usecase
 
 import com.meshconnect.link.converter.JsonConverter
-import com.meshconnect.link.entity.AccessTokenPayload
-import com.meshconnect.link.entity.DelayedAuthPayload
+import com.meshconnect.link.entity.AccessTokenResponse
+import com.meshconnect.link.entity.DelayedAuthResponse
 import com.meshconnect.link.entity.JsError
 import com.meshconnect.link.entity.JsType
 import com.meshconnect.link.entity.LinkEvent
-import com.meshconnect.link.entity.LinkPayload
-import com.meshconnect.link.entity.TransferFinishedPayload
+import com.meshconnect.link.entity.TransferFinishedResponse
 import com.meshconnect.link.entity.Type
 
 internal class DeserializeLinkMessageUseCase(
     private val jsonConverter: JsonConverter
 ) {
-    fun launch(json: String): LinkEvent {
+    fun launch(json: String): LinkEvent? {
         val type = jsonConverter.fromJson(json, JsType::class.java).type
 
         return when (type) {
-            null -> LinkEvent.Undefined
             Type.close -> LinkEvent.Close
             Type.done -> LinkEvent.Done
             Type.showClose -> LinkEvent.ShowClose
             Type.loaded -> LinkEvent.Loaded
             Type.brokerageAccountAccessToken -> {
-                toPayload(json, AccessTokenPayload::class.java)
+                val response = jsonConverter.fromJson(json, AccessTokenResponse::class.java)
+                LinkEvent.Payload(response.payload)
             }
             Type.transferFinished -> {
-                toPayload(json, TransferFinishedPayload::class.java)
+                val response = jsonConverter.fromJson(json, TransferFinishedResponse::class.java)
+                LinkEvent.Payload(response.payload)
             }
             Type.delayedAuthentication -> {
-                toPayload(json, DelayedAuthPayload::class.java)
+                val response = jsonConverter.fromJson(json, DelayedAuthResponse::class.java)
+                LinkEvent.Payload(response.payload)
             }
             Type.error -> {
-                val errorMessage = toError(json).errorMessage
-                error(errorMessage ?: "Error is not defined")
+                val error = jsonConverter.fromJson(json, JsError::class.java)
+                error(error.errorMessage ?: "Error is not defined")
             }
+            else -> null
         }
     }
-
-    private inline fun <reified T : LinkPayload> toPayload(json: String, classOfT: Class<T>) =
-        LinkEvent.Payload(jsonConverter.fromJson(json, classOfT))
-
-    private fun toError(json: String) = jsonConverter.fromJson(json, JsError::class.java)
 }

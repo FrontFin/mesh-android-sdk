@@ -81,4 +81,51 @@ class LinkViewModelTest : ViewModelTest() {
         viewModel.error shouldBe null
         eventObserver.shouldContainEvents(event)
     }
+
+    @Test
+    fun `verify viewModel handle null from use case`() {
+        val json = randomString
+        val eventObserver = viewModel.linkEvent.testObserver()
+
+        coEvery { deserializeLinkMessageUseCase.launch(json) } returns null
+        coEvery { broadcastLinkMessageUseCase.launch(json) } just Runs
+        viewModel.onJsonReceived(json)
+
+        viewModel.payloads.shouldBeEmpty()
+        viewModel.error shouldBe null
+        eventObserver.shouldBeEmpty()
+    }
+
+    @Test
+    fun `verify viewModel handle exception from use case`() {
+        val json = randomString
+        val eventObserver = viewModel.linkEvent.testObserver()
+        val msg = randomString
+        val exception = IllegalStateException(msg)
+
+        coEvery { deserializeLinkMessageUseCase.launch(json) } throws exception
+        coEvery { broadcastLinkMessageUseCase.launch(json) } just Runs
+        viewModel.onJsonReceived(json)
+
+        viewModel.payloads.shouldBeEmpty()
+        viewModel.error shouldBe exception
+        eventObserver.shouldBeEmpty()
+    }
+
+    @Test
+    fun `verify viewModel handle exception inside success block`() {
+        val json = randomString
+        val eventObserver = viewModel.linkEvent.testObserver()
+        val event = LinkEvent.Payload(mockk())
+        val msg = randomString
+        val exception = IllegalStateException(msg)
+
+        coEvery { deserializeLinkMessageUseCase.launch(json) } returns event
+        coEvery { broadcastLinkMessageUseCase.launch(json) } just Runs
+        coEvery { payloadEmitter.emit(event.payload) } throws exception
+        viewModel.onJsonReceived(json)
+
+        viewModel.error shouldBe exception
+        eventObserver.shouldBeEmpty()
+    }
 }

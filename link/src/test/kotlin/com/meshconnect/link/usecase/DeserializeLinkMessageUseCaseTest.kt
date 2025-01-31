@@ -9,7 +9,10 @@ import com.meshconnect.link.entity.TransferFinishedPayload
 import com.meshconnect.link.entity.Type
 import com.meshconnect.link.randomString
 import com.meshconnect.link.converter.JsonConverter
+import com.meshconnect.link.entity.AccessTokenResponse
 import com.meshconnect.link.entity.DelayedAuthPayload
+import com.meshconnect.link.entity.DelayedAuthResponse
+import com.meshconnect.link.entity.TransferFinishedResponse
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -52,7 +55,7 @@ class DeserializeLinkMessageUseCaseTest : UseCaseTest() {
     @Test
     fun `test Undefined`() = runTest {
         mockkJsType(null)
-        useCase.launch("") shouldBeEqualTo LinkEvent.Undefined
+        useCase.launch("") shouldBeEqualTo null
     }
 
     @Test
@@ -65,9 +68,10 @@ class DeserializeLinkMessageUseCaseTest : UseCaseTest() {
     fun `test brokerageAccountAccessToken`() = runTest {
         val jsType = JsType(Type.brokerageAccountAccessToken)
         val payload = mockk<AccessTokenPayload>()
+        val response = AccessTokenResponse(payload)
 
         mockkFromJson(JsType::class.java, jsType)
-        mockkFromJson(AccessTokenPayload::class.java, payload)
+        mockkFromJson(AccessTokenResponse::class.java, response)
 
         useCase.launch("") shouldBeEqualTo LinkEvent.Payload(payload)
     }
@@ -76,9 +80,10 @@ class DeserializeLinkMessageUseCaseTest : UseCaseTest() {
     fun `test transferFinished`() = runTest {
         val jsType = JsType(Type.transferFinished)
         val payload = mockk<TransferFinishedPayload>()
+        val response = TransferFinishedResponse(payload)
 
         mockkFromJson(JsType::class.java, jsType)
-        mockkFromJson(TransferFinishedPayload::class.java, payload)
+        mockkFromJson(TransferFinishedResponse::class.java, response)
 
         useCase.launch("") shouldBeEqualTo LinkEvent.Payload(payload)
     }
@@ -87,9 +92,10 @@ class DeserializeLinkMessageUseCaseTest : UseCaseTest() {
     fun `test delayedAuthentication`() = runTest {
         val jsType = JsType(Type.delayedAuthentication)
         val payload = mockk<DelayedAuthPayload>()
+        val response = DelayedAuthResponse(payload)
 
         mockkFromJson(JsType::class.java, jsType)
-        mockkFromJson(DelayedAuthPayload::class.java, payload)
+        mockkFromJson(DelayedAuthResponse::class.java, response)
 
         useCase.launch("") shouldBeEqualTo LinkEvent.Payload(payload)
     }
