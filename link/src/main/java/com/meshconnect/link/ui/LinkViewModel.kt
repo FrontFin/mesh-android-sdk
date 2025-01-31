@@ -47,7 +47,6 @@ internal class LinkViewModel(
                         error = it
                         throwable.emit(it)
                     }
-
             }
         }
     }
