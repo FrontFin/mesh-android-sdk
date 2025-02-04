@@ -4,9 +4,7 @@ import android.app.Activity
 import android.content.res.Configuration
 import androidx.core.view.WindowInsetsControllerCompat
 
-internal fun Activity.windowInsetsController(
-    controller: WindowInsetsControllerCompat.() -> Unit
-) {
+internal fun Activity.windowInsetsController(controller: WindowInsetsControllerCompat.() -> Unit) {
     controller(WindowInsetsControllerCompat(window, window.decorView))
 }
 

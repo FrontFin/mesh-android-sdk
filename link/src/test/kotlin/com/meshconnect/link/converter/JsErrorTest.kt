@@ -5,7 +5,6 @@ import com.meshconnect.link.readFile
 import org.junit.Test
 
 class JsErrorTest {
-
     private val jsonConverter = JsonConverter
 
     @Test

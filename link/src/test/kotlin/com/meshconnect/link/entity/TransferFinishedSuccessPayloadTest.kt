@@ -17,7 +17,7 @@ class TransferFinishedSuccessPayloadTest {
             totalAmountInFiat = 112.0,
             networkName = "Solana",
             txHash = "o4398590211",
-            transferId = "trid"
+            transferId = "trid",
         ).apply {
             assertEquals("234sdf-xxx3902", txId)
             assertEquals("0923xxx", fromAddress)

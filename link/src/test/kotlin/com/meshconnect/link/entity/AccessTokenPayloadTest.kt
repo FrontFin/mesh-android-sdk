@@ -15,14 +15,15 @@ class AccessTokenPayloadTest {
         val expiresInSeconds = 1000
         val refreshTokenExpiresInSeconds = 2000
 
-        val it = AccessTokenPayload(
-            accountTokens,
-            brokerType,
-            brokerName,
-            brokerBrandInfo,
-            expiresInSeconds,
-            refreshTokenExpiresInSeconds
-        )
+        val it =
+            AccessTokenPayload(
+                accountTokens,
+                brokerType,
+                brokerName,
+                brokerBrandInfo,
+                expiresInSeconds,
+                refreshTokenExpiresInSeconds,
+            )
 
         assertEquals(accountTokens, it.accountTokens)
         assertEquals(brokerType, it.brokerType)

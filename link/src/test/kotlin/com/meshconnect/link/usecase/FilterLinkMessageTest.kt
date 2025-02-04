@@ -7,7 +7,6 @@ import org.amshove.kluent.shouldNotBeNull
 import org.junit.Test
 
 class FilterLinkMessageTest {
-
     private val filterLinkMessage = FilterLinkMessage
 
     @Test
@@ -30,7 +29,10 @@ class FilterLinkMessageTest {
         verifyTypeNotExist("")
     }
 
-    private fun verifyTypeReplaced(original: String, expected: String) {
+    private fun verifyTypeReplaced(
+        original: String,
+        expected: String,
+    ) {
         filterLinkMessage.filter(mapOfType(original))
             .shouldNotBeNull()
             .shouldContainSame(mapOfType(expected))

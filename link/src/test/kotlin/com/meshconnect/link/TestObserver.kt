@@ -36,6 +36,7 @@ class TestObserver<T> : Observer<T> {
     }
 }
 
-fun <T> LiveData<T>.testObserver() = TestObserver<T>().also {
-    observeForever(it)
-}
+fun <T> LiveData<T>.testObserver() =
+    TestObserver<T>().also {
+        observeForever(it)
+    }

@@ -13,7 +13,6 @@ import java.net.MalformedURLException
 import java.net.URL
 
 class DecodeToURLTest {
-
     @Before
     fun setUp() {
         mockkStatic(::isAtLeastOreo)

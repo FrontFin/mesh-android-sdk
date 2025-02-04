@@ -6,7 +6,7 @@ import com.meshconnect.link.converter.JsonConverter
 internal class BroadcastLinkMessageUseCase(
     private val jsonConverter: JsonConverter,
     private val filterLinkMessage: FilterLinkMessage,
-    private val eventEmitter: EventEmitter
+    private val eventEmitter: EventEmitter,
 ) {
     suspend fun launch(json: String) {
         val map = filterLinkMessage.filter(jsonConverter.toMap(json))
@@ -15,42 +15,43 @@ internal class BroadcastLinkMessageUseCase(
 }
 
 internal object FilterLinkMessage {
+    private val typesMap =
+        mapOf(
+            "brokerageAccountAccessToken" to "integrationConnected",
+            "delayedAuthentication" to "integrationConnected",
+            "transferFinished" to "transferCompleted",
+            "loaded" to "pageLoaded",
+        )
 
-    private val typesMap = mapOf(
-        "brokerageAccountAccessToken" to "integrationConnected",
-        "delayedAuthentication" to "integrationConnected",
-        "transferFinished" to "transferCompleted",
-        "loaded" to "pageLoaded",
-    )
-
-    private val types = listOf(
-        "integrationConnectionError",
-        "integrationSelected",
-        "credentialsEntered",
-        "transferStarted",
-        "transferExecuted",
-        "transferInitiated",
-        "transferPreviewed",
-        "transferPreviewError",
-        "transferExecutionError",
-        "transferNoEligibleAssets",
-        "walletMessageSigned",
-        "verifyDonePage",
-        "verifyWalletRejected",
-        "integrationMfaRequired",
-        "integrationMfaEntered",
-        "integrationOAuthStarted",
-        "integrationAccountSelectionRequired",
-        "transferAmountEntered",
-        "transferMfaRequired",
-        "transferKycRequired",
-        "connectionDeclined",
-        "transferConfigureError",
-        "transferAssetSelected",
-        "transferNetworkSelected",
-        "connectionUnavailable",
-        "transferDeclined"
-    )
+    private val types =
+        listOf(
+            "integrationConnectionError",
+            "integrationSelected",
+            "credentialsEntered",
+            "transferStarted",
+            "transferExecuted",
+            "transferInitiated",
+            "transferPreviewed",
+            "transferPreviewError",
+            "transferExecutionError",
+            "transferNoEligibleAssets",
+            "walletMessageSigned",
+            "verifyDonePage",
+            "verifyWalletRejected",
+            "integrationMfaRequired",
+            "integrationMfaEntered",
+            "integrationOAuthStarted",
+            "integrationAccountSelectionRequired",
+            "transferAmountEntered",
+            "transferMfaRequired",
+            "transferKycRequired",
+            "connectionDeclined",
+            "transferConfigureError",
+            "transferAssetSelected",
+            "transferNetworkSelected",
+            "connectionUnavailable",
+            "transferDeclined",
+        )
 
     fun filter(map: Map<String, *>): Map<String, *>? {
         val type = map["type"]

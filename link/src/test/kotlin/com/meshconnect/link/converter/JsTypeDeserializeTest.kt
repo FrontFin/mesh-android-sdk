@@ -5,7 +5,6 @@ import com.meshconnect.link.entity.Type
 import org.junit.Test
 
 class JsTypeDeserializeTest {
-
     private val jsonConverter = JsonConverter
 
     private fun toJsType(json: String) = jsonConverter.fromJson(json, JsType::class.java)

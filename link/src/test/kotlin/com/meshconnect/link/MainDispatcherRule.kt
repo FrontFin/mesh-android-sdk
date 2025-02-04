@@ -9,9 +9,8 @@ import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
 class MainDispatcherRule(
-    val dispatcher: TestDispatcher  = UnconfinedTestDispatcher()
+    val dispatcher: TestDispatcher = UnconfinedTestDispatcher(),
 ) : TestWatcher() {
-
     override fun starting(description: Description) {
         Dispatchers.setMain(dispatcher)
     }

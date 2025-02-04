@@ -53,10 +53,14 @@ internal class LinkActivity : AppCompatActivity() {
         private const val CBW_HOST = "wallet.coinbase.com"
         private const val CBW_PACKAGE_NAME = "org.toshi"
 
-        fun getLinkIntent(activity: Context, config: LinkConfiguration): Intent {
-            val intent = intent<LinkActivity>(activity)
-                .putExtra(TOKEN, config.token)
-                .putExtra(DISABLE_WHITELIST, config.disableDomainWhiteList)
+        fun getLinkIntent(
+            activity: Context,
+            config: LinkConfiguration,
+        ): Intent {
+            val intent =
+                intent<LinkActivity>(activity)
+                    .putExtra(TOKEN, config.token)
+                    .putExtra(DISABLE_WHITELIST, config.disableDomainWhiteList)
 
             val accessTokens = config.accessTokens
             val transferTokens = config.transferDestinationTokens
@@ -112,21 +116,24 @@ internal class LinkActivity : AppCompatActivity() {
 
     private fun applyTheme(url: String) {
         val linkStyle = getLinkStyleFromLinkUrl(url)
-        val isDarkTheme = when (linkStyle?.th) {
-            "dark" -> true
-            "system" -> isSystemDarkTheme()
-            else -> false
-        }
+        val isDarkTheme =
+            when (linkStyle?.th) {
+                "dark" -> true
+                "system" -> isSystemDarkTheme()
+                else -> false
+            }
 
-        val topColor = when {
-            isDarkTheme -> getColor(R.color.coldGray70)
-            else -> getColor(R.color.coldGray0)
-        }
+        val topColor =
+            when {
+                isDarkTheme -> getColor(R.color.coldGray70)
+                else -> getColor(R.color.coldGray0)
+            }
 
-        val bottomColor = when {
-            isDarkTheme -> getColor(R.color.gray80)
-            else -> getColor(R.color.gray0)
-        }
+        val bottomColor =
+            when {
+                isDarkTheme -> getColor(R.color.gray80)
+                else -> getColor(R.color.gray0)
+            }
 
         findViewById<ViewGroup>(android.R.id.content).setBackgroundColor(bottomColor)
 
@@ -207,7 +214,10 @@ internal class LinkActivity : AppCompatActivity() {
         setResult(RESULT_CANCELED, LinkExit(throwable))
     }
 
-    private fun setResult(resultCode: Int, result: LinkResult) {
+    private fun setResult(
+        resultCode: Int,
+        result: LinkResult,
+    ) {
         setResult(resultCode, Intent().apply { putExtra(DATA, result) })
     }
 
@@ -221,12 +231,13 @@ internal class LinkActivity : AppCompatActivity() {
         when {
             message.isNullOrEmpty() -> Unit
             message.length <= MAX_TOAST_MSG_LENGTH -> showToast(message)
-            else -> alertDialog {
-                setMessage(message)
-                setPositiveButton(R.string.okay, null)
-                setCancelable(false)
-                show()
-            }
+            else ->
+                alertDialog {
+                    setMessage(message)
+                    setPositiveButton(R.string.okay, null)
+                    setCancelable(false)
+                    show()
+                }
         }
     }
 
@@ -239,10 +250,11 @@ internal class LinkActivity : AppCompatActivity() {
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
             addJavascriptInterface(JSBridge { viewModel.onJsonReceived(it) }, JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
-            webViewClient = WebClient(
-                disableWhiteList = intent.getBooleanExtra(DISABLE_WHITELIST, false),
-                linkHost = url.host
-            )
+            webViewClient =
+                WebClient(
+                    disableWhiteList = intent.getBooleanExtra(DISABLE_WHITELIST, false),
+                    linkHost = url.host,
+                )
             webChromeClient = ChromeClient()
             loadUrl(url.toString())
         }
@@ -252,7 +264,10 @@ internal class LinkActivity : AppCompatActivity() {
         private val disableWhiteList: Boolean,
         private val linkHost: String,
     ) : WebViewClient() {
-        override fun onPageCommitVisible(view: WebView?, url: String?) {
+        override fun onPageCommitVisible(
+            view: WebView?,
+            url: String?,
+        ) {
             super.onPageCommitVisible(view, url)
             binding.toolbar.isGone = isLinkUrl(url)
             binding.progress.isVisible = false
@@ -268,13 +283,14 @@ internal class LinkActivity : AppCompatActivity() {
 
         override fun shouldOverrideUrlLoading(
             view: WebView?,
-            request: WebResourceRequest?
+            request: WebResourceRequest?,
         ): Boolean {
-            val override = when {
-                request == null -> true
-                disableWhiteList -> request.url.scheme != "https"
-                else -> !isUrlWhitelisted(request.url.toString(), request.url.host.orEmpty())
-            }
+            val override =
+                when {
+                    request == null -> true
+                    disableWhiteList -> request.url.scheme != "https"
+                    else -> !isUrlWhitelisted(request.url.toString(), request.url.host.orEmpty())
+                }
             // return 'true' to reject loading the url by WebView
             return override
         }
@@ -282,26 +298,28 @@ internal class LinkActivity : AppCompatActivity() {
 
     inner class ChromeClient : WebChromeClient() {
         private val target
-            get() = WebView(this@LinkActivity).apply {
-                webViewClient = object : WebViewClient() {
-                    override fun shouldOverrideUrlLoading(
-                        view: WebView?,
-                        request: WebResourceRequest?
-                    ): Boolean {
-                        if (request != null && !request.isRedirect) {
-                            actionView(request.url)
+            get() =
+                WebView(this@LinkActivity).apply {
+                    webViewClient =
+                        object : WebViewClient() {
+                            override fun shouldOverrideUrlLoading(
+                                view: WebView?,
+                                request: WebResourceRequest?,
+                            ): Boolean {
+                                if (request != null && !request.isRedirect) {
+                                    actionView(request.url)
+                                }
+                                // return 'true' to reject loading the url by WebView
+                                return true
+                            }
                         }
-                        // return 'true' to reject loading the url by WebView
-                        return true
-                    }
                 }
-            }
 
         override fun onCreateWindow(
             view: WebView?,
             isDialog: Boolean,
             isUserGesture: Boolean,
-            resultMsg: Message?
+            resultMsg: Message?,
         ): Boolean {
             val url = view?.hitTestResult?.extra
 
@@ -335,23 +353,24 @@ internal class LinkActivity : AppCompatActivity() {
             }
         }
 
-    private fun actionView(uri: Uri) = try {
-        if (uri.host == CBW_HOST) {
-            val intent = packageManager.getLaunchIntentForPackage(CBW_PACKAGE_NAME)
-            if (intent != null) {
-                intent.type = Intent.ACTION_VIEW
-                intent.flags = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK.inv()
-                intent.data = uri
-                coinbaseLauncher.launch(intent)
+    private fun actionView(uri: Uri) =
+        try {
+            if (uri.host == CBW_HOST) {
+                val intent = packageManager.getLaunchIntentForPackage(CBW_PACKAGE_NAME)
+                if (intent != null) {
+                    intent.type = Intent.ACTION_VIEW
+                    intent.flags = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK.inv()
+                    intent.data = uri
+                    coinbaseLauncher.launch(intent)
+                } else {
+                    startViewIntent(uri)
+                }
             } else {
                 startViewIntent(uri)
             }
-        } else {
-            startViewIntent(uri)
+        } catch (expected: ActivityNotFoundException) {
+            showToast(R.string.not_able_to_perform)
         }
-    } catch (expected: ActivityNotFoundException) {
-        showToast(R.string.not_able_to_perform)
-    }
 
     private fun startViewIntent(uri: Uri) {
         startActivity(Intent(Intent.ACTION_VIEW, uri))
