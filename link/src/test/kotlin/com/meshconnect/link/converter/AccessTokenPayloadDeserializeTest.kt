@@ -9,12 +9,12 @@ import org.junit.Test
 
 class AccessTokenPayloadDeserializeTest {
 
-    private val gson = JsonConverter.get()
+    private val jsonConverter = JsonConverter
 
     @Test
     fun testAccessToken() {
         val json = readFile("access-token.json")
-        val actual = gson.fromJson<AccessTokenPayload>(json)
+        val actual = jsonConverter.fromJson(json, AccessTokenPayload::class.java)
         val expected = AccessTokenPayload(
             brokerType = "alpaca",
             brokerName = "Alpaca",

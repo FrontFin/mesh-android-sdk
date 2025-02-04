@@ -8,7 +8,7 @@ import org.junit.Test
 
 class FilterLinkMessageTest {
 
-    private val filterLinkMessage = FilterLinkMessageImpl
+    private val filterLinkMessage = FilterLinkMessage
 
     @Test
     fun `filter link message`() {
@@ -31,19 +31,19 @@ class FilterLinkMessageTest {
     }
 
     private fun verifyTypeReplaced(original: String, expected: String) {
-        filterLinkMessage(mapOfType(original))
+        filterLinkMessage.filter(mapOfType(original))
             .shouldNotBeNull()
             .shouldContainSame(mapOfType(expected))
     }
 
     private fun verifyTypeExists(type: String) {
-        filterLinkMessage(mapOfType(type))
+        filterLinkMessage.filter(mapOfType(type))
             .shouldNotBeNull()
             .shouldContainSame(mapOfType(type))
     }
 
     private fun verifyTypeNotExist(type: String) {
-        filterLinkMessage(mapOfType(type))
+        filterLinkMessage.filter(mapOfType(type))
             .shouldBeNull()
     }
 

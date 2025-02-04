@@ -2,63 +2,76 @@ package com.meshconnect.link.usecase
 
 import com.meshconnect.link.EventEmitter
 import com.meshconnect.link.UseCaseTest
+import com.meshconnect.link.converter.JsonConverter
+import com.meshconnect.link.randomString
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 class BroadcastLinkMessageUseCaseTest: UseCaseTest() {
 
-    private val deserializeToMap = mockk<DeserializeToMap>()
+    private val jsonConverter = mockk<JsonConverter>()
     private val filterLinkMessage = mockk<FilterLinkMessage>()
     private val eventEmitter = mockk<EventEmitter>()
 
     private val useCase = BroadcastLinkMessageUseCase(
-        mainCoroutineRule.dispatcher,
-        deserializeToMap,
+        jsonConverter,
         filterLinkMessage,
         eventEmitter
     )
 
-    @Test
-    fun `test useCase broadcasts the link message`() = runTest {
-        every { deserializeToMap(any()) } returns mockk()
-        every { filterLinkMessage(any()) } returns mockk()
-        coEvery { eventEmitter.emit(any()) } just Runs
-        useCase.launch("").apply { assert(isSuccess) }
-        coVerify { eventEmitter.emit(any()) }
+    private fun mockkDeserializeToMap(inputValue: String = mockk(), returnValue: Map<String, *>) {
+        every { jsonConverter.toMap(inputValue) } returns returnValue
+    }
+
+    private fun mockkFilterLinkMessage(inputValue: Map<String, *> = mockk(), returnValue: Map<String, *>?) {
+        every { filterLinkMessage.filter(inputValue) } returns returnValue
     }
 
     @Test
-    fun `test useCase does not broadcast invalid message`() = runTest {
-        every { deserializeToMap(any()) } returns mockk()
-        every { filterLinkMessage(any()) } returns null
-        useCase.launch("").apply { assert(isSuccess) }
-        coVerify(exactly = 0) { eventEmitter.emit(any()) }
+    fun `test useCase broadcasts the message correctly`() = runTest {
+        val json = randomString
+        val convertedMap: Map<String, *> = mockk()
+        val filteredMap: Map<String, *> = mockk()
+
+        mockkDeserializeToMap(json, convertedMap)
+        mockkFilterLinkMessage(convertedMap, filteredMap)
+        coEvery { eventEmitter.emit(filteredMap) } just Runs
+
+        useCase.launch(json)
+
+        verify(exactly = 1) {
+            jsonConverter.toMap(json)
+            filterLinkMessage.filter(convertedMap)
+        }
+        coVerify(exactly = 1) {
+            eventEmitter.emit(filteredMap)
+        }
     }
 
     @Test
-    fun `test failure when deserializer throws an exception`() = runTest {
-        every { deserializeToMap(any()) } throws mockk()
-        useCase.launch("").apply { assert(isFailure) }
-    }
+    fun `test useCase does not broadcast a map on filtered out map`() = runTest {
+        val json = randomString
+        val convertedMap: Map<String, *> = mockk()
+        val filteredMap: Map<String, *>? = null
 
-    @Test
-    fun `test failure when filter throws an exception`() = runTest {
-        every { deserializeToMap(any()) } returns mockk()
-        every { filterLinkMessage(any()) } throws mockk()
-        useCase.launch("").apply { assert(isFailure) }
-    }
+        mockkDeserializeToMap(json, convertedMap)
+        mockkFilterLinkMessage(convertedMap, filteredMap)
 
-    @Test
-    fun `test failure when broadcast throws an exception`() = runTest {
-        every { deserializeToMap(any()) } returns mockk()
-        every { filterLinkMessage(any()) } returns mockk()
-        coEvery { eventEmitter.emit(any()) } throws mockk()
-        useCase.launch("").apply { assert(isFailure) }
+        useCase.launch(json)
+
+        verify(exactly = 1) {
+            jsonConverter.toMap(json)
+            filterLinkMessage.filter(convertedMap)
+        }
+        coVerify(exactly = 0) {
+            eventEmitter.emit(any())
+        }
     }
 }

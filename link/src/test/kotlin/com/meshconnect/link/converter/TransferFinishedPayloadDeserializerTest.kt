@@ -10,12 +10,12 @@ import org.junit.Test
 
 class TransferFinishedPayloadDeserializerTest {
 
-    private val gson = JsonConverter.get()
+    private val jsonConverter = JsonConverter
 
     @Test
     fun `test success payload`() {
         val json = readFile("transfer-success.json")
-        val actual = gson.fromJson<TransferFinishedPayload>(json)
+        val actual = jsonConverter.fromJson(json, TransferFinishedPayload::class.java)
         val expected = TransferFinishedSuccessPayload(
             txId = "234sdf-xxx3902",
             fromAddress = "0923xxx",
@@ -35,7 +35,7 @@ class TransferFinishedPayloadDeserializerTest {
     @Test
     fun `test success payload with empty address`() {
         val json = readFile("transfer-success-empty-fields.json")
-        val actual = gson.fromJson<TransferFinishedPayload>(json)
+        val actual = jsonConverter.fromJson(json, TransferFinishedPayload::class.java)
         val expected = TransferFinishedSuccessPayload(
             txId = "234sdf-xxx3902",
             fromAddress = "",
@@ -55,7 +55,7 @@ class TransferFinishedPayloadDeserializerTest {
     @Test
     fun `test error payload`() {
         val json = readFile("transfer-error.json")
-        val actual = gson.fromJson<TransferFinishedPayload>(json)
+        val actual = jsonConverter.fromJson(json, TransferFinishedPayload::class.java)
         val expected = TransferFinishedErrorPayload(
             errorMessage = "service unavailable"
         )
@@ -66,7 +66,7 @@ class TransferFinishedPayloadDeserializerTest {
     fun `test invalid status`() {
         val json = "{status:'lorem'}"
         val ex = assertThrows(JsonSyntaxException::class.java) {
-            gson.fromJson<TransferFinishedPayload>(json)
+            jsonConverter.fromJson(json, TransferFinishedPayload::class.java)
         }
         assert(ex.message == "java.lang.IllegalStateException: unknown status 'lorem'")
     }

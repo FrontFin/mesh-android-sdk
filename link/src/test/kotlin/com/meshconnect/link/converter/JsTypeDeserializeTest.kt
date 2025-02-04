@@ -6,41 +6,43 @@ import org.junit.Test
 
 class JsTypeDeserializeTest {
 
-    private val gson = JsonConverter.get()
+    private val jsonConverter = JsonConverter
+
+    private fun toJsType(json: String) = jsonConverter.fromJson(json, JsType::class.java)
 
     @Test
     fun `test JsType done`() {
-        val obj = gson.fromJson<JsType>("{type:'done'}")
+        val obj = toJsType("{type:'done'}")
         assert(obj == JsType(Type.done))
     }
 
     @Test
     fun `test JsType close`() {
-        val obj = gson.fromJson<JsType>("{type:'close'}")
+        val obj = toJsType("{type:'close'}")
         assert(obj == JsType(Type.close))
     }
 
     @Test
     fun `test JsType showClose`() {
-        val obj = gson.fromJson<JsType>("{type:'showClose'}")
+        val obj = toJsType("{type:'showClose'}")
         assert(obj == JsType(Type.showClose))
     }
 
     @Test
     fun `test JsType error`() {
-        val obj = gson.fromJson<JsType>("{type:'error'}")
+        val obj = toJsType("{type:'error'}")
         assert(obj == JsType(Type.error))
     }
 
     @Test
     fun `test JsType brokerageAccountAccessToken`() {
-        val obj = gson.fromJson<JsType>("{type:'brokerageAccountAccessToken'}")
+        val obj = toJsType("{type:'brokerageAccountAccessToken'}")
         assert(obj == JsType(Type.brokerageAccountAccessToken))
     }
 
     @Test
     fun `test JsType transferFinished`() {
-        val obj = gson.fromJson<JsType>("{type:'transferFinished'}")
+        val obj = toJsType("{type:'transferFinished'}")
         assert(obj == JsType(Type.transferFinished))
     }
 }

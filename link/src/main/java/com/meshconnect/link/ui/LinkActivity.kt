@@ -27,10 +27,10 @@ import com.meshconnect.link.databinding.LinkActivityBinding
 import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
-import com.meshconnect.link.utils.OnLoadedScriptBuilder
 import com.meshconnect.link.utils.alertDialog
 import com.meshconnect.link.utils.decodeToURL
 import com.meshconnect.link.utils.getLinkStyleFromLinkUrl
+import com.meshconnect.link.utils.getOnLoadedScript
 import com.meshconnect.link.utils.getParcelable
 import com.meshconnect.link.utils.intent
 import com.meshconnect.link.utils.isSystemDarkTheme
@@ -43,7 +43,6 @@ import com.meshconnect.link.utils.windowInsetsController
 import java.net.URL
 
 internal class LinkActivity : AppCompatActivity() {
-
     companion object {
         private const val TOKEN = "token"
         private const val ACCESS_TOKENS = "access_tokens"
@@ -174,19 +173,19 @@ internal class LinkActivity : AppCompatActivity() {
             when (event) {
                 is LinkEvent.Close, LinkEvent.Done -> finish()
                 is LinkEvent.ShowClose -> showCloseDialog()
-                is LinkEvent.Payload, LinkEvent.Undefined -> Unit
                 is LinkEvent.Loaded -> onLinkLoaded()
+                is LinkEvent.Payload -> Unit
             }
         }
     }
 
     private fun onLinkLoaded() {
-        val script = OnLoadedScriptBuilder(
-            version = BuildConfig.VERSION,
-            accessTokens = intent.getStringExtra(ACCESS_TOKENS),
-            transferDestinationTokens = intent.getStringExtra(TRANSFER_TOKENS)
-        ).build()
-
+        val script =
+            getOnLoadedScript(
+                version = BuildConfig.VERSION,
+                accessTokens = intent.getStringExtra(ACCESS_TOKENS),
+                transferDestinationTokens = intent.getStringExtra(TRANSFER_TOKENS),
+            )
         binding.webView.evaluateJavascript(script, null)
     }
 
@@ -282,7 +281,6 @@ internal class LinkActivity : AppCompatActivity() {
     }
 
     inner class ChromeClient : WebChromeClient() {
-
         private val target
             get() = WebView(this@LinkActivity).apply {
                 webViewClient = object : WebViewClient() {
