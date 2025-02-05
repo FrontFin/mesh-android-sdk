@@ -5,7 +5,6 @@ import org.amshove.kluent.shouldContainSame
 import org.junit.Test
 
 class DeserializeToMapTest {
-
     private val jsonConverter = JsonConverter
 
     @Test

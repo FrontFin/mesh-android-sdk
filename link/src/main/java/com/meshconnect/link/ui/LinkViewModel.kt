@@ -24,17 +24,18 @@ internal class LinkViewModel(
     private val payloadEmitter: PayloadEmitter,
     private val broadcastLinkMessageUseCase: BroadcastLinkMessageUseCase,
 ) : ViewModel() {
-
     internal val linkEvent = EventLiveData<LinkEvent>()
     internal val throwable = EventLiveData<Throwable>()
     private val _payloads = mutableSetOf<LinkPayload>()
     internal val payloads: List<LinkPayload> get() = _payloads.toList()
-    internal var error: Throwable? = null; private set
+    internal var error: Throwable? = null
+        private set
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
-        error = exception
-        throwable.emit(exception)
-    }
+    private val exceptionHandler =
+        CoroutineExceptionHandler { _, exception ->
+            error = exception
+            throwable.emit(exception)
+        }
 
     fun onJsonReceived(json: String) {
         viewModelScope.launch(exceptionHandler) {
@@ -61,11 +62,12 @@ internal class LinkViewModel(
                 dispatcher = Dispatchers.IO,
                 deserializeLinkMessageUseCase = DeserializeLinkMessageUseCase(JsonConverter),
                 payloadEmitter = PayloadEmitter(),
-                broadcastLinkMessageUseCase = BroadcastLinkMessageUseCase(
-                    jsonConverter = JsonConverter,
-                    filterLinkMessage = FilterLinkMessage,
-                    eventEmitter = EventEmitter()
-                )
+                broadcastLinkMessageUseCase =
+                    BroadcastLinkMessageUseCase(
+                        jsonConverter = JsonConverter,
+                        filterLinkMessage = FilterLinkMessage,
+                        eventEmitter = EventEmitter(),
+                    ),
             ) as T
         }
     }

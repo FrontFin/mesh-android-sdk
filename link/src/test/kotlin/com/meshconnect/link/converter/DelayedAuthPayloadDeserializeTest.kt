@@ -7,23 +7,24 @@ import org.amshove.kluent.internal.assertEquals
 import org.junit.Test
 
 class DelayedAuthPayloadDeserializeTest {
-
     private val jsonConverter = JsonConverter
 
     @Test
     fun `deserialize 'delayedAuthentication'`() {
         val json = readFile("delayed-auth-payload.json")
         val actual = jsonConverter.fromJson(json, DelayedAuthPayload::class.java)
-        val expected = DelayedAuthPayload(
-            refreshTokenExpiresInSeconds = 1923849,
-            brokerType = "alpaca",
-            refreshToken = "lorem-ipsum",
-            brokerName =  "Alpacas",
-            brokerBrandInfo = BrandInfo(
-                brokerLogo = "iVB2RSUhEUgAAA",
-                brokerPrimaryColor =  "#FFF"
+        val expected =
+            DelayedAuthPayload(
+                refreshTokenExpiresInSeconds = 1923849,
+                brokerType = "alpaca",
+                refreshToken = "lorem-ipsum",
+                brokerName = "Alpacas",
+                brokerBrandInfo =
+                    BrandInfo(
+                        brokerLogo = "iVB2RSUhEUgAAA",
+                        brokerPrimaryColor = "#FFF",
+                    ),
             )
-        )
         assertEquals(expected, actual)
     }
 }

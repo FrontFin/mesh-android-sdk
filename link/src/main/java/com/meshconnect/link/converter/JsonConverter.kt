@@ -9,11 +9,14 @@ internal object JsonConverter {
     private val gson: Gson by lazy {
         GsonBuilder().registerTypeAdapter(
             TransferFinishedPayload::class.java,
-            TransferFinishedPayloadDeserializer()
+            TransferFinishedPayloadDeserializer(),
         ).create()
     }
 
-    fun <T> fromJson(json: String, classOfT: Class<T>): T {
+    fun <T> fromJson(
+        json: String,
+        classOfT: Class<T>,
+    ): T {
         return gson.fromJson(json, classOfT)
     }
 

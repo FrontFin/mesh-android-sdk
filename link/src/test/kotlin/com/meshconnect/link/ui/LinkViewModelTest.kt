@@ -19,17 +19,17 @@ import org.amshove.kluent.shouldContainSame
 import org.junit.Test
 
 class LinkViewModelTest : ViewModelTest() {
-
     private val deserializeLinkMessageUseCase = mockk<DeserializeLinkMessageUseCase>()
     private val payloadEmitter = mockk<PayloadEmitter>()
     private val broadcastLinkMessageUseCase = mockk<BroadcastLinkMessageUseCase>()
 
-    private val viewModel = LinkViewModel(
-        mainCoroutineRule.dispatcher,
-        deserializeLinkMessageUseCase,
-        payloadEmitter,
-        broadcastLinkMessageUseCase
-    )
+    private val viewModel =
+        LinkViewModel(
+            mainCoroutineRule.dispatcher,
+            deserializeLinkMessageUseCase,
+            payloadEmitter,
+            broadcastLinkMessageUseCase,
+        )
 
     @Test
     fun `test factory`() {
@@ -52,35 +52,37 @@ class LinkViewModelTest : ViewModelTest() {
     }
 
     @Test
-    fun `verify viewModel emits error`() = runTest {
-        val json = randomString
-        val th = mockk<Throwable>()
-        val errorObserver = viewModel.throwable.testObserver()
+    fun `verify viewModel emits error`() =
+        runTest {
+            val json = randomString
+            val th = mockk<Throwable>()
+            val errorObserver = viewModel.throwable.testObserver()
 
-        coEvery { deserializeLinkMessageUseCase.launch(json) } throws th
-        coEvery { broadcastLinkMessageUseCase.launch(any()) } just Runs
-        viewModel.onJsonReceived(json)
+            coEvery { deserializeLinkMessageUseCase.launch(json) } throws th
+            coEvery { broadcastLinkMessageUseCase.launch(any()) } just Runs
+            viewModel.onJsonReceived(json)
 
-        errorObserver.shouldContainEvents(th)
-        viewModel.error shouldBe th
-    }
+            errorObserver.shouldContainEvents(th)
+            viewModel.error shouldBe th
+        }
 
     @Test
-    fun `verify viewModel emits payload`() = runTest {
-        val json = randomString
-        val payload: LinkPayload = mockk()
-        val event = LinkEvent.Payload(payload)
-        val eventObserver = viewModel.linkEvent.testObserver()
+    fun `verify viewModel emits payload`() =
+        runTest {
+            val json = randomString
+            val payload: LinkPayload = mockk()
+            val event = LinkEvent.Payload(payload)
+            val eventObserver = viewModel.linkEvent.testObserver()
 
-        coEvery { deserializeLinkMessageUseCase.launch(json) } returns event
-        coEvery { payloadEmitter.emit(payload) } just Runs
-        coEvery { broadcastLinkMessageUseCase.launch(json) } just Runs
-        viewModel.onJsonReceived(json)
+            coEvery { deserializeLinkMessageUseCase.launch(json) } returns event
+            coEvery { payloadEmitter.emit(payload) } just Runs
+            coEvery { broadcastLinkMessageUseCase.launch(json) } just Runs
+            viewModel.onJsonReceived(json)
 
-        viewModel.payloads.shouldContainSame(listOf(payload))
-        viewModel.error shouldBe null
-        eventObserver.shouldContainEvents(event)
-    }
+            viewModel.payloads.shouldContainSame(listOf(payload))
+            viewModel.error shouldBe null
+            eventObserver.shouldContainEvents(event)
+        }
 
     @Test
     fun `verify viewModel handle null from use case`() {

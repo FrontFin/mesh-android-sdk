@@ -7,7 +7,6 @@ import org.amshove.kluent.internal.assertEquals
 import org.junit.Test
 
 class DelayedAuthPayloadTest {
-
     @Test
     fun `test 'DelayedAuthPayload' entity`() {
         val refreshTokenExpiresInSeconds: Int = randomInt
@@ -16,11 +15,14 @@ class DelayedAuthPayloadTest {
         val brokerName: String = randomString
         val brokerBrandInfo: BrandInfo = mockk()
 
-        val it = DelayedAuthPayload(
-            refreshTokenExpiresInSeconds,
-            brokerType,
-            refreshToken, brokerName, brokerBrandInfo
-        )
+        val it =
+            DelayedAuthPayload(
+                refreshTokenExpiresInSeconds,
+                brokerType,
+                refreshToken,
+                brokerName,
+                brokerBrandInfo,
+            )
 
         assertEquals(refreshTokenExpiresInSeconds, it.refreshTokenExpiresInSeconds)
         assertEquals(brokerType, it.brokerType)

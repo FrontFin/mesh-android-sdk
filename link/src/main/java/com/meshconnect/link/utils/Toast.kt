@@ -8,6 +8,8 @@ internal fun Context.showToast(text: CharSequence) {
     Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
 }
 
-internal fun Context.showToast(@StringRes resId: Int) {
+internal fun Context.showToast(
+    @StringRes resId: Int,
+) {
     Toast.makeText(this, resId, Toast.LENGTH_SHORT).show()
 }

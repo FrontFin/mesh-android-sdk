@@ -10,7 +10,7 @@ import com.meshconnect.link.entity.TransferFinishedResponse
 import com.meshconnect.link.entity.Type
 
 internal class DeserializeLinkMessageUseCase(
-    private val jsonConverter: JsonConverter
+    private val jsonConverter: JsonConverter,
 ) {
     fun launch(json: String): LinkEvent? {
         val type = jsonConverter.fromJson(json, JsType::class.java).type

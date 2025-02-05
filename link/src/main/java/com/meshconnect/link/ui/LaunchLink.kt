@@ -27,18 +27,23 @@ import com.meshconnect.link.entity.LinkConfiguration
  * ```
  */
 class LaunchLink : ActivityResultContract<LinkConfiguration, LinkResult>() {
-
     /**
      * Returns [Intent] to start the Link Activity.
      */
-    override fun createIntent(context: Context, input: LinkConfiguration): Intent {
+    override fun createIntent(
+        context: Context,
+        input: LinkConfiguration,
+    ): Intent {
         return LinkActivity.getLinkIntent(context, input)
     }
 
     /**
      * Extracts [LinkResult] from [Intent].
      */
-    override fun parseResult(resultCode: Int, intent: Intent?): LinkResult {
+    override fun parseResult(
+        resultCode: Int,
+        intent: Intent?,
+    ): LinkResult {
         return LinkActivity.getLinkResult(intent)
     }
 }

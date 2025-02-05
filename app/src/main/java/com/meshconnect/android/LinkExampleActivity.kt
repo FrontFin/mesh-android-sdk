@@ -19,7 +19,6 @@ import com.meshconnect.link.ui.LinkSuccess
 import kotlinx.coroutines.launch
 
 class LinkExampleActivity : AppCompatActivity() {
-
     private val binding by lazy(LazyThreadSafetyMode.NONE) {
         LinkExampleActivityBinding.inflate(layoutInflater)
     }
@@ -55,12 +54,13 @@ class LinkExampleActivity : AppCompatActivity() {
     }
 
     // Register an Activity Result callback
-    private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
-        when (result) {
-            is LinkSuccess -> handlePayloads(result.payloads)
-            is LinkExit -> logD("Exit. ${result.errorMessage}")
+    private val linkLauncher =
+        registerForActivityResult(LaunchLink()) { result ->
+            when (result) {
+                is LinkSuccess -> handlePayloads(result.payloads)
+                is LinkExit -> logD("Exit. ${result.errorMessage}")
+            }
         }
-    }
 
     private fun handlePayloads(payloads: List<LinkPayload>) {
         payloads.forEach { payload ->

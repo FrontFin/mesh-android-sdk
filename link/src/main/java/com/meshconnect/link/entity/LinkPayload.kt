@@ -4,6 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 sealed interface LinkPayload : Parcelable
+
 sealed interface TransferFinishedPayload : LinkPayload
 
 /**
@@ -33,13 +34,13 @@ data class Account(
     val frontAccountId: String,
     val fund: Double?,
     val cash: Double?,
-    val isReconnected: Boolean?
+    val isReconnected: Boolean?,
 ) : Parcelable
 
 @Parcelize
 data class BrandInfo(
     val brokerLogo: String?,
-    val brokerPrimaryColor: String?
+    val brokerPrimaryColor: String?,
 ) : Parcelable
 
 /**
@@ -51,7 +52,7 @@ data class DelayedAuthPayload(
     val brokerType: String,
     val refreshToken: String,
     val brokerName: String,
-    val brokerBrandInfo: BrandInfo
+    val brokerBrandInfo: BrandInfo,
 ) : LinkPayload
 
 /**
@@ -74,5 +75,5 @@ data class TransferFinishedSuccessPayload(
 
 @Parcelize
 data class TransferFinishedErrorPayload(
-    val errorMessage: String
+    val errorMessage: String,
 ) : TransferFinishedPayload

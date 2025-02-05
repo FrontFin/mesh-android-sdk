@@ -13,13 +13,14 @@ class IntegrationAccessTokenTest {
         val brokerType: String = randomString
         val brokerName: String = randomString
 
-        val it = IntegrationAccessToken(
-            accountId,
-            accountName,
-            accessToken,
-            brokerType,
-            brokerName
-        )
+        val it =
+            IntegrationAccessToken(
+                accountId,
+                accountName,
+                accessToken,
+                brokerType,
+                brokerName,
+            )
 
         assertEquals(accountId, it.accountId)
         assertEquals(accountName, it.accountName)
