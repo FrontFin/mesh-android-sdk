@@ -28,6 +28,7 @@ class TransferFinishedPayloadDeserializerTest {
                 networkName = "Polygon",
                 txHash = "1-9340-194350432-21123232",
                 transferId = "0x093547892-24234-2342",
+                refundAddress = "test-refund-address",
             )
         assert(actual == expected)
     }
@@ -49,6 +50,7 @@ class TransferFinishedPayloadDeserializerTest {
                 amountInFiat = null,
                 totalAmountInFiat = null,
                 transferId = null,
+                refundAddress = null,
             )
         assert(actual == expected)
     }
