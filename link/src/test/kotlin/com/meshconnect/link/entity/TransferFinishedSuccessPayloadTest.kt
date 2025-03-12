@@ -18,6 +18,7 @@ class TransferFinishedSuccessPayloadTest {
             networkName = "Solana",
             txHash = "o4398590211",
             transferId = "trid",
+            refundAddress = "ra",
         ).apply {
             assertEquals("234sdf-xxx3902", txId)
             assertEquals("0923xxx", fromAddress)
@@ -30,6 +31,7 @@ class TransferFinishedSuccessPayloadTest {
             assertEquals("Solana", networkName)
             assertEquals("o4398590211", txHash)
             assertEquals("trid", transferId)
+            assertEquals("ra", refundAddress)
         }
     }
 }
