@@ -46,7 +46,7 @@ class LinkExampleActivity : AppCompatActivity() {
             val token = binding.linkTokenInputText.text.toString()
             if (token.isNotEmpty()) {
                 binding.linkTokenInputText.text = null
-                linkLauncher.launch(LinkConfiguration(token))
+                linkLauncher.launch(LinkConfiguration(token, language = "en"))
             }
         }
 

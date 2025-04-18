@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="okay">OK</string>
-    <string name="onCloseDialog_title">Are you sure you want to exit?</string>
-    <string name="onCloseDialog_message">Your progress will be lost.</string>
-    <string name="onCloseDialog_exit">Exit</string>
-    <string name="onCloseDialog_cancel">Cancel</string>
-    <string name="back_not_allowed">Back not allowed</string>
+    <string name="exitDialog_title">Are you sure you want to exit?</string>
+    <string name="exitDialog_message">Your progress will be lost.</string>
+    <string name="exitDialog_exit">Exit</string>
+    <string name="exitDialog_cancel">Cancel</string>
     <string name="not_able_to_perform">Not able to perform an operation</string>
 </resources>
