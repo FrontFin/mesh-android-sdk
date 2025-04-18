@@ -4,12 +4,12 @@ import java.net.URL
 
 internal fun createURL(
     source: String,
-    queryMap: Map<String, String?>,
+    queryMap: Map<String, String?>? = null,
 ): URL {
     val builder = StringBuilder(source)
-    queryMap.forEach { (key, value) ->
+    queryMap?.forEach { (key, value) ->
         if (key.isNotEmpty() && !value.isNullOrEmpty()) {
-            builder.append(if (source.contains("?")) "&" else "?")
+            builder.append(if (builder.toString().contains("?")) "&" else "?")
             builder.append("$key=$value")
         }
     }
