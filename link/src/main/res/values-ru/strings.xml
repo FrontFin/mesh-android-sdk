@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exitDialog_title">Вы уверены, что хотите выйти?</string>
+    <string name="exitDialog_message">Ваш прогресс будет потерян.</string>
+    <string name="exitDialog_exit">Выйти</string>
+    <string name="exitDialog_cancel">Отмена</string>
+    <string name="not_able_to_perform">Невозможно выполнить операцию</string>
+</resources>
+

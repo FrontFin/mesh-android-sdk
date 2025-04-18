@@ -28,7 +28,8 @@ import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.utils.alertDialog
-import com.meshconnect.link.utils.decodeToURL
+import com.meshconnect.link.utils.createURL
+import com.meshconnect.link.utils.decodeToken
 import com.meshconnect.link.utils.getLinkStyleFromLinkUrl
 import com.meshconnect.link.utils.getOnLoadedScript
 import com.meshconnect.link.utils.getParcelable
@@ -49,6 +50,7 @@ internal class LinkActivity : AppCompatActivity() {
         private const val TRANSFER_TOKENS = "transfer_tokens"
         private const val DISABLE_WHITELIST = "disable_whitelist"
         private const val DATA = "data"
+        private const val LANGUAGE = "language"
         private const val MAX_TOAST_MSG_LENGTH = 38
         private const val CBW_HOST = "wallet.coinbase.com"
         private const val CBW_PACKAGE_NAME = "org.toshi"
@@ -61,6 +63,7 @@ internal class LinkActivity : AppCompatActivity() {
                 intent<LinkActivity>(activity)
                     .putExtra(TOKEN, config.token)
                     .putExtra(DISABLE_WHITELIST, config.disableDomainWhiteList)
+                    .putExtra(LANGUAGE, config.language)
 
             val accessTokens = config.accessTokens
             val transferTokens = config.transferDestinationTokens
@@ -89,29 +92,28 @@ internal class LinkActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val urlResult = decodeToURL(intent.getStringExtra(TOKEN))
-        val url = urlResult.getOrNull()
-        if (url == null) {
-            val e = urlResult.exceptionOrNull()
-            Log.e("SDK", "Failed to decode token", e)
-            setExitResult(e)
+        runCatching {
+            val link = decodeToken(intent.getStringExtra(TOKEN))
+            createURL(link, mapOf("lng" to intent.getStringExtra(LANGUAGE)))
+        }.onSuccess { url ->
+            setContentView(binding.root)
+
+            applyTheme(url.toString())
+
+            binding.back.setOnClickListener { onBack() }
+            binding.close.setOnClickListener { showCloseDialog() }
+            binding.toolbar.isVisible = false
+
+            observeLinkEvent()
+            observeThrowable()
+            openWebView(url)
+
+            WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
+        }.onFailure { throwable ->
+            Log.e("MeshSDK", "Failed to initialize SDK", throwable)
+            setExitResult(throwable)
             super.finish()
-            return
         }
-
-        setContentView(binding.root)
-
-        applyTheme(url.toString())
-
-        binding.back.setOnClickListener { onBack() }
-        binding.close.setOnClickListener { showCloseDialog() }
-        binding.toolbar.isVisible = false
-
-        observeLinkEvent()
-        observeThrowable()
-        openWebView(url)
-
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
     }
 
     private fun applyTheme(url: String) {
@@ -154,10 +156,6 @@ internal class LinkActivity : AppCompatActivity() {
     private fun onBack() {
         binding.webView.run {
             when {
-                url?.endsWith("broker-connect/done") == true -> {
-                    showToast(R.string.back_not_allowed)
-                }
-
                 canGoBack() -> evaluateJavascript("window.history.go(-1)", null)
                 else -> finish()
             }
@@ -166,10 +164,10 @@ internal class LinkActivity : AppCompatActivity() {
 
     private fun showCloseDialog() {
         alertDialog {
-            setTitle(R.string.onCloseDialog_title)
-            setMessage(R.string.onCloseDialog_message)
-            setPositiveButton(R.string.onCloseDialog_exit) { _, _ -> finish() }
-            setNegativeButton(R.string.onCloseDialog_cancel, null)
+            setTitle(R.string.exitDialog_title)
+            setMessage(R.string.exitDialog_message)
+            setPositiveButton(R.string.exitDialog_exit) { _, _ -> finish() }
+            setNegativeButton(R.string.exitDialog_cancel, null)
             setCancelable(false)
             show()
         }
@@ -234,7 +232,7 @@ internal class LinkActivity : AppCompatActivity() {
             else ->
                 alertDialog {
                     setMessage(message)
-                    setPositiveButton(R.string.okay, null)
+                    setPositiveButton(android.R.string.ok, null)
                     setCancelable(false)
                     show()
                 }
