@@ -1,18 +1,43 @@
-apply from: "$rootDir/android-app.gradle"
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.jlleitschuh.ktlint)
+}
+apply from: "$rootDir/detekt.gradle"
 
 android {
     namespace 'com.meshconnect.android'
 
-    flavorDimensions 'env'
-    productFlavors {
-        dev { dimension 'env' }
-        live { dimension 'env' }
+    compileSdk 33
+    defaultConfig {
+        minSdk 26
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        viewBinding true
     }
 }
 
 dependencies {
-    devImplementation project(':link')
-    liveImplementation ('com.meshconnect:link:2.0.15') { changing = true }
+    implementation project(':link')
+    //implementation(libs.meshconnect.link) { changing = true }
     implementation libs.androidx.appcompat
     implementation libs.androidx.core.ktx
     implementation libs.androidx.lifecycle.runtime
