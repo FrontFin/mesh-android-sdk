@@ -1,28 +1,28 @@
 [versions]
 # plugins
-agp = "8.0.2"
-kotlin = "1.7.20"
+agp = "8.3.2"
+kotlin = "1.9.0"
 ktlint = "12.1.2"
 dokka = "1.7.20"
 detekt = "1.19.0"
 sonarqube = "4.4.0.3356"
 maven-publish = "0.30.0"
 # libraries
-appcompat = "1.6.1"
-core-ktx = "1.7.0"
+appcompat = "1.7.0"
+core-ktx = "1.13.1"
 coroutines = "1.6.3"
 lifecycle = "2.5.1"
-material = "1.5.0"
+material = "1.12.0"
 gson = "2.11.0"
 # testing
 junit = "4.13.2"
 mockk = "1.13.7"
 kluent = "1.73"
-test-runner = "1.5.2"
-test-rules = "1.5.0"
+test-runner = "1.6.2"
+test-rules = "1.6.1"
 core-testing = "2.2.0"
 # link
-meshlink = "3.0.1"
+mesh-link = "3.0.1"
 
 [libraries]
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
@@ -43,7 +43,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kluent = { group = "org.amshove.kluent", name = "kluent-android", version.ref = "kluent" }
 
-meshconnect-link = { group = "com.meshconnect", name = "link", version.ref = "meshlink" }
+mesh-link = { group = "com.meshconnect", name = "link", version.ref = "mesh-link" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
