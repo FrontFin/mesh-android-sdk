@@ -1,0 +1,58 @@
+[versions]
+# plugins
+agp = "8.0.2"
+kotlin = "1.7.20"
+ktlint = "12.1.2"
+dokka = "1.7.20"
+detekt = "1.19.0"
+sonarqube = "4.4.0.3356"
+maven-publish = "0.30.0"
+# libraries
+appcompat = "1.6.1"
+core-ktx = "1.7.0"
+coroutines = "1.6.3"
+lifecycle = "2.5.1"
+material = "1.5.0"
+gson = "2.11.0"
+# testing
+junit = "4.13.2"
+mockk = "1.13.7"
+kluent = "1.73"
+test-runner = "1.5.2"
+test-rules = "1.5.0"
+core-testing = "2.2.0"
+# link
+meshlink = "3.0.1"
+
+[libraries]
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "core-testing" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "test-runner" }
+androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "test-rules" }
+
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+
+google-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kluent = { group = "org.amshove.kluent", name = "kluent-android", version.ref = "kluent" }
+
+meshconnect-link = { group = "com.meshconnect", name = "link", version.ref = "meshlink" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+jetbrains-dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+jlleitschuh-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+arturbosch-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
+vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
+jacoco = { id = "jacoco" }
+kotlin-parcelize = { id = "kotlin-parcelize" }
