@@ -20,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
@@ -41,6 +42,8 @@ import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
 import com.meshconnect.link.utils.windowInsetsController
+import financial.atomic.quantum.Quantum
+import kotlinx.coroutines.launch
 import java.net.URL
 
 internal class LinkActivity : AppCompatActivity() {
@@ -88,6 +91,7 @@ internal class LinkActivity : AppCompatActivity() {
 
     private val binding by viewBinding(LinkActivityBinding::inflate)
     private val viewModel by viewModel<LinkViewModel>(LinkViewModel.Factory())
+    private val quantum by lazy { Quantum(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -241,6 +245,8 @@ internal class LinkActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun openWebView(url: URL) {
+        val disableWhiteList = intent.getBooleanExtra(DISABLE_WHITELIST, false)
+
         binding.webView.apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
@@ -248,11 +254,7 @@ internal class LinkActivity : AppCompatActivity() {
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
             addJavascriptInterface(JSBridge { viewModel.onJsonReceived(it) }, JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
-            webViewClient =
-                WebClient(
-                    disableWhiteList = intent.getBooleanExtra(DISABLE_WHITELIST, false),
-                    linkHost = url.host,
-                )
+            webViewClient = WebClient(disableWhiteList, linkHost = url.host)
             webChromeClient = ChromeClient()
             loadUrl(url.toString())
         }
@@ -351,7 +353,19 @@ internal class LinkActivity : AppCompatActivity() {
             }
         }
 
-    private fun actionView(uri: Uri) =
+    private fun actionView(uri: Uri) {
+        if (uri.toString().contains("/true-auth")) {
+            lifecycleScope.launch {
+                binding.webViewContainer.removeAllViews()
+                val webView = WebView(this@LinkActivity)
+                webView.setBackgroundColor(Color.TRANSPARENT)
+                binding.webViewContainer.addView(webView)
+                quantum.initialize(webView, binding.webViewContainer)
+                quantum.goto(uri.toString())
+                binding.webViewContainer.visibility = ViewGroup.VISIBLE
+            }
+            return
+        }
         try {
             if (uri.host == CBW_HOST) {
                 val intent = packageManager.getLaunchIntentForPackage(CBW_PACKAGE_NAME)
@@ -369,6 +383,7 @@ internal class LinkActivity : AppCompatActivity() {
         } catch (expected: ActivityNotFoundException) {
             showToast(R.string.not_able_to_perform)
         }
+    }
 
     private fun startViewIntent(uri: Uri) {
         startActivity(Intent(Intent.ACTION_VIEW, uri))
