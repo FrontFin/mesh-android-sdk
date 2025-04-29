@@ -255,7 +255,7 @@ internal class LinkActivity : AppCompatActivity() {
             addJavascriptInterface(JSBridge { viewModel.onJsonReceived(it) }, JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
             webViewClient = WebClient(disableWhiteList, linkHost = url.host)
-            webChromeClient = ChromeClient()
+            webChromeClient = ChromeClient(linkHost = url.host)
             loadUrl(url.toString())
         }
     }
@@ -296,7 +296,7 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
-    inner class ChromeClient : WebChromeClient() {
+    inner class ChromeClient(private val linkHost: String,) : WebChromeClient() {
         private val target
             get() =
                 WebView(this@LinkActivity).apply {
@@ -307,7 +307,7 @@ internal class LinkActivity : AppCompatActivity() {
                                 request: WebResourceRequest?,
                             ): Boolean {
                                 if (request != null && !request.isRedirect) {
-                                    actionView(request.url)
+                                    actionView(request.url, linkHost)
                                 }
                                 // return 'true' to reject loading the url by WebView
                                 return true
@@ -325,7 +325,7 @@ internal class LinkActivity : AppCompatActivity() {
 
             return when {
                 !url.isNullOrBlank() -> {
-                    actionView(Uri.parse(url))
+                    actionView(Uri.parse(url), linkHost)
                     false
                 }
 
@@ -353,8 +353,8 @@ internal class LinkActivity : AppCompatActivity() {
             }
         }
 
-    private fun actionView(uri: Uri) {
-        if (uri.toString().contains("/true-auth")) {
+    private fun actionView(uri: Uri, linkHost: String) {
+        if (uri.host == linkHost && uri.toString().contains("/true-auth")) {
             lifecycleScope.launch {
                 binding.webViewContainer.removeAllViews()
                 val webView = WebView(this@LinkActivity)
