@@ -111,6 +111,15 @@ class DeserializeLinkMessageUseCaseTest : UseCaseTest() {
         }
 
     @Test
+    fun `test openTrueAuth`() =
+        runTest {
+            val jsType = JsType(Type.openTrueAuth)
+            mockkFromJson(JsType::class.java, jsType)
+            every { jsonConverter.toMap("") } returns mapOf("link" to "lorem-ipsum")
+            useCase.launch("") shouldBeEqualTo LinkEvent.TrueAuth("lorem-ipsum")
+        }
+
+    @Test
     fun `test error`() =
         runTest {
             val msg = randomString

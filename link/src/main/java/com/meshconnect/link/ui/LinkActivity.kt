@@ -24,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
+import com.meshconnect.link.converter.JsonConverter
 import com.meshconnect.link.databinding.LinkActivityBinding
 import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkEvent
@@ -153,15 +154,22 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         onBack()
     }
 
     private fun onBack() {
-        binding.webView.run {
-            when {
-                canGoBack() -> evaluateJavascript("window.history.go(-1)", null)
-                else -> finish()
+        if (binding.webViewContainer.isVisible) {
+            binding.webViewContainer.removeAllViews()
+            binding.webViewContainer.visibility = ViewGroup.GONE
+        } else {
+            binding.webView.run {
+                when {
+                    canGoBack() -> evaluateJavascript("window.history.go(-1)", null)
+                    else -> finish()
+                }
             }
         }
     }
@@ -184,6 +192,7 @@ internal class LinkActivity : AppCompatActivity() {
                 is LinkEvent.ShowClose -> showCloseDialog()
                 is LinkEvent.Loaded -> onLinkLoaded()
                 is LinkEvent.Payload -> Unit
+                is LinkEvent.TrueAuth -> openTrueAuth(event.link)
             }
         }
     }
@@ -255,7 +264,7 @@ internal class LinkActivity : AppCompatActivity() {
             addJavascriptInterface(JSBridge { viewModel.onJsonReceived(it) }, JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
             webViewClient = WebClient(disableWhiteList, linkHost = url.host)
-            webChromeClient = ChromeClient(linkHost = url.host)
+            webChromeClient = ChromeClient()
             loadUrl(url.toString())
         }
     }
@@ -296,7 +305,7 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
-    inner class ChromeClient(private val linkHost: String,) : WebChromeClient() {
+    inner class ChromeClient : WebChromeClient() {
         private val target
             get() =
                 WebView(this@LinkActivity).apply {
@@ -307,7 +316,7 @@ internal class LinkActivity : AppCompatActivity() {
                                 request: WebResourceRequest?,
                             ): Boolean {
                                 if (request != null && !request.isRedirect) {
-                                    actionView(request.url, linkHost)
+                                    actionView(request.url)
                                 }
                                 // return 'true' to reject loading the url by WebView
                                 return true
@@ -325,7 +334,7 @@ internal class LinkActivity : AppCompatActivity() {
 
             return when {
                 !url.isNullOrBlank() -> {
-                    actionView(Uri.parse(url), linkHost)
+                    actionView(Uri.parse(url))
                     false
                 }
 
@@ -353,19 +362,31 @@ internal class LinkActivity : AppCompatActivity() {
             }
         }
 
-    private fun actionView(uri: Uri, linkHost: String) {
-        if (uri.host == linkHost && uri.toString().contains("/true-auth")) {
-            lifecycleScope.launch {
-                binding.webViewContainer.removeAllViews()
-                val webView = WebView(this@LinkActivity)
-                webView.setBackgroundColor(Color.TRANSPARENT)
-                binding.webViewContainer.addView(webView)
-                quantum.initialize(webView, binding.webViewContainer)
-                quantum.goto(uri.toString())
-                binding.webViewContainer.visibility = ViewGroup.VISIBLE
+    private fun openTrueAuth(url: String) {
+        fun onEvent(ev: String) {
+            val map = JsonConverter.toMap(ev)
+            val type = map["type"]
+            val result = map["result"]
+            if (type == "trueAuthResult" && result != null) {
+                lifecycleScope.launch {
+                    binding.webView.evaluateJavascript("window.trueAuthResult='$result'", null)
+                }
             }
-            return
         }
+        val webView = WebView(this@LinkActivity)
+        webView.setBackgroundColor(Color.TRANSPARENT)
+        webView.addJavascriptInterface(JSBridge(::onEvent), JSBridge.NAME)
+        binding.webViewContainer.removeAllViews()
+        binding.webViewContainer.addView(webView)
+
+        lifecycleScope.launch {
+            quantum.initialize(webView, binding.webViewContainer)
+            quantum.goto(url)
+            binding.webViewContainer.visibility = ViewGroup.VISIBLE
+        }
+    }
+
+    private fun actionView(uri: Uri) {
         try {
             if (uri.host == CBW_HOST) {
                 val intent = packageManager.getLaunchIntentForPackage(CBW_PACKAGE_NAME)
