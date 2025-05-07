@@ -24,7 +24,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
-import com.meshconnect.link.converter.JsonConverter
 import com.meshconnect.link.databinding.LinkActivityBinding
 import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkEvent
@@ -32,6 +31,7 @@ import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.utils.alertDialog
 import com.meshconnect.link.utils.createURL
 import com.meshconnect.link.utils.decodeToken
+import com.meshconnect.link.utils.extractTrueAuthResult
 import com.meshconnect.link.utils.getLinkStyleFromLinkUrl
 import com.meshconnect.link.utils.getOnLoadedScript
 import com.meshconnect.link.utils.getParcelable
@@ -44,7 +44,9 @@ import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
 import com.meshconnect.link.utils.windowInsetsController
 import financial.atomic.quantum.Quantum
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.URL
 
 internal class LinkActivity : AppCompatActivity() {
@@ -362,20 +364,20 @@ internal class LinkActivity : AppCompatActivity() {
             }
         }
 
-    private fun openTrueAuth(url: String) {
-        fun onEvent(ev: String) {
-            val map = JsonConverter.toMap(ev)
-            val type = map["type"]
-            val result = map["result"]
-            if (type == "trueAuthResult" && result != null) {
-                lifecycleScope.launch {
-                    binding.webView.evaluateJavascript("window.trueAuthResult='$result'", null)
-                }
+    private fun onTrueAuthEvent(json: String) {
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                runCatching { extractTrueAuthResult(json) }
+            }.onSuccess {
+                binding.webView.evaluateJavascript("window.trueAuthResult='$it'", null)
             }
         }
+    }
+
+    private fun openTrueAuth(url: String) {
         val webView = WebView(this@LinkActivity)
         webView.setBackgroundColor(Color.TRANSPARENT)
-        webView.addJavascriptInterface(JSBridge(::onEvent), JSBridge.NAME)
+        webView.addJavascriptInterface(JSBridge(::onTrueAuthEvent), JSBridge.NAME)
         binding.webViewContainer.removeAllViews()
         binding.webViewContainer.addView(webView)
 
