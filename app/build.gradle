@@ -22,6 +22,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
         }
+        maven {
+            initWith release
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -36,8 +39,9 @@ android {
 }
 
 dependencies {
-    implementation project(':link')
-    //implementation(libs.mesh.link) { changing = true }
+    debugImplementation project(':link')
+    releaseImplementation project(':link')
+    mavenImplementation (libs.mesh.link) { changing = true }
     implementation libs.androidx.appcompat
     implementation libs.androidx.core.ktx
     implementation libs.androidx.lifecycle.runtime
