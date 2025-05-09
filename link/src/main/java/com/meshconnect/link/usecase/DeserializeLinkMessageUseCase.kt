@@ -36,6 +36,10 @@ internal class DeserializeLinkMessageUseCase(
                 val error = jsonConverter.fromJson(json, JsError::class.java)
                 error(error.errorMessage ?: "Error is not defined")
             }
+            Type.openTrueAuth -> {
+                val link = jsonConverter.toMap(json)["link"]
+                LinkEvent.TrueAuth(link.toString())
+            }
             else -> null
         }
     }

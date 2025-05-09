@@ -20,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
@@ -30,6 +31,7 @@ import com.meshconnect.link.entity.LinkPayload
 import com.meshconnect.link.utils.alertDialog
 import com.meshconnect.link.utils.createURL
 import com.meshconnect.link.utils.decodeToken
+import com.meshconnect.link.utils.extractTrueAuthResult
 import com.meshconnect.link.utils.getLinkStyleFromLinkUrl
 import com.meshconnect.link.utils.getOnLoadedScript
 import com.meshconnect.link.utils.getParcelable
@@ -41,6 +43,10 @@ import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
 import com.meshconnect.link.utils.windowInsetsController
+import financial.atomic.quantum.Quantum
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.URL
 
 internal class LinkActivity : AppCompatActivity() {
@@ -88,6 +94,7 @@ internal class LinkActivity : AppCompatActivity() {
 
     private val binding by viewBinding(LinkActivityBinding::inflate)
     private val viewModel by viewModel<LinkViewModel>(LinkViewModel.Factory())
+    private val quantum by lazy { Quantum(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -149,15 +156,22 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         onBack()
     }
 
     private fun onBack() {
-        binding.webView.run {
-            when {
-                canGoBack() -> evaluateJavascript("window.history.go(-1)", null)
-                else -> finish()
+        if (binding.webViewContainer.isVisible) {
+            binding.webViewContainer.removeAllViews()
+            binding.webViewContainer.visibility = ViewGroup.GONE
+        } else {
+            binding.webView.run {
+                when {
+                    canGoBack() -> evaluateJavascript("window.history.go(-1)", null)
+                    else -> finish()
+                }
             }
         }
     }
@@ -180,6 +194,7 @@ internal class LinkActivity : AppCompatActivity() {
                 is LinkEvent.ShowClose -> showCloseDialog()
                 is LinkEvent.Loaded -> onLinkLoaded()
                 is LinkEvent.Payload -> Unit
+                is LinkEvent.TrueAuth -> openTrueAuth(event.link)
             }
         }
     }
@@ -241,6 +256,8 @@ internal class LinkActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun openWebView(url: URL) {
+        val disableWhiteList = intent.getBooleanExtra(DISABLE_WHITELIST, false)
+
         binding.webView.apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
@@ -248,11 +265,7 @@ internal class LinkActivity : AppCompatActivity() {
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
             addJavascriptInterface(JSBridge { viewModel.onJsonReceived(it) }, JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
-            webViewClient =
-                WebClient(
-                    disableWhiteList = intent.getBooleanExtra(DISABLE_WHITELIST, false),
-                    linkHost = url.host,
-                )
+            webViewClient = WebClient(disableWhiteList, linkHost = url.host)
             webChromeClient = ChromeClient()
             loadUrl(url.toString())
         }
@@ -351,7 +364,31 @@ internal class LinkActivity : AppCompatActivity() {
             }
         }
 
-    private fun actionView(uri: Uri) =
+    private fun onTrueAuthEvent(json: String) {
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                runCatching { extractTrueAuthResult(json) }
+            }.onSuccess {
+                binding.webView.evaluateJavascript("window.trueAuthResult='$it'", null)
+            }
+        }
+    }
+
+    private fun openTrueAuth(url: String) {
+        val webView = WebView(this@LinkActivity)
+        webView.setBackgroundColor(Color.TRANSPARENT)
+        webView.addJavascriptInterface(JSBridge(::onTrueAuthEvent), JSBridge.NAME)
+        binding.webViewContainer.removeAllViews()
+        binding.webViewContainer.addView(webView)
+
+        lifecycleScope.launch {
+            quantum.initialize(webView, binding.webViewContainer)
+            quantum.goto(url)
+            binding.webViewContainer.visibility = ViewGroup.VISIBLE
+        }
+    }
+
+    private fun actionView(uri: Uri) {
         try {
             if (uri.host == CBW_HOST) {
                 val intent = packageManager.getLaunchIntentForPackage(CBW_PACKAGE_NAME)
@@ -369,6 +406,7 @@ internal class LinkActivity : AppCompatActivity() {
         } catch (expected: ActivityNotFoundException) {
             showToast(R.string.not_able_to_perform)
         }
+    }
 
     private fun startViewIntent(uri: Uri) {
         startActivity(Intent(Intent.ACTION_VIEW, uri))

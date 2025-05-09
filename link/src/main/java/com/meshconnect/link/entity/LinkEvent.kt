@@ -1,13 +1,15 @@
 package com.meshconnect.link.entity
 
 internal sealed interface LinkEvent {
-    object Done : LinkEvent
+    data object Done : LinkEvent
 
-    object Close : LinkEvent
+    data object Close : LinkEvent
 
-    object ShowClose : LinkEvent
+    data object ShowClose : LinkEvent
 
-    object Loaded : LinkEvent
+    data object Loaded : LinkEvent
+
+    data class TrueAuth(val link: String) : LinkEvent
 
     data class Payload(val payload: LinkPayload) : LinkEvent
 }

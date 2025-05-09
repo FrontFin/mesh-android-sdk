@@ -16,10 +16,10 @@ apply from: 'version.gradle'
 android {
     namespace 'com.meshconnect.link'
 
-    compileSdk 33
+    compileSdk 34
     defaultConfig {
         minSdk 24
-        targetSdk 33
+        targetSdk 34
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro'
         versionCode 1
@@ -68,6 +68,7 @@ dependencies {
     implementation libs.google.material
     implementation libs.google.gson
     implementation libs.kotlinx.coroutines.core
+    implementation libs.atomic.quantum
 
     testImplementation libs.junit
     testImplementation libs.mockk

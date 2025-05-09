@@ -8,10 +8,10 @@ apply from: "$rootDir/detekt.gradle"
 android {
     namespace 'com.meshconnect.android'
 
-    compileSdk 33
+    compileSdk 34
     defaultConfig {
         minSdk 26
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -21,6 +21,9 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
+        }
+        maven {
+            initWith release
         }
     }
     compileOptions {
@@ -36,8 +39,9 @@ android {
 }
 
 dependencies {
-    implementation project(':link')
-    //implementation(libs.meshconnect.link) { changing = true }
+    debugImplementation project(':link')
+    releaseImplementation project(':link')
+    mavenImplementation (libs.mesh.link) { changing = true }
     implementation libs.androidx.appcompat
     implementation libs.androidx.core.ktx
     implementation libs.androidx.lifecycle.runtime

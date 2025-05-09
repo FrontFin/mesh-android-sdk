@@ -14,6 +14,7 @@ internal enum class Type {
     transferFinished,
     loaded,
     delayedAuthentication,
+    openTrueAuth,
 }
 
 internal data class JsError(
