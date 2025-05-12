@@ -19,7 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
--repackageclasses 'com.meshconnect.link'
+-flattenpackagehierarchy com.meshconnect.link
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt # core serialization annotations
 
 -keep class com.meshconnect.link.entity.** { *; }
 -keep class com.meshconnect.link.ui.LaunchLink { *; }
