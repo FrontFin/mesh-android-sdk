@@ -16,8 +16,8 @@
 
         <activity
             android:name=".LinkExampleActivity"
-            android:windowSoftInputMode="stateAlwaysVisible"
-            android:exported="true">
+            android:exported="true"
+            android:windowSoftInputMode="stateAlwaysVisible">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
