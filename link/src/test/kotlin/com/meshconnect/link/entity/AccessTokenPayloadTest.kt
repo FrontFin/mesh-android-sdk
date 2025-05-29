@@ -69,10 +69,18 @@ class AccessTokenPayloadTest {
     fun `test BrandInfo`() {
         val logo = randomString
         val color = randomString
+        val logoLightUrl = randomString
+        val logoDarkUrl = randomString
+        val iconLightUrl = randomString
+        val iconDarkUrl = randomString
 
-        val it = BrandInfo(logo, color)
+        val it = BrandInfo(logo, color, logoLightUrl, logoDarkUrl, iconLightUrl, iconDarkUrl)
 
         assertEquals(logo, it.brokerLogo)
         assertEquals(color, it.brokerPrimaryColor)
+        assertEquals(logoLightUrl, it.logoLightUrl)
+        assertEquals(logoDarkUrl, it.logoDarkUrl)
+        assertEquals(iconLightUrl, it.iconLightUrl)
+        assertEquals(iconDarkUrl, it.iconDarkUrl)
     }
 }

@@ -22,6 +22,10 @@ class AccessTokenPayloadDeserializeTest {
                     BrandInfo(
                         brokerLogo = "iVBORwxxxxxSUhEUgAAA",
                         brokerPrimaryColor = "#FFF",
+                        logoLightUrl = "http://logoLightUrl",
+                        logoDarkUrl = "http://logoDarkUrl",
+                        iconLightUrl = "http://iconLightUrl",
+                        iconDarkUrl = "http://iconDarkUrl",
                     ),
                 expiresInSeconds = 200,
                 refreshTokenExpiresInSeconds = 300,

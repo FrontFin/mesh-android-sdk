@@ -15,7 +15,11 @@
     "brokerName": "Alpaca",
     "brokerBrandInfo": {
       "brokerLogo": "iVBORwxxxxxSUhEUgAAA",
-      "brokerPrimaryColor": "#FFF"
+      "brokerPrimaryColor": "#FFF",
+      "logoLightUrl": "http://logoLightUrl",
+      "logoDarkUrl": "http://logoDarkUrl",
+      "iconLightUrl": "http://iconLightUrl",
+      "iconDarkUrl": "http://iconDarkUrl"
     },
   "expiresInSeconds": 200,
   "refreshTokenExpiresInSeconds": 300
