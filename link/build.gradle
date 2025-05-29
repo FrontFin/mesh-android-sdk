@@ -11,7 +11,8 @@ apply from: "$rootDir/detekt.gradle"
 apply from: 'jacoco.gradle'
 apply from: 'sonar.gradle'
 apply from: "secrets.gradle"
-apply from: 'version.gradle'
+
+def MESH_VERSION = libs.versions.mesh.link.get()
 
 android {
     namespace 'com.meshconnect.link'
@@ -41,7 +42,7 @@ android {
         viewBinding true
     }
     defaultConfig {
-        buildConfigField "String", "VERSION", "\"$publishVersion\""
+        buildConfigField "String", "VERSION", "\"$MESH_VERSION\""
     }
     // see https://googlesamples.github.io/android-custom-lint-rules/user-guide.md.html#lintgradleplugindsl
     // and https://googlesamples.github.io/android-custom-lint-rules/user-guide.md.html#performancetuning
@@ -98,8 +99,8 @@ mavenPublishing {
     // sing publication
     signAllPublications()
     // define group, artifact and version
-    // the version is taken from `link/version.gradle` file
-    coordinates('com.meshconnect', 'link', publishVersion)
+    // the version is taken from gradle/libs.versions.toml file
+    coordinates('com.meshconnect', 'link', MESH_VERSION)
 
     pom {
         name = 'Mesh Connect Android SDK'
