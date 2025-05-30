@@ -47,6 +47,6 @@ jobs:
 
       - name: Push git tag ☀️
         run: |
-          NEW_TAG=$(grep "publishVersion" link/version.gradle | cut -d '=' -f2 | xargs)
+          NEW_TAG=$(grep "mesh-link" gradle/libs.versions.toml -m 1 | cut -d "=" -f2 | xargs)
           git tag $NEW_TAG
           git push origin $NEW_TAG

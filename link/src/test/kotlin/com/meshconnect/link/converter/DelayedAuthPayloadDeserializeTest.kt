@@ -23,6 +23,10 @@ class DelayedAuthPayloadDeserializeTest {
                     BrandInfo(
                         brokerLogo = "iVB2RSUhEUgAAA",
                         brokerPrimaryColor = "#FFF",
+                        logoLightUrl = "http://logoLightUrl",
+                        logoDarkUrl = "http://logoDarkUrl",
+                        iconLightUrl = "http://iconLightUrl",
+                        iconDarkUrl = "http://iconDarkUrl",
                     ),
             )
         assertEquals(expected, actual)

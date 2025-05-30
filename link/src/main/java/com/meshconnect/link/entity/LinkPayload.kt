@@ -41,6 +41,10 @@ data class Account(
 data class BrandInfo(
     val brokerLogo: String?,
     val brokerPrimaryColor: String?,
+    val logoLightUrl: String?,
+    val logoDarkUrl: String?,
+    val iconLightUrl: String?,
+    val iconDarkUrl: String?,
 ) : Parcelable
 
 /**

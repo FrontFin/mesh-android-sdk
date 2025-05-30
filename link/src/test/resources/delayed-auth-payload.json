@@ -5,6 +5,10 @@
   "brokerName": "Alpacas",
   "brokerBrandInfo": {
     "brokerLogo": "iVB2RSUhEUgAAA",
-    "brokerPrimaryColor": "#FFF"
+    "brokerPrimaryColor": "#FFF",
+    "logoLightUrl": "http://logoLightUrl",
+    "logoDarkUrl": "http://logoDarkUrl",
+    "iconLightUrl": "http://iconLightUrl",
+    "iconDarkUrl": "http://iconDarkUrl"
   }
 }
