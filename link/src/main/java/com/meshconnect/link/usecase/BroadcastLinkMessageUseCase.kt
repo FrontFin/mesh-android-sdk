@@ -51,6 +51,12 @@ internal object FilterLinkMessage {
             "transferNetworkSelected",
             "connectionUnavailable",
             "transferDeclined",
+            "legalTermsViewed",
+            "seeWhatHappenedClicked",
+            "executeFundingStep",
+            "fundingOptionsUpdated",
+            "fundingOptionsViewed",
+            "gasIncreaseWarning",
         )
 
     fun filter(map: Map<String, *>): Map<String, *>? {
