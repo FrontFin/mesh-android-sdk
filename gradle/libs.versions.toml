@@ -5,7 +5,7 @@ kotlin = "1.9.0"
 ktlint = "12.1.2"
 dokka = "1.7.20"
 detekt = "1.19.0"
-sonarqube = "4.4.0.3356"
+sonarqube = "6.2.0.5505"
 maven-publish = "0.30.0"
 # libraries
 appcompat = "1.7.0"

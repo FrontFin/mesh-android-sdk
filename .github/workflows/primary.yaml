@@ -17,7 +17,7 @@ jobs:
       - name: Setup Java ♨️
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: 17
 
       - name: Setup Android SDK 🎁
@@ -35,6 +35,7 @@ jobs:
       - name: Run sonar ✅
         run: ./gradlew link:sonar
         env:
-          ORG_GRADLE_PROJECT_sonarProjectKey: ${{ secrets.SONAR_PROJECT_KEY }}
-          ORG_GRADLE_PROJECT_sonarHostUrl: ${{ secrets.SONAR_HOST_URL }}
-          ORG_GRADLE_PROJECT_sonarLogin: ${{ secrets.SONAR_LOGIN }}
+          ORG_GRADLE_PROJECT_sonarProjectKey: ${{ vars.SONAR_PROJECT_KEY }}
+          ORG_GRADLE_PROJECT_sonarOrganization: ${{ vars.SONAR_ORGANIZATION }}
+          ORG_GRADLE_PROJECT_sonarHostUrl: ${{ vars.SONAR_HOST_URL }}
+          ORG_GRADLE_PROJECT_sonarToken: ${{ secrets.SONAR_TOKEN }}
