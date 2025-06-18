@@ -4,8 +4,9 @@ sonar {
     properties {
         property 'sonar.gradle.skipCompile', true
         property 'sonar.projectKey', sonarProjectKey
+        property 'sonar.organization', sonarOrganization
         property 'sonar.host.url', sonarHostUrl
-        property 'sonar.login', sonarLogin
+        property 'sonar.token', sonarToken
         property 'sonar.projectVersion', android.defaultConfig.versionCode
         property 'sonar.projectName', 'mesh-android-sdk/link'
         property 'sonar.projectDescription', 'Mesh Connect Android SDK'
