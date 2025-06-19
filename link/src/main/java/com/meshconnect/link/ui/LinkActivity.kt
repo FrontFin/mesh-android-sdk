@@ -376,11 +376,12 @@ internal class LinkActivity : AppCompatActivity() {
     }
 
     private fun openTrueAuth(url: String) {
-        val webView = WebView(this@LinkActivity).apply {
-            setBackgroundColor(Color.TRANSPARENT)
-            addJavascriptInterface(JSBridge(::onTrueAuthEvent), JSBridge.NAME)
-            settings.cacheMode = WebSettings.LOAD_NO_CACHE
-        }
+        val webView =
+            WebView(this@LinkActivity).apply {
+                setBackgroundColor(Color.TRANSPARENT)
+                addJavascriptInterface(JSBridge(::onTrueAuthEvent), JSBridge.NAME)
+                settings.cacheMode = WebSettings.LOAD_NO_CACHE
+            }
         binding.webViewContainer.removeAllViews()
         binding.webViewContainer.addView(webView)
         CookieManager.getInstance().removeSessionCookies(null)
