@@ -11,6 +11,7 @@ import android.os.Message
 import android.util.Log
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -375,14 +376,17 @@ internal class LinkActivity : AppCompatActivity() {
     }
 
     private fun openTrueAuth(url: String) {
-        val webView = WebView(this@LinkActivity)
-        webView.setBackgroundColor(Color.TRANSPARENT)
-        webView.addJavascriptInterface(JSBridge(::onTrueAuthEvent), JSBridge.NAME)
+        val webView =
+            WebView(this@LinkActivity).apply {
+                setBackgroundColor(Color.TRANSPARENT)
+                addJavascriptInterface(JSBridge(::onTrueAuthEvent), JSBridge.NAME)
+                settings.cacheMode = WebSettings.LOAD_NO_CACHE
+            }
         binding.webViewContainer.removeAllViews()
         binding.webViewContainer.addView(webView)
-
+        CookieManager.getInstance().removeSessionCookies(null)
+        quantum.initialize(webView, binding.webViewContainer)
         lifecycleScope.launch {
-            quantum.initialize(webView, binding.webViewContainer)
             quantum.goto(url)
             binding.webViewContainer.visibility = ViewGroup.VISIBLE
         }
