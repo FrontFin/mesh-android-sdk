@@ -129,3 +129,50 @@ lifecycleScope.launch {
   LinkEvents.collect { /* use event */ }
 }
 ```
+
+## Deeplink navigation (recommended solution)
+
+Standard deep links always create a new task or activity, unless you handle the back stack yourself.
+To resume the previous state, consider these steps:
+
+1. Define a custom URI scheme that is handled by a "No-op" activity.
+2. No-op activity checks if the app is already running. If so, it finishes itself.
+
+AndroidManifest.xml:
+```xml
+<activity
+    android:name=".DeepLinkEntryActivity"
+    android:exported="true"
+    android:theme="@android:style/Theme.Translucent.NoTitleBar">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="myapp" />
+    </intent-filter>
+</activity>
+```
+
+DeepLinkEntryActivity.kt:
+```kotlin
+class DeepLinkEntryActivity : Activity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Check if app is already running
+        packageManager.getLaunchIntentForPackage(packageName)?.run {
+            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            startActivity(this)
+        }
+        finish()
+    }
+}
+```
+
+Test deeplink:
+```shell
+adb shell am start -a android.intent.action.VIEW -d "myapp://"
+```
+
+When triggered:
+- If your app is in the background: it’s brought to the foreground.
+- If it’s not running: the default launcher activity is opened.
