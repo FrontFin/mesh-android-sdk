@@ -195,7 +195,7 @@ internal class LinkActivity : AppCompatActivity() {
                 is LinkEvent.ShowClose -> showCloseDialog()
                 is LinkEvent.Loaded -> onLinkLoaded()
                 is LinkEvent.Payload -> Unit
-                is LinkEvent.TrueAuth -> openTrueAuth(event.link)
+                is LinkEvent.TrueAuth -> openTrueAuth(event)
             }
         }
     }
@@ -375,9 +375,10 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
-    private fun openTrueAuth(url: String) {
+    private fun openTrueAuth(event: LinkEvent.TrueAuth) {
+        val context = this@LinkActivity
         val webView =
-            WebView(this@LinkActivity).apply {
+            WebView(context).apply {
                 setBackgroundColor(Color.TRANSPARENT)
                 addJavascriptInterface(JSBridge(::onTrueAuthEvent), JSBridge.NAME)
                 settings.cacheMode = WebSettings.LOAD_NO_CACHE
@@ -385,9 +386,9 @@ internal class LinkActivity : AppCompatActivity() {
         binding.webViewContainer.removeAllViews()
         binding.webViewContainer.addView(webView)
         CookieManager.getInstance().removeSessionCookies(null)
-        quantum.initialize(webView, binding.webViewContainer)
         lifecycleScope.launch {
-            quantum.goto(url)
+            quantum.initialize(event.atomicToken, webView, binding.webViewContainer)
+            quantum.goto(event.link)
             binding.webViewContainer.visibility = ViewGroup.VISIBLE
         }
     }
