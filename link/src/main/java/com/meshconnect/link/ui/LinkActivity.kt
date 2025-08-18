@@ -132,18 +132,8 @@ internal class LinkActivity : AppCompatActivity() {
                 "system" -> isSystemDarkTheme()
                 else -> false
             }
-
-        val topColor =
-            when {
-                isDarkTheme -> getColor(R.color.coldGray70)
-                else -> getColor(R.color.coldGray0)
-            }
-
-        val bottomColor =
-            when {
-                isDarkTheme -> getColor(R.color.gray80)
-                else -> getColor(R.color.gray0)
-            }
+        val topColor = getColor(if (isDarkTheme) R.color.coldGray70 else R.color.coldGray0)
+        val bottomColor = getColor(if (isDarkTheme) R.color.gray80 else R.color.gray0)
 
         findViewById<ViewGroup>(android.R.id.content).setBackgroundColor(bottomColor)
 
@@ -303,8 +293,7 @@ internal class LinkActivity : AppCompatActivity() {
                     disableWhiteList -> request.url.scheme != "https"
                     else -> !isUrlWhitelisted(request.url.toString(), request.url.host.orEmpty())
                 }
-            // return 'true' to reject loading the url by WebView
-            return override
+            return override // reject loading the url by WebView
         }
     }
 
@@ -321,8 +310,7 @@ internal class LinkActivity : AppCompatActivity() {
                                 if (request != null && !request.isRedirect) {
                                     actionView(request.url)
                                 }
-                                // return 'true' to reject loading the url by WebView
-                                return true
+                                return true // reject loading the url by WebView
                             }
                         }
                 }
@@ -334,19 +322,16 @@ internal class LinkActivity : AppCompatActivity() {
             resultMsg: Message?,
         ): Boolean {
             val url = view?.hitTestResult?.extra
-
             return when {
                 !url.isNullOrBlank() -> {
                     actionView(Uri.parse(url))
                     false
                 }
-
                 resultMsg != null -> {
                     (resultMsg.obj as WebView.WebViewTransport).webView = target
                     resultMsg.sendToTarget()
                     true
                 }
-
                 else -> false
             }
         }
@@ -376,9 +361,8 @@ internal class LinkActivity : AppCompatActivity() {
     }
 
     private fun openTrueAuth(event: LinkEvent.TrueAuth) {
-        val context = this@LinkActivity
         val webView =
-            WebView(context).apply {
+            WebView(this@LinkActivity).apply {
                 setBackgroundColor(Color.TRANSPARENT)
                 addJavascriptInterface(JSBridge(::onTrueAuthEvent), JSBridge.NAME)
                 settings.cacheMode = WebSettings.LOAD_NO_CACHE
@@ -387,9 +371,13 @@ internal class LinkActivity : AppCompatActivity() {
         binding.webViewContainer.addView(webView)
         CookieManager.getInstance().removeSessionCookies(null)
         lifecycleScope.launch {
-            quantum.initialize(event.atomicToken, webView, binding.webViewContainer)
-            quantum.goto(event.link)
-            binding.webViewContainer.visibility = ViewGroup.VISIBLE
+            try {
+                quantum.initialize(event.atomicToken, webView, binding.webViewContainer)
+                quantum.goto(event.link)
+                binding.webViewContainer.visibility = ViewGroup.VISIBLE
+            } catch (expected: Exception) {
+                showToast(R.string.not_able_to_perform)
+            }
         }
     }
 

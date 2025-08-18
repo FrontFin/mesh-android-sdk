@@ -37,9 +37,9 @@ internal class DeserializeLinkMessageUseCase(
                 error(error.errorMessage ?: "Error is not defined")
             }
             Type.openTrueAuth -> {
-                val map = jsonConverter.toMap(json)
-                val link = map["link"].toString()
-                val atomicToken = map["atomicToken"].toString()
+                val props = jsonConverter.toMap(json)
+                val link = props["link"].toString()
+                val atomicToken = props["atomicToken"].toString()
                 LinkEvent.TrueAuth(link, atomicToken)
             }
             else -> null
