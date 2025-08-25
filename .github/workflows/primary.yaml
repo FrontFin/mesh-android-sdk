@@ -26,8 +26,8 @@ jobs:
       - name: Run code quality checks 🧹
         run: ./gradlew link:ktlintCheck link:detekt link:lintRelease
 
-      - name: Run tests & coverage 🥁
-        run: ./gradlew link:jacocoTestReport link:jacocoCoverageVerification
+      - name: Run tests & coverage verification 🥁
+        run: ./gradlew link:jacocoCoverageVerification
 
       - name: Build 🧩
         run: ./gradlew link:assembleRelease
