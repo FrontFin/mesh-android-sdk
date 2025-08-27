@@ -1,7 +1,7 @@
 [versions]
 # plugins
-agp = "8.3.2"
-kotlin = "1.9.0"
+agp = "8.6.1"
+kotlin = "2.1.0"
 ktlint = "12.1.2"
 dokka = "1.7.20"
 detekt = "1.19.0"
@@ -14,7 +14,7 @@ coroutines = "1.6.3"
 lifecycle = "2.5.1"
 material = "1.12.0"
 gson = "2.11.0"
-atomic-quantum = "0.0.3"
+atomic-quantum = "0.0.5"
 # testing
 junit = "4.13.2"
 mockk = "1.13.7"
@@ -23,7 +23,7 @@ test-runner = "1.6.2"
 test-rules = "1.6.1"
 core-testing = "2.2.0"
 # link
-mesh-link = "3.1.1"
+mesh-link = "3.1.2"
 
 [libraries]
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }

@@ -27,9 +27,9 @@ class DeserializeLinkMessageUseCaseTest : UseCaseTest() {
 
     private inline fun <reified T> mockkFromJson(
         classOfT: Class<T>,
-        returnValue: T,
+        value: T,
     ) {
-        every { jsonConverter.fromJson(any(), classOfT) } returns returnValue
+        every { jsonConverter.fromJson(any(), classOfT) } returns value
     }
 
     private fun mockkJsType(type: Type?) {
@@ -113,10 +113,13 @@ class DeserializeLinkMessageUseCaseTest : UseCaseTest() {
     @Test
     fun `test openTrueAuth`() =
         runTest {
-            val jsType = JsType(Type.openTrueAuth)
-            mockkFromJson(JsType::class.java, jsType)
-            every { jsonConverter.toMap("") } returns mapOf("link" to "lorem-ipsum")
-            useCase.launch("") shouldBeEqualTo LinkEvent.TrueAuth("lorem-ipsum")
+            mockkFromJson(JsType::class.java, JsType(Type.openTrueAuth))
+            every { jsonConverter.toMap(any()) } returns
+                mapOf(
+                    "link" to "lorem-ipsum",
+                    "atomicToken" to "0sd23Dx",
+                )
+            useCase.launch("") shouldBeEqualTo LinkEvent.TrueAuth("lorem-ipsum", "0sd23Dx")
         }
 
     @Test

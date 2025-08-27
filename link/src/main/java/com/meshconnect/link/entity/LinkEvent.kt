@@ -9,7 +9,7 @@ internal sealed interface LinkEvent {
 
     data object Loaded : LinkEvent
 
-    data class TrueAuth(val link: String) : LinkEvent
+    data class TrueAuth(val link: String, val atomicToken: String) : LinkEvent
 
     data class Payload(val payload: LinkPayload) : LinkEvent
 }

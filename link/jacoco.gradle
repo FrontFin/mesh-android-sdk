@@ -1,7 +1,7 @@
 apply plugin: 'jacoco'
 
 jacoco {
-    toolVersion '0.8.10'
+    toolVersion '0.8.11'
 }
 
 tasks.withType(Test).configureEach {
@@ -9,43 +9,35 @@ tasks.withType(Test).configureEach {
     jacoco.excludes = ['jdk.internal.*']
 }
 
-def buildDir = layout.buildDirectory
-
-def classDirs = fileTree("$buildDir/tmp/kotlin-classes/release")
-
-def sourceDirs = files("$projectDir/src/main/java")
-
-def executionDirs = files("$buildDir/jacoco/testReleaseUnitTest.exec")
+def classDir = files("build/tmp/kotlin-classes/debug/com")
+def sourceDir = files('src/main/java')
+def execFile = files('build/jacoco/testDebugUnitTest.exec')
 
 tasks.register('jacocoTestReport', JacocoReport) {
-    dependsOn 'testReleaseUnitTest'
+    dependsOn 'testDebugUnitTest'
     group = "Reporting"
-    description = "Code coverage report for Android & Unit tests."
-
+    description = "Generation of code coverage report."
     reports {
         html.required = true
         xml.required = true
     }
-
-    classDirectories.from(classDirs)
-    sourceDirectories.from(sourceDirs)
-    executionData.from(executionDirs)
+    classDirectories = classDir
+    sourceDirectories = sourceDir
+    executionData = execFile
 }
 
 tasks.register('jacocoCoverageVerification', JacocoCoverageVerification) {
-    dependsOn 'testReleaseUnitTest'
+    dependsOn 'testDebugUnitTest'
     group = "Verification"
-    description = "Code coverage verification for Android & Unit tests."
-
+    description = "Verification of code coverage level."
     violationRules {
         rule {
             limit {
-                minimum = 0.3
+                minimum = 0.45
             }
         }
     }
-
-    classDirectories.from(classDirs)
-    sourceDirectories.from(sourceDirs)
-    executionData.from(executionDirs)
+    classDirectories = classDir
+    sourceDirectories = sourceDir
+    executionData = execFile
 }
