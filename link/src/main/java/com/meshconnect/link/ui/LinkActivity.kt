@@ -321,7 +321,7 @@ internal class LinkActivity : AppCompatActivity() {
             isUserGesture: Boolean,
             resultMsg: Message?,
         ): Boolean {
-            if(resultMsg != null) {
+            if (resultMsg != null) {
                 (resultMsg.obj as WebView.WebViewTransport).webView = target
                 resultMsg.sendToTarget()
                 return true
