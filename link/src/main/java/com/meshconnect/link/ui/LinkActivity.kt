@@ -321,19 +321,12 @@ internal class LinkActivity : AppCompatActivity() {
             isUserGesture: Boolean,
             resultMsg: Message?,
         ): Boolean {
-            val url = view?.hitTestResult?.extra
-            return when {
-                !url.isNullOrBlank() -> {
-                    actionView(Uri.parse(url))
-                    false
-                }
-                resultMsg != null -> {
-                    (resultMsg.obj as WebView.WebViewTransport).webView = target
-                    resultMsg.sendToTarget()
-                    true
-                }
-                else -> false
+            if (resultMsg != null) {
+                (resultMsg.obj as WebView.WebViewTransport).webView = target
+                resultMsg.sendToTarget()
+                return true
             }
+            return false
         }
     }
 
