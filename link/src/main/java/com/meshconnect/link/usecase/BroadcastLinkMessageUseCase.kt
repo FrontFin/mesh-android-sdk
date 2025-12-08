@@ -57,6 +57,8 @@ internal object FilterLinkMessage {
             "fundingOptionsUpdated",
             "fundingOptionsViewed",
             "gasIncreaseWarning",
+            "linkTransferQRGenerated",
+            "methodSelected",
         )
 
     fun filter(map: Map<String, *>): Map<String, *>? {
