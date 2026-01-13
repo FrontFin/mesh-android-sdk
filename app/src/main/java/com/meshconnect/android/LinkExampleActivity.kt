@@ -2,6 +2,7 @@ package com.meshconnect.android
 
 import android.os.Bundle
 import android.util.Log
+import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.meshconnect.android.databinding.LinkExampleActivityBinding
@@ -26,7 +27,7 @@ class LinkExampleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
+        WebView.setWebContentsDebuggingEnabled(true)
         // Subscribe for payloads
         lifecycleScope.launch {
             LinkPayloads.collect {
