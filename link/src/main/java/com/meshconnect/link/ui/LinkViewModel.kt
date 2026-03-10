@@ -16,6 +16,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 internal class LinkViewModel(
@@ -31,6 +33,8 @@ internal class LinkViewModel(
     internal var error: Throwable? = null
         private set
 
+    private val mutex = Mutex()
+
     private val exceptionHandler =
         CoroutineExceptionHandler { _, exception ->
             error = exception
@@ -39,19 +43,21 @@ internal class LinkViewModel(
 
     fun onJsonReceived(json: String) {
         viewModelScope.launch(exceptionHandler) {
-            withContext(dispatcher) {
-                runCatching { broadcastLinkMessageUseCase.launch(json) }
-                runCatching { deserializeLinkMessageUseCase.launch(json) }
-            }.onSuccess {
-                if (it is LinkEvent.Payload) {
-                    _payloads.add(it.payload)
-                    error = null
-                    payloadEmitter.emit(it.payload)
-                }
-                if (it != null) {
-                    linkEvent.emit(it)
-                }
-            }.onFailure { throw it }
+            mutex.withLock {
+                withContext(dispatcher) {
+                    runCatching { broadcastLinkMessageUseCase.launch(json) }
+                    runCatching { deserializeLinkMessageUseCase.launch(json) }
+                }.onSuccess {
+                    if (it is LinkEvent.Payload) {
+                        _payloads.add(it.payload)
+                        error = null
+                        payloadEmitter.emit(it.payload)
+                    }
+                    if (it != null) {
+                        linkEvent.emit(it)
+                    }
+                }.onFailure { throw it }
+            }
         }
     }
 
