@@ -18,6 +18,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEmpty
+import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldContainSame
 import org.junit.Test
 
@@ -132,7 +133,8 @@ class LinkViewModelTest : ViewModelTest() {
             val payloadJson = "payload_json"
             val doneJson = "done_json"
             val payload: LinkPayload = mockk()
-            val eventObserver = vm.linkEvent.testObserver()
+            val capturedEvents = mutableListOf<LinkEvent>()
+            vm.linkEvent.observeForever { it.consume { e -> capturedEvents.add(e) } }
 
             // transferFinished IO is slow
             coEvery { deserializeLinkMessageUseCase.launch(payloadJson) } coAnswers {
@@ -155,7 +157,8 @@ class LinkViewModelTest : ViewModelTest() {
             advanceUntilIdle()
 
             vm.payloads.shouldContainSame(listOf(payload))
-            eventObserver.shouldContainEvents(LinkEvent.Payload(payload), LinkEvent.Done)
+            // Payload must be emitted before Done — order matters
+            capturedEvents shouldBeEqualTo listOf(LinkEvent.Payload(payload), LinkEvent.Done)
         }
 
     @Test
