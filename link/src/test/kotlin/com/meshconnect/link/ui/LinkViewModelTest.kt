@@ -12,6 +12,9 @@ import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.just
 import io.mockk.mockk
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEmpty
@@ -113,6 +116,47 @@ class LinkViewModelTest : ViewModelTest() {
         viewModel.error shouldBe exception
         eventObserver.shouldBeEmpty()
     }
+
+    @Test
+    fun `verify payload is collected before done event when done IO completes first`() =
+        runTest {
+            val testDispatcher = StandardTestDispatcher(testScheduler)
+            val vm =
+                LinkViewModel(
+                    testDispatcher,
+                    deserializeLinkMessageUseCase,
+                    payloadEmitter,
+                    broadcastLinkMessageUseCase,
+                )
+
+            val payloadJson = "payload_json"
+            val doneJson = "done_json"
+            val payload: LinkPayload = mockk()
+            val eventObserver = vm.linkEvent.testObserver()
+
+            // transferFinished IO is slow
+            coEvery { deserializeLinkMessageUseCase.launch(payloadJson) } coAnswers {
+                delay(100)
+                LinkEvent.Payload(payload)
+            }
+            coEvery { broadcastLinkMessageUseCase.launch(payloadJson) } just Runs
+            coEvery { payloadEmitter.emit(payload) } just Runs
+
+            // done IO completes faster — would win the race without the mutex
+            coEvery { deserializeLinkMessageUseCase.launch(doneJson) } coAnswers {
+                delay(10)
+                LinkEvent.Done
+            }
+            coEvery { broadcastLinkMessageUseCase.launch(doneJson) } just Runs
+
+            vm.onJsonReceived(payloadJson)
+            vm.onJsonReceived(doneJson)
+
+            advanceUntilIdle()
+
+            vm.payloads.shouldContainSame(listOf(payload))
+            eventObserver.shouldContainEvents(LinkEvent.Payload(payload), LinkEvent.Done)
+        }
 
     @Test
     fun `verify viewModel handle exception inside success block`() {
