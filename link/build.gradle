@@ -83,7 +83,8 @@ dependencies {
     androidTestImplementation libs.kluent
 }
 /**
- * Publication setup to Maven Central
+ * Setup publication to Maven Central
+ * https://github.com/vanniktech/gradle-maven-publish-plugin/blob/0.30.0/docs/central.md
  */
 import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 import com.vanniktech.maven.publish.SonatypeHost
@@ -95,8 +96,8 @@ mavenPublishing {
     configure(new AndroidSingleVariantLibrary('release', true, true))
     // the first parameter represents the repository to publish
     // the second whether to publish automatically
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, false)
-    // sing publication
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    // sign publication
     signAllPublications()
     // define group, artifact and version
     // the version is taken from gradle/libs.versions.toml file

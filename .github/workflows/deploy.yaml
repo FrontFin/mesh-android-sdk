@@ -31,7 +31,7 @@ jobs:
         run: ./gradlew link:assembleRelease
 
       - name: Publish release 🎉
-        run: ./gradlew link:publishToMavenCentral --no-configuration-cache
+        run: ./gradlew link:publishAndReleaseToMavenCentral --no-configuration-cache
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_PASSWORD }}
