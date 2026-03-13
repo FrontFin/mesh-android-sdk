@@ -5,7 +5,9 @@ import android.view.ViewGroup
 import android.webkit.WebView
 
 internal object Quantum {
-    fun newInstance(context: Context) = QuantumPlaceholder()
+    fun newInstance(expected: Context): IQuantum = QuantumPlaceholder()
+    // Replace with: financial.atomic.quantum.Quantum(context) when re-enabling
+    // By adding 'implementation libs.atomic.quantum' to link/build.gradle
 }
 
 internal interface IQuantum {
@@ -18,16 +20,12 @@ internal interface IQuantum {
     suspend fun goto(link: String)
 }
 
-class QuantumPlaceholder : IQuantum {
+internal class QuantumPlaceholder : IQuantum {
     override suspend fun initialize(
         atomicToken: String,
         webView: WebView,
         container: ViewGroup,
-    ) {
-        // no-op
-    }
+    ) = Unit
 
-    override suspend fun goto(link: String) {
-        // no-op
-    }
+    override suspend fun goto(link: String) = Unit
 }
