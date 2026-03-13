@@ -178,7 +178,7 @@ internal class LinkActivity : AppCompatActivity() {
                 is LinkEvent.Loaded -> onLinkLoaded()
                 is LinkEvent.Payload -> Unit
                 is LinkEvent.TrueAuth -> showToast(R.string.integration_disabled)
-                /** @use [com.meshconnect.link.utils.handleTrueAuth] to re-enable the TrueAuth **/
+                /** Use [com.meshconnect.link.utils.handleTrueAuth] to re-enable the TrueAuth **/
             }
         }
     }

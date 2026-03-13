@@ -73,11 +73,19 @@ internal fun handleTrueAuth(
  */
 @Suppress("UnusedPrivateMember")
 internal class Quantum(private val context: Context) {
+    private fun throwPlaceholderError() {
+        error("Placeholder used. Enable the True Auth.")
+    }
+
     fun initialize(
         atomicToken: String,
         webView: WebView,
         container: ViewGroup,
-    ) = Unit
+    ) {
+        throwPlaceholderError()
+    }
 
-    fun goto(link: String) = Unit
+    fun goto(link: String) {
+        throwPlaceholderError()
+    }
 }
