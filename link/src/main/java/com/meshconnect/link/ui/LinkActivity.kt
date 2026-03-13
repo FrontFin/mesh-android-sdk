@@ -29,6 +29,7 @@ import com.meshconnect.link.databinding.LinkActivityBinding
 import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
+import com.meshconnect.link.utils.Quantum
 import com.meshconnect.link.utils.alertDialog
 import com.meshconnect.link.utils.createURL
 import com.meshconnect.link.utils.decodeToken
@@ -44,7 +45,6 @@ import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
 import com.meshconnect.link.utils.windowInsetsController
-import financial.atomic.quantum.Quantum
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -95,7 +95,7 @@ internal class LinkActivity : AppCompatActivity() {
 
     private val binding by viewBinding(LinkActivityBinding::inflate)
     private val viewModel by viewModel<LinkViewModel>(LinkViewModel.Factory())
-    private val quantum by lazy { Quantum(this) }
+    private val quantum by lazy { Quantum.newInstance(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
