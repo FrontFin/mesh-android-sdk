@@ -5,4 +5,5 @@
     <string name="exitDialog_exit">Exit</string>
     <string name="exitDialog_cancel">Cancel</string>
     <string name="not_able_to_perform">Not able to perform an operation</string>
+    <string name="integration_disabled" translatable="false">Integration is disabled in this build.</string>
 </resources>
