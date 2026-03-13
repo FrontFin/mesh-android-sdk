@@ -11,7 +11,6 @@ import android.os.Message
 import android.util.Log
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -21,7 +20,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
@@ -29,11 +27,9 @@ import com.meshconnect.link.databinding.LinkActivityBinding
 import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
-import com.meshconnect.link.utils.Quantum
 import com.meshconnect.link.utils.alertDialog
 import com.meshconnect.link.utils.createURL
 import com.meshconnect.link.utils.decodeToken
-import com.meshconnect.link.utils.extractTrueAuthResult
 import com.meshconnect.link.utils.getLinkStyleFromLinkUrl
 import com.meshconnect.link.utils.getOnLoadedScript
 import com.meshconnect.link.utils.getParcelable
@@ -45,9 +41,6 @@ import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
 import com.meshconnect.link.utils.windowInsetsController
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.net.URL
 
 internal class LinkActivity : AppCompatActivity() {
@@ -95,7 +88,6 @@ internal class LinkActivity : AppCompatActivity() {
 
     private val binding by viewBinding(LinkActivityBinding::inflate)
     private val viewModel by viewModel<LinkViewModel>(LinkViewModel.Factory())
-    private val quantum by lazy { Quantum.newInstance(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -185,7 +177,8 @@ internal class LinkActivity : AppCompatActivity() {
                 is LinkEvent.ShowClose -> showCloseDialog()
                 is LinkEvent.Loaded -> onLinkLoaded()
                 is LinkEvent.Payload -> Unit
-                is LinkEvent.TrueAuth -> openTrueAuth(event)
+                is LinkEvent.TrueAuth -> showToast(R.string.integration_disabled)
+                /** @use [com.meshconnect.link.utils.handleTrueAuth] to re-enable the TrueAuth **/
             }
         }
     }
@@ -342,37 +335,6 @@ internal class LinkActivity : AppCompatActivity() {
                 }
             }
         }
-
-    private fun onTrueAuthEvent(json: String) {
-        lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                runCatching { extractTrueAuthResult(json) }
-            }.onSuccess {
-                binding.webView.evaluateJavascript("window.trueAuthResult='$it'", null)
-            }
-        }
-    }
-
-    private fun openTrueAuth(event: LinkEvent.TrueAuth) {
-        val webView =
-            WebView(this@LinkActivity).apply {
-                setBackgroundColor(Color.TRANSPARENT)
-                addJavascriptInterface(JSBridge(::onTrueAuthEvent), JSBridge.NAME)
-                settings.cacheMode = WebSettings.LOAD_NO_CACHE
-            }
-        binding.webViewContainer.removeAllViews()
-        binding.webViewContainer.addView(webView)
-        CookieManager.getInstance().removeSessionCookies(null)
-        lifecycleScope.launch {
-            try {
-                quantum.initialize(event.atomicToken, webView, binding.webViewContainer)
-                quantum.goto(event.link)
-                binding.webViewContainer.visibility = ViewGroup.VISIBLE
-            } catch (expected: Exception) {
-                showToast(R.string.not_able_to_perform)
-            }
-        }
-    }
 
     private fun actionView(uri: Uri) {
         try {
