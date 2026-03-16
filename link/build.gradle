@@ -69,7 +69,6 @@ dependencies {
     implementation libs.google.material
     implementation libs.google.gson
     implementation libs.kotlinx.coroutines.core
-    implementation libs.atomic.quantum
 
     testImplementation libs.junit
     testImplementation libs.mockk
