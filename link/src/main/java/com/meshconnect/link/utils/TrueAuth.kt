@@ -8,19 +8,22 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleCoroutineScope
-import com.meshconnect.link.R
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.ui.JSBridge
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-internal fun handleTrueAuth(
+// Think about modification to class
+// with a `destroy` function or subscription to Lifecycle.DESTROY event
+// to release the resources from created views and Quantum instance
+
+internal fun openTrueAuth(
     lifecycleScope: LifecycleCoroutineScope,
     webView: WebView,
     webViewContainer: ViewGroup,
     event: LinkEvent.TrueAuth,
-    onShowToast: (Int) -> Unit,
+    onError: (Exception) -> Unit,
 ) {
     val trueAuthWebView = WebView(webViewContainer.context)
 
@@ -29,8 +32,11 @@ internal fun handleTrueAuth(
             withContext(Dispatchers.IO) {
                 runCatching { extractTrueAuthResult(json) }
             }.onSuccess {
+                // Replace with `onTrueAuthSuccess` callback
+                // to avoid a `webView` dependency in this function
                 webView.evaluateJavascript("window.trueAuthResult='$it'", null)
-                // test WebView destroy before uncomment
+
+                // Destroy the trueAuthWebView after success
                 // trueAuthWebView.destroy()
             }
         }
@@ -51,30 +57,31 @@ internal fun handleTrueAuth(
 
     lifecycleScope.launch {
         try {
-            Quantum(webViewContainer.context).apply {
-                initialize(event.atomicToken, trueAuthWebView, webViewContainer)
-                goto(event.link)
-            }
+            val quantum = QuantumPlaceholder(webViewContainer.context)
+            quantum.initialize(event.atomicToken, trueAuthWebView, webViewContainer)
+            quantum.goto(event.link)
+
             webViewContainer.isVisible = true
         } catch (expected: Exception) {
             trueAuthWebView.destroy()
             webViewContainer.removeAllViews()
             webViewContainer.isVisible = false
-            onShowToast(R.string.not_able_to_perform)
+            onError(expected)
         }
     }
 }
 
 /**
  * This is a placeholder class for Quantum.
- * To re-enable it, follow the next steps:
+ * To re-enable it:
  *  1. Add a dependency 'implementation libs.atomic.quantum' to link/build.gradle
- *  2. Replace with: financial.atomic.quantum.Quantum(context)
+ *  2. Import `financial.atomic.quantum.Quantum`
+ *  3. Remove QuantumPlaceholder class
  */
 @Suppress("UnusedPrivateMember")
-internal class Quantum(private val context: Context) {
+private class QuantumPlaceholder(private val context: Context) {
     private fun throwPlaceholderError() {
-        error("Placeholder used. Enable the True Auth.")
+        error("Quantum is not enabled")
     }
 
     fun initialize(

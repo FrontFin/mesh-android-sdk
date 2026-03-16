@@ -20,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
@@ -37,6 +38,7 @@ import com.meshconnect.link.utils.intent
 import com.meshconnect.link.utils.isSystemDarkTheme
 import com.meshconnect.link.utils.isUrlWhitelisted
 import com.meshconnect.link.utils.observeEvent
+import com.meshconnect.link.utils.openTrueAuth
 import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
@@ -177,10 +179,23 @@ internal class LinkActivity : AppCompatActivity() {
                 is LinkEvent.ShowClose -> showCloseDialog()
                 is LinkEvent.Loaded -> onLinkLoaded()
                 is LinkEvent.Payload -> Unit
-                is LinkEvent.TrueAuth -> showToast(R.string.integration_disabled)
-                /** Use [com.meshconnect.link.utils.handleTrueAuth] to re-enable the TrueAuth **/
+                is LinkEvent.TrueAuth -> {
+                    /** To re-enable the TrueAuth replace with [onTrueAuthEvent] **/
+                    showToast(R.string.integration_disabled)
+                }
             }
         }
+    }
+
+    @Suppress("UnusedPrivateMember")
+    private fun onTrueAuthEvent(event: LinkEvent.TrueAuth) {
+        openTrueAuth(
+            lifecycleScope = lifecycleScope,
+            webView = binding.webView,
+            webViewContainer = binding.webViewContainer,
+            event = event,
+            onError = { showToast(R.string.not_able_to_perform) },
+        )
     }
 
     private fun onLinkLoaded() {
