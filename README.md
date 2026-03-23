@@ -50,7 +50,7 @@ Additional `LinkConfiguration` object parameters:
 It can be used if you have a valid `auth_token` and want to bypass authentication to jump right into a transfer.
 
 - `disableDomainWhiteList` is a flag that allows to disable origin whitelisting.
-By default, it's enabled with the predefined [domains](link/src/main/java/com/meshconnect/link/utils/WhitelistedvOrigins.kt).
+By default, it's enabled with the predefined [domains](link/src/main/java/com/meshconnect/link/utils/WhitelistedOrigins.kt).
 
 ### Register an Activity Result callback
 
