@@ -49,7 +49,6 @@ internal class LinkActivity : AppCompatActivity() {
     companion object {
         private const val TOKEN = "token"
         private const val ACCESS_TOKENS = "access_tokens"
-        private const val TRANSFER_TOKENS = "transfer_tokens"
         private const val DISABLE_WHITELIST = "disable_whitelist"
         private const val DATA = "data"
         private const val LANGUAGE = "language"
@@ -68,16 +67,9 @@ internal class LinkActivity : AppCompatActivity() {
                     .putExtra(LANGUAGE, config.language)
 
             val accessTokens = config.accessTokens
-            val transferTokens = config.transferDestinationTokens
 
-            if (!accessTokens.isNullOrEmpty() || !transferTokens.isNullOrEmpty()) {
-                val gson = Gson()
-                if (accessTokens != null) {
-                    intent.putExtra(ACCESS_TOKENS, gson.toJson(accessTokens))
-                }
-                if (transferTokens != null) {
-                    intent.putExtra(TRANSFER_TOKENS, gson.toJson(transferTokens))
-                }
+            if (!accessTokens.isNullOrEmpty()) {
+                intent.putExtra(ACCESS_TOKENS, Gson().toJson(accessTokens))
             }
             return intent
         }
@@ -203,7 +195,6 @@ internal class LinkActivity : AppCompatActivity() {
             getOnLoadedScript(
                 version = BuildConfig.VERSION,
                 accessTokens = intent.getStringExtra(ACCESS_TOKENS),
-                transferDestinationTokens = intent.getStringExtra(TRANSFER_TOKENS),
             )
         binding.webView.evaluateJavascript(script, null)
     }
@@ -301,7 +292,7 @@ internal class LinkActivity : AppCompatActivity() {
                     disableWhiteList -> request.url.scheme != "https"
                     else -> !isUrlWhitelisted(request.url.toString(), request.url.host.orEmpty())
                 }
-            return override // reject loading the url by WebView
+            return override // return 'true' to reject loading the url
         }
     }
 
@@ -318,7 +309,7 @@ internal class LinkActivity : AppCompatActivity() {
                                 if (request != null && !request.isRedirect) {
                                     actionView(request.url)
                                 }
-                                return true // reject loading the url by WebView
+                                return true // return 'true' to reject loading the url
                             }
                         }
                 }

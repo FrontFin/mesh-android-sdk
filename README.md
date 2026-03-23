@@ -49,9 +49,6 @@ Additional `LinkConfiguration` object parameters:
 - `accessTokens` to initialize crypto transfers flow at the 'Select asset step’ using previously obtained integration `auth_token`. 
 It can be used if you have a valid `auth_token` and want to bypass authentication to jump right into a transfer.
 
-- `transferDestinationTokens` for crypto transfers flow. 
-It is an alternative way of providing target addresses for crypto transfers by using previously obtained integration `auth_tokens`.
-
 - `disableDomainWhiteList` is a flag that allows to disable origin whitelisting.
 By default, it's enabled with the predefined [domains](link/src/main/java/com/meshconnect/link/utils/WhitelistedvOrigins.kt).
 
