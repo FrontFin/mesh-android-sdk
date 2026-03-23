@@ -10,18 +10,15 @@ class LinkConfigurationTest {
     fun `test LinkConfiguration`() {
         val token = randomString
         val accessTokens = mockk<List<IntegrationAccessToken>>()
-        val transferDestinationTokens = mockk<List<IntegrationAccessToken>>()
 
         val it =
             LinkConfiguration(
                 token,
                 accessTokens,
-                transferDestinationTokens,
             )
 
         assertEquals(token, it.token)
         assertEquals(accessTokens, it.accessTokens)
-        assertEquals(transferDestinationTokens, it.transferDestinationTokens)
     }
 
     @Test
@@ -35,6 +32,5 @@ class LinkConfigurationTest {
 
         assertEquals(token, it.token)
         assertEquals(null, it.accessTokens)
-        assertEquals(null, it.transferDestinationTokens)
     }
 }

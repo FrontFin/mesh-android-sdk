@@ -24,6 +24,7 @@
 /.idea/deploymentTargetDropDown.xml
 
 .DS_Store
+.kotlin
 
 /build
 /captures

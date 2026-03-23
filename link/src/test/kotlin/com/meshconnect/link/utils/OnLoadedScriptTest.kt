@@ -15,23 +15,13 @@ class OnLoadedScriptTest {
     }
 
     @Test
-    fun `test with accessTokens & transferDestinationTokens`() {
+    fun `test with accessTokens`() {
         val version = randomString
         val accessTokens = randomString
-        val transferDestinationTokens = randomString
 
-        val script =
-            getOnLoadedScript(
-                version,
-                accessTokens,
-                transferDestinationTokens,
-            )
+        val script = getOnLoadedScript(version, accessTokens)
 
         script shouldBeEqualTo
-            StringBuilder()
-                .append("window.meshSdkPlatform='android';window.meshSdkVersion='$version';")
-                .append("window.accessTokens='$accessTokens';")
-                .append("window.transferDestinationTokens='$transferDestinationTokens'")
-                .toString()
+            "window.meshSdkPlatform='android';window.meshSdkVersion='$version';window.accessTokens='$accessTokens'"
     }
 }
