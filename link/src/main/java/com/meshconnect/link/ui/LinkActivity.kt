@@ -39,6 +39,7 @@ import com.meshconnect.link.utils.isSystemDarkTheme
 import com.meshconnect.link.utils.isUrlWhitelisted
 import com.meshconnect.link.utils.observeEvent
 import com.meshconnect.link.utils.openTrueAuth
+import com.meshconnect.link.utils.resolveLanguage
 import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
@@ -88,7 +89,8 @@ internal class LinkActivity : AppCompatActivity() {
 
         runCatching {
             val link = decodeToken(intent.getStringExtra(TOKEN))
-            createURL(link, mapOf("lng" to intent.getStringExtra(LANGUAGE)))
+            val language = resolveLanguage(intent.getStringExtra(LANGUAGE))
+            createURL(link, mapOf("lng" to language))
         }.onSuccess { url ->
             setContentView(binding.root)
 
