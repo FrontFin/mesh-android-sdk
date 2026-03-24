@@ -53,6 +53,7 @@ internal class LinkActivity : AppCompatActivity() {
         private const val DISABLE_WHITELIST = "disable_whitelist"
         private const val DATA = "data"
         private const val LANGUAGE = "language"
+        private const val FIAT_CURRENCY = "fiat_currency"
         private const val MAX_TOAST_MSG_LENGTH = 38
         private const val CBW_HOST = "wallet.coinbase.com"
         private const val CBW_PACKAGE_NAME = "org.toshi"
@@ -66,6 +67,7 @@ internal class LinkActivity : AppCompatActivity() {
                     .putExtra(TOKEN, config.token)
                     .putExtra(DISABLE_WHITELIST, config.disableDomainWhiteList)
                     .putExtra(LANGUAGE, config.language)
+                    .putExtra(FIAT_CURRENCY, config.displayFiatCurrency)
 
             val accessTokens = config.accessTokens
 
@@ -90,7 +92,8 @@ internal class LinkActivity : AppCompatActivity() {
         runCatching {
             val link = decodeToken(intent.getStringExtra(TOKEN))
             val language = resolveLanguage(intent.getStringExtra(LANGUAGE))
-            createURL(link, mapOf("lng" to language))
+            val fiatCurrency = intent.getStringExtra(FIAT_CURRENCY)
+            createURL(link, mapOf("lng" to language, "fiatCur" to fiatCurrency))
         }.onSuccess { url ->
             setContentView(binding.root)
 
