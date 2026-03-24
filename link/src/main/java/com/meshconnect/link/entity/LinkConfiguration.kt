@@ -6,4 +6,5 @@ data class LinkConfiguration(
     val disableDomainWhiteList: Boolean? = false,
     val language: String? = null,
     val displayFiatCurrency: String? = null,
+    val theme: LinkTheme? = null,
 )

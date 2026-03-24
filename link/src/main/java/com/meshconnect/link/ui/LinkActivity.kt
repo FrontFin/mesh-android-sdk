@@ -35,11 +35,12 @@ import com.meshconnect.link.utils.getLinkStyleFromLinkUrl
 import com.meshconnect.link.utils.getOnLoadedScript
 import com.meshconnect.link.utils.getParcelable
 import com.meshconnect.link.utils.intent
-import com.meshconnect.link.utils.isSystemDarkTheme
+import com.meshconnect.link.utils.isSystemThemeDark
 import com.meshconnect.link.utils.isUrlWhitelisted
 import com.meshconnect.link.utils.observeEvent
 import com.meshconnect.link.utils.openTrueAuth
 import com.meshconnect.link.utils.resolveLanguage
+import com.meshconnect.link.utils.resolveTheme
 import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
@@ -54,6 +55,7 @@ internal class LinkActivity : AppCompatActivity() {
         private const val DATA = "data"
         private const val LANGUAGE = "language"
         private const val FIAT_CURRENCY = "fiat_currency"
+        private const val THEME = "theme"
         private const val MAX_TOAST_MSG_LENGTH = 38
         private const val CBW_HOST = "wallet.coinbase.com"
         private const val CBW_PACKAGE_NAME = "org.toshi"
@@ -68,6 +70,7 @@ internal class LinkActivity : AppCompatActivity() {
                     .putExtra(DISABLE_WHITELIST, config.disableDomainWhiteList)
                     .putExtra(LANGUAGE, config.language)
                     .putExtra(FIAT_CURRENCY, config.displayFiatCurrency)
+                    .putExtra(THEME, config.theme?.name)
 
             val accessTokens = config.accessTokens
 
@@ -93,8 +96,10 @@ internal class LinkActivity : AppCompatActivity() {
             val link = decodeToken(intent.getStringExtra(TOKEN))
             val language = resolveLanguage(intent.getStringExtra(LANGUAGE))
             val fiatCurrency = intent.getStringExtra(FIAT_CURRENCY)
-            createURL(link, mapOf("lng" to language, "fiatCur" to fiatCurrency))
+            val theme = resolveTheme(intent.getStringExtra(THEME), ::isSystemThemeDark)
+            createURL(link, mapOf("lng" to language, "fiatCur" to fiatCurrency, "th" to theme))
         }.onSuccess { url ->
+            // TODO: Result should return url + theme to avoid parsing the url if theme is provided
             setContentView(binding.root)
 
             applyTheme(url.toString())
@@ -116,11 +121,12 @@ internal class LinkActivity : AppCompatActivity() {
     }
 
     private fun applyTheme(url: String) {
+        // TODO: get th from url OR linkStyle
         val linkStyle = getLinkStyleFromLinkUrl(url)
         val isDarkTheme =
             when (linkStyle?.th) {
                 "dark" -> true
-                "system" -> isSystemDarkTheme()
+                "system" -> isSystemThemeDark()
                 else -> false
             }
         val topColor = getColor(if (isDarkTheme) R.color.coldGray70 else R.color.coldGray0)
