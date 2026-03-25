@@ -75,6 +75,7 @@ dependencies {
     testImplementation libs.kotlinx.coroutines.test
     testImplementation libs.kluent
     testImplementation libs.androidx.core.testing
+    testImplementation libs.org.json
 
     androidTestImplementation libs.androidx.test.runner
     androidTestImplementation libs.androidx.test.rules

@@ -28,12 +28,14 @@ import com.meshconnect.link.databinding.LinkActivityBinding
 import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
+import com.meshconnect.link.utils.THEME_DARK
 import com.meshconnect.link.utils.alertDialog
 import com.meshconnect.link.utils.createURL
 import com.meshconnect.link.utils.decodeToken
-import com.meshconnect.link.utils.getLinkStyleFromLinkUrl
 import com.meshconnect.link.utils.getOnLoadedScript
 import com.meshconnect.link.utils.getParcelable
+import com.meshconnect.link.utils.getThemeFromUrl
+import com.meshconnect.link.utils.getThemeName
 import com.meshconnect.link.utils.intent
 import com.meshconnect.link.utils.isSystemThemeDark
 import com.meshconnect.link.utils.isUrlWhitelisted
@@ -70,7 +72,7 @@ internal class LinkActivity : AppCompatActivity() {
                     .putExtra(DISABLE_WHITELIST, config.disableDomainWhiteList)
                     .putExtra(LANGUAGE, config.language)
                     .putExtra(FIAT_CURRENCY, config.displayFiatCurrency)
-                    .putExtra(THEME, config.theme?.name)
+                    .putExtra(THEME, getThemeName(config.theme))
 
             val accessTokens = config.accessTokens
 
@@ -99,10 +101,9 @@ internal class LinkActivity : AppCompatActivity() {
             val theme = resolveTheme(intent.getStringExtra(THEME), ::isSystemThemeDark)
             createURL(link, mapOf("lng" to language, "fiatCur" to fiatCurrency, "th" to theme))
         }.onSuccess { url ->
-            // TODO: Result should return url + theme to avoid parsing the url if theme is provided
             setContentView(binding.root)
 
-            applyTheme(url.toString())
+            applyThemeFromURL(url.toString())
 
             binding.back.setOnClickListener { onBack() }
             binding.close.setOnClickListener { showCloseDialog() }
@@ -120,15 +121,10 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
-    private fun applyTheme(url: String) {
-        // TODO: get th from url OR linkStyle
-        val linkStyle = getLinkStyleFromLinkUrl(url)
-        val isDarkTheme =
-            when (linkStyle?.th) {
-                "dark" -> true
-                "system" -> isSystemThemeDark()
-                else -> false
-            }
+    private fun applyThemeFromURL(url: String) {
+        val theme = getThemeFromUrl(url)
+        val isDarkTheme = resolveTheme(theme, ::isSystemThemeDark) == THEME_DARK
+
         val topColor = getColor(if (isDarkTheme) R.color.coldGray70 else R.color.coldGray0)
         val bottomColor = getColor(if (isDarkTheme) R.color.gray80 else R.color.gray0)
 

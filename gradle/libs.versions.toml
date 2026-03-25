@@ -19,6 +19,7 @@ atomic-quantum = "0.0.5"
 junit = "4.13.2"
 mockk = "1.13.7"
 kluent = "1.73"
+org-json = "20240303"
 test-runner = "1.6.2"
 test-rules = "1.6.1"
 core-testing = "2.2.0"
@@ -44,6 +45,7 @@ atomic-quantum = { group = "financial.atomic", name = "quantum", version.ref = "
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kluent = { group = "org.amshove.kluent", name = "kluent-android", version.ref = "kluent" }
+org-json = { group = "org.json", name = "json", version.ref = "org-json" }
 
 mesh-link = { group = "com.meshconnect", name = "link", version.ref = "mesh-link" }
 
