@@ -46,11 +46,19 @@ val configuration = LinkConfiguration(
 
 Additional `LinkConfiguration` object parameters:
 
-- `accessTokens` to initialize crypto transfers flow at the 'Select asset step’ using previously obtained integration `auth_token`. 
+- `accessTokens` to initialize crypto transfers flow at the ‘Select asset step’ using previously obtained integration `auth_token`.
 It can be used if you have a valid `auth_token` and want to bypass authentication to jump right into a transfer.
 
 - `disableDomainWhiteList` is a flag that allows to disable origin whitelisting.
-By default, it's enabled with the predefined [domains](link/src/main/java/com/meshconnect/link/utils/WhitelistedOrigins.kt).
+By default, it’s enabled with the predefined [domains](link/src/main/java/com/meshconnect/link/utils/WhitelistedOrigins.kt).
+
+- `language` is a BCP-47 language tag that overrides the UI locale (e.g. `"en"`, `"fr-FR"`).
+Pass `"system"` to use the device’s current locale automatically.
+
+- `displayFiatCurrency` is an ISO 4217 currency code shown as the fiat equivalent of crypto amounts inside the Link UI (e.g. `"USD"`, `"EUR"`).
+
+- `theme` sets the colour theme of the Link UI. Accepts a `LinkTheme` value: `LIGHT`, `DARK`, or `SYSTEM`.
+Pass `SYSTEM` to use the device's current theme automatically.
 
 ### Register an Activity Result callback
 
