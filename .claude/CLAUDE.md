@@ -128,7 +128,9 @@ launcher.launch(LinkConfiguration(token = "your-link-token"))
 | `token` | `String` | required | Link token from Mesh backend |
 | `accessTokens` | `List<IntegrationAccessToken>?` | null | Pre-populate existing tokens |
 | `disableDomainWhiteList` | `Boolean?` | false | Bypass domain whitelisting |
-| `language` | `String?` | null | UI language override |
+| `language` | `String?` | null | BCP-47 language tag; pass `"system"` to use the device locale |
+| `displayFiatCurrency` | `String?` | null | ISO 4217 code for fiat equivalent display (e.g. `"USD"`) |
+| `theme` | `LinkTheme?` | null | UI theme — `LIGHT`, `DARK`, or `SYSTEM` (follows device dark-mode) |
 
 ### `LinkResult` (sealed interface, `entity/LinkResult.kt`)
 
@@ -167,13 +169,16 @@ Both are `SharedFlow` instances in `entity/LinkPayloads.kt` and `entity/LinkEven
 | `link/src/main/java/.../ui/LinkViewModel.kt` | Message processing, state, SharedFlow emission |
 | `link/src/main/java/.../ui/JSBridge.kt` | `@JavascriptInterface` — receives JS messages |
 | `link/src/main/java/.../entity/` | All public data models |
+| `link/src/main/java/.../entity/LinkTheme.kt` | `LIGHT`/`DARK`/`SYSTEM` enum with `LIGHT_VALUE`/`DARK_VALUE`/`SYSTEM_VALUE` constants |
 | `link/src/main/java/.../usecase/DeserializeLinkMessageUseCase.kt` | JSON → LinkEvent |
 | `link/src/main/java/.../usecase/BroadcastLinkMessageUseCase.kt` | LinkEvent → SharedFlow |
 | `link/src/main/java/.../usecase/FilterLinkMessage.kt` | JsType → payload routing |
 | `link/src/main/java/.../converter/JsonConverter.kt` | Gson setup with custom deserializers |
 | `link/src/main/java/.../utils/WhitelistedOrigins.kt` | Allowed WebView domains list |
-| `link/src/main/java/.../utils/CreateURL.kt` | Builds link URL from token/config |
+| `link/src/main/java/.../utils/CreateURL.kt` | Builds link URL from token/config (`lng`, `fiatCur`, `th` params) |
 | `link/src/main/java/.../utils/DecodeToken.kt` | Base64/URL token decoding |
+| `link/src/main/java/.../utils/Language.kt` | `getSystemLanguage()` + `resolveLanguage()` — device locale resolution |
+| `link/src/main/java/.../utils/Theme.kt` | `getThemeName()`, `resolveTheme()`, `getThemeFromUrl()`, `isSystemThemeDark()` |
 | `link/src/main/AndroidManifest.xml` | Permissions, LinkActivity declaration |
 | `link/proguard-rules.pro` | R8/ProGuard rules for SDK consumers |
 | `gradle/libs.versions.toml` | All versions — update `mesh-link` to bump SDK version |
@@ -200,6 +205,7 @@ Both are `SharedFlow` instances in `entity/LinkPayloads.kt` and `entity/LinkEven
 | `kluent` (1.73) | Fluent assertion DSL |
 | `kotlinx-coroutines-test` | Coroutine testing utilities |
 | `androidx.arch.core:core-testing` | LiveData testing |
+| `org.json:json` | Real `JSONObject` implementation for unit tests (Android stub replacement) |
 
 ---
 
@@ -219,6 +225,8 @@ Tests live in `link/src/test/kotlin/com/meshconnect/link/`.
 | `DecodeTokenTest` | Token decoding edge cases |
 | `CreateURLTest` | URL builder |
 | `WhitelistedOriginsTest` | Domain allowlist logic |
+| `LanguageTest` | `getSystemLanguage` and `resolveLanguage` including `"system"` passthrough |
+| `ThemeTest` | `getThemeName`, `resolveTheme`, `getThemeFromUrl` — `decodeBase64` mocked via `mockkStatic` |
 
 ### Running Tests
 
@@ -318,3 +326,8 @@ See `RELEASE.md` for full details. Summary:
   5. Add tests in the corresponding test files
 - **Adding a whitelisted domain:** Edit `WhitelistedOrigins.kt` and add a test case in `WhitelistedOriginsTest`
 - **Changing the public API:** Update ProGuard rules in `link/proguard-rules.pro` if new public classes are added
+- **`LinkTheme` string values:** Always use `LinkTheme.LIGHT_VALUE`, `DARK_VALUE`, `SYSTEM_VALUE` constants instead of raw string literals — never hardcode `"light"`, `"dark"`, `"system"` for theme
+- **`LinkTheme.valueOf` safety:** Use `LinkTheme.entries.find { it.name == name }` instead of `valueOf()` to avoid `IllegalArgumentException` on unrecognised values
+- **Mocking Android statics in tests:** Use `mockkStatic(::functionRef)` for top-level functions (e.g. `decodeBase64`, `isSystemThemeDark`) and `mockkStatic(ClassName::class)` for class statics (e.g. `Uri`, `Log`). Always pair with `unmockkStatic` in `@After`
+- **URL query parameters added by SDK:** `lng` (language), `fiatCur` (display fiat currency), `th` (theme) — see `CreateURL.kt`
+- **Theme resolution from URL:** `getThemeFromUrl(url)` checks the `th` query param first; falls back to the `th` field inside the Base64-encoded `link_style` param if `th` is absent or blank
