@@ -44,7 +44,7 @@ val configuration = LinkConfiguration(
 )
 ```
 
-#### Additional parameters
+#### Additional parameters (optional)
 
 | Parameter | Type | Description                                                                                                                                                                                   |
 |---|---|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
