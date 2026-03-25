@@ -283,7 +283,7 @@ To allow all domains (e.g. for testing): set `disableDomainWhiteList = true` in 
 
 See `RELEASE.md` for full details. Summary:
 
-1. Update version in `gradle/libs.versions.toml` (`mesh-link = "X.Y.Z"`)
+1. Run `/bump-version` — automatically diffs HEAD against the latest tag, bumps `mesh-link` in `gradle/libs.versions.toml` using semantic versioning, and prepends a new entry to `CHANGELOG.md`
 2. Merge to `main`
 3. Trigger **Deploy** workflow manually in GitHub Actions
 4. Verify artifact on Maven Central
