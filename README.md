@@ -17,7 +17,7 @@ dependencies {
 ## Getting a link token
 
 The `linkToken` must be obtained from the
-[`/api/v1/linktoken`](https://docs.meshconnect.com/reference/post_api-v1-linktoken) endpoint.
+[`linktoken`](https://docs.meshconnect.com/api-reference/managed-account-authentication/get-link-token-with-parameters) endpoint.
 This request must be performed server-side to avoid exposing your API secret.
 The response has the following format:
 
