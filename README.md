@@ -46,13 +46,13 @@ val configuration = LinkConfiguration(
 
 #### Additional parameters
 
-| Parameter | Type | Description |
-|---|---|---|
-| `accessTokens` | `List<IntegrationAccessToken>?` | Previously obtained access tokens to pre-populate the flow. Useful in transfer flows where the source account is already authenticated. |
-| `disableDomainWhiteList` | `Boolean?` | Disables origin whitelisting in the WebView. By default whitelisting is enabled with the predefined [domains](link/src/main/java/com/meshconnect/link/utils/WhitelistedOrigins.kt). Intended for testing only. |
-| `language` | `String?` | BCP-47 language tag that overrides the UI locale (e.g. `"en"`, `"fr-FR"`). Pass `"system"` to use the device's current locale automatically. |
-| `displayFiatCurrency` | `String?` | ISO 4217 currency code shown as the fiat equivalent of crypto amounts (e.g. `"USD"`, `"EUR"`). |
-| `theme` | `LinkTheme?` | Colour theme of the Link UI. Accepts `LinkTheme.LIGHT`, `LinkTheme.DARK`, or `LinkTheme.SYSTEM`. `SYSTEM` follows the device's dark-mode setting at launch. |
+| Parameter | Type | Description                                                                                                                                                                                   |
+|---|---|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `accessTokens` | `List<IntegrationAccessToken>?` | Previously obtained access tokens to pre-populate the flow. Useful in transfer flows where the source account is already authenticated.                                                       |
+| `disableDomainWhiteList` | `Boolean?` | Disables origin whitelisting in the WebView. By default it's enabled with the predefined [domains](link/src/main/java/com/meshconnect/link/utils/WhitelistedOrigins.kt). Intended for testing only. |
+| `language` | `String?` | BCP-47 language tag that overrides the UI locale (e.g. `"en"`, `"fr-FR"`). Pass `"system"` to use the device's current locale automatically.                                                  |
+| `displayFiatCurrency` | `String?` | ISO 4217 currency code shown as the fiat equivalent of crypto amounts (e.g. `"USD"`, `"EUR"`).                                                                                                |
+| `theme` | `LinkTheme?` | Colour theme of the Link UI. Accepts `LIGHT`, `DARK`, or `SYSTEM`. Pass `SYSTEM` to follow the device's setting.                                                               |
 
 ### 2. Register an Activity Result callback
 
