@@ -6,7 +6,7 @@ Android library for integrating with Mesh Connect.
 
 ## Installation
 
-Add dependency to your `build.gradle`:
+Add the dependency to your `build.gradle`:
 
 ```gradle
 dependencies {
@@ -14,12 +14,12 @@ dependencies {
 }
 ```
 
-## Getting Link token
+## Getting a link token
 
-The `linkToken` should be obtained from
-the [`/api/v1/linktoken`](https://docs.meshconnect.com/reference/post_api-v1-linktoken) endpoint.
-The request must be performed from the server side as it risks exposing your API secret.
-You will get the response in the following format:
+The `linkToken` must be obtained from the
+[`/api/v1/linktoken`](https://docs.meshconnect.com/reference/post_api-v1-linktoken) endpoint.
+This request must be performed server-side to avoid exposing your API secret.
+The response has the following format:
 
 ```json
 {
@@ -33,10 +33,10 @@ You will get the response in the following format:
 
 ## Launching Link
 
-### Create a LinkConfiguration
+### 1. Create a `LinkConfiguration`
 
-Each time you launch Link, you have to get a new `linkToken` from your backend and build a new
-`LinkConfiguration` object:
+Each time you launch Link, obtain a fresh `linkToken` from your backend and build a
+`LinkConfiguration`:
 
 ```kotlin
 val configuration = LinkConfiguration(
@@ -44,26 +44,21 @@ val configuration = LinkConfiguration(
 )
 ```
 
-Additional `LinkConfiguration` object parameters:
+#### Additional parameters
 
-- `accessTokens` to initialize crypto transfers flow at the ‘Select asset step’ using previously obtained integration `auth_token`.
-It can be used if you have a valid `auth_token` and want to bypass authentication to jump right into a transfer.
+| Parameter | Type | Description |
+|---|---|---|
+| `accessTokens` | `List<IntegrationAccessToken>?` | Previously obtained access tokens to pre-populate the flow. Useful in transfer flows where the source account is already authenticated. |
+| `disableDomainWhiteList` | `Boolean?` | Disables origin whitelisting in the WebView. By default whitelisting is enabled with the predefined [domains](link/src/main/java/com/meshconnect/link/utils/WhitelistedOrigins.kt). Intended for testing only. |
+| `language` | `String?` | BCP-47 language tag that overrides the UI locale (e.g. `"en"`, `"fr-FR"`). Pass `"system"` to use the device's current locale automatically. |
+| `displayFiatCurrency` | `String?` | ISO 4217 currency code shown as the fiat equivalent of crypto amounts (e.g. `"USD"`, `"EUR"`). |
+| `theme` | `LinkTheme?` | Colour theme of the Link UI. Accepts `LinkTheme.LIGHT`, `LinkTheme.DARK`, or `LinkTheme.SYSTEM`. `SYSTEM` follows the device's dark-mode setting at launch. |
 
-- `disableDomainWhiteList` is a flag that allows to disable origin whitelisting.
-By default, it’s enabled with the predefined [domains](link/src/main/java/com/meshconnect/link/utils/WhitelistedOrigins.kt).
+### 2. Register an Activity Result callback
 
-- `language` is a BCP-47 language tag that overrides the UI locale (e.g. `"en"`, `"fr-FR"`).
-Pass `"system"` to use the device’s current locale automatically.
-
-- `displayFiatCurrency` is an ISO 4217 currency code shown as the fiat equivalent of crypto amounts inside the Link UI (e.g. `"USD"`, `"EUR"`).
-
-- `theme` sets the colour theme of the Link UI. Accepts a `LinkTheme` value: `LIGHT`, `DARK`, or `SYSTEM`.
-Pass `SYSTEM` to use the device's current theme automatically.
-
-### Register an Activity Result callback
-
-The Link UI runs in a separate Activity within your app.
-To return the result you can use [Activity Result APIs](https://developer.android.com/training/basics/intents/result).
+The Link UI runs inside a separate Activity. Use the
+[Activity Result APIs](https://developer.android.com/training/basics/intents/result) to receive
+the result:
 
 ```kotlin
 private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
@@ -74,19 +69,19 @@ private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
 }
 ```
 
-### Launch Link
+### 3. Launch Link
 
 ```kotlin
 linkLauncher.launch(configuration)
 ```
 
-At this point, Link UI will open and return the `LinkSuccess` object if the user successfully
-completes the flow.
+The Link UI opens and returns a `LinkSuccess` object when the user successfully completes the flow.
 
-### LinkSuccess
+### Handling results
 
-When a user successfully links an account or completes the transfer, the `LinkSuccess` object is
-received. It contains a list of payloads that represent the linked items:
+#### `LinkSuccess`
+
+Returned when a user links an account or completes a transfer. Contains a list of payloads:
 
 ```kotlin
 private fun onLinkSuccess(result: LinkSuccess) {
@@ -94,20 +89,18 @@ private fun onLinkSuccess(result: LinkSuccess) {
         when (payload) {
             is AccessTokenPayload -> /* broker connected */
             is DelayedAuthPayload -> /* delayed authentication */
-            is TransferFinishedSuccessPayload -> /* transfer succeed */
+            is TransferFinishedSuccessPayload -> /* transfer succeeded */
             is TransferFinishedErrorPayload -> /* transfer failed */
         }
     }
 }
 ```
 
-### LinkExit
+#### `LinkExit`
 
-When a user exits Link without successfully linking an account or an error occurs, 
-the `LinkExit` object is received:
+Returned when a user exits Link without completing the flow, or when an error occurs:
 
 ```kotlin
-
 private fun onLinkExit(result: LinkExit) {
     if (result.errorMessage != null) {
         /* use error message */
@@ -115,35 +108,37 @@ private fun onLinkExit(result: LinkExit) {
 }
 ```
 
-### LinkPayloads
+### Real-time streams
 
-A `SharedFlow` emits payloads immediately:
+#### `LinkPayloads`
 
-```kotlin
-lifecycleScope.launch {
-    LinkPayloads.collect { /* use payloads */ }
-}
-```
-
-### LinkEvents
-
-A `SharedFlow` emits events that happen at certain points in the Link flow:
+A `SharedFlow` that emits payloads as they arrive, independently of the Activity result:
 
 ```kotlin
 lifecycleScope.launch {
-  LinkEvents.collect { /* use event */ }
+    LinkPayloads.collect { /* use payload */ }
 }
 ```
 
-## Deeplink navigation (recommended solution)
+#### `LinkEvents`
 
-Standard deep links always create a new task or activity, unless you handle the back stack yourself.
-To resume the previous state, consider these steps:
+A `SharedFlow` that emits raw events at each step of the Link flow:
 
-1. Define a custom URI scheme that is handled by a "No-op" activity.
-2. No-op activity checks if the app is already running. If so, it finishes itself.
+```kotlin
+lifecycleScope.launch {
+    LinkEvents.collect { /* use event */ }
+}
+```
 
-AndroidManifest.xml:
+## Deep link navigation (recommended)
+
+Standard deep links always create a new task or activity unless you manage the back stack manually.
+To resume the previous state, follow these steps:
+
+**1. Define a custom URI scheme handled by a no-op Activity.**
+
+`AndroidManifest.xml`:
+
 ```xml
 <activity
     android:name=".DeepLinkEntryActivity"
@@ -158,12 +153,14 @@ AndroidManifest.xml:
 </activity>
 ```
 
-DeepLinkEntryActivity.kt:
+**2. In the no-op Activity, check whether the app is already running and finish immediately.**
+
+`DeepLinkEntryActivity.kt`:
+
 ```kotlin
 class DeepLinkEntryActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Check if app is already running
         packageManager.getLaunchIntentForPackage(packageName)?.run {
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
             startActivity(this)
@@ -173,11 +170,13 @@ class DeepLinkEntryActivity : Activity() {
 }
 ```
 
-Test deeplink:
+**3. Test the deep link:**
+
 ```shell
 adb shell am start -a android.intent.action.VIEW -d "myapp://"
 ```
 
 When triggered:
-- If your app is in the background: it’s brought to the foreground.
-- If it’s not running: the default launcher activity is opened.
+
+- If the app is in the background — it is brought to the foreground.
+- If the app is not running — the default launcher Activity is opened.
