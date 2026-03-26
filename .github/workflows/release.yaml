@@ -121,7 +121,7 @@ jobs:
             --notes-file /tmp/release_notes.md \
             --target main
 
-          RELEASE_URL=$(gh release view "$VERSION" --json url --jq '.url')
+          RELEASE_URL="https://github.com/FrontFin/mesh-android-sdk/releases/tag/${VERSION}"
           echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
 
       - name: Determine version bump type 📊
