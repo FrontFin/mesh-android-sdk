@@ -1,4 +1,4 @@
-name: Release Link SDK
+name: Release
 
 on:
   push:
