@@ -1,0 +1,120 @@
+name: Release Link SDK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    outputs:
+      new_version: ${{ steps.version_check.outputs.new_version }}
+      version: ${{ steps.version_check.outputs.version }}
+      previous_tag: ${{ steps.version_check.outputs.previous_tag }}
+
+    steps:
+      - name: Checkout 🎾
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if new version 🔍
+        id: version_check
+        run: |
+          VERSION=$(grep "mesh-link" gradle/libs.versions.toml -m 1 | cut -d "=" -f2 | xargs)
+          LATEST_TAG=$(git tag --sort=-v:refname | head -n 1)
+
+          echo "Current version in libs.versions.toml: $VERSION"
+          echo "Latest git tag: $LATEST_TAG"
+
+          if [[ "$VERSION" == "$LATEST_TAG" ]]; then
+            echo "No new version detected — skipping release"
+            echo "new_version=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "New version detected: $VERSION (previous: $LATEST_TAG)"
+            echo "new_version=true" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "previous_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+          fi
+
+  release:
+    needs: check-version
+    if: needs.check-version.outputs.new_version == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout 🎾
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java ♨️
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Android SDK 🎁
+        uses: android-actions/setup-android@v3
+
+      - name: Validate changelog 📋
+        run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
+          if ! grep -q "^## ${VERSION}" CHANGELOG.md; then
+            echo "Error: No changelog entry found for version ${VERSION} in CHANGELOG.md"
+            exit 1
+          fi
+          echo "Changelog entry for ${VERSION} found ✓"
+
+      - name: Run code quality checks 🧹
+        run: ./gradlew link:ktlintCheck link:detekt link:lintRelease
+
+      - name: Run tests & coverage verification 🥁
+        run: ./gradlew link:jacocoCoverageVerification
+
+      - name: Build 🧩
+        run: ./gradlew link:assembleRelease
+
+      - name: Run sonar ✅
+        run: ./gradlew link:sonar
+        env:
+          ORG_GRADLE_PROJECT_sonarProjectKey: ${{ vars.SONAR_PROJECT_KEY }}
+          ORG_GRADLE_PROJECT_sonarOrganization: ${{ vars.SONAR_ORGANIZATION }}
+          ORG_GRADLE_PROJECT_sonarHostUrl: ${{ vars.SONAR_HOST_URL }}
+          ORG_GRADLE_PROJECT_sonarToken: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Publish release 🎉
+        run: ./gradlew link:publishAndReleaseToMavenCentral --no-configuration-cache
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+
+      - name: Create GitHub Release 🚀
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
+          PREV_TAG="${{ needs.check-version.outputs.previous_tag }}"
+
+          CHANGELOG_SECTION=$(awk "/^## ${VERSION}/{found=1; next} found && /^## /{exit} found{print}" CHANGELOG.md)
+
+          cat > /tmp/release_notes.md << EOF
+          ## What's Changed
+
+          ${CHANGELOG_SECTION}
+
+          **Full Changelog**: https://github.com/FrontFin/mesh-android-sdk/compare/${PREV_TAG}...${VERSION}
+          EOF
+
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --notes-file /tmp/release_notes.md \
+            --target main
