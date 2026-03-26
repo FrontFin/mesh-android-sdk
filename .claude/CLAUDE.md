@@ -308,7 +308,7 @@ See `RELEASE.md` for full details. Summary:
 - Validates CHANGELOG has a matching entry
 - Runs all CI checks (ktlint+detekt, lint, coverage, Sonar)
 - Publishes to Maven Central
-- Creates and pushes git tag `vX.Y.Z`
+- Creates and pushes git tag `X.Y.Z` (matching the version from `gradle/libs.versions.toml`, without a `v` prefix)
 - Creates GitHub Release with changelog notes and full-diff link
 - Posts Slack announcement
 
