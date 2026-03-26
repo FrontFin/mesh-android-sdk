@@ -23,11 +23,8 @@ jobs:
       - name: Setup Android SDK 🎁
         uses: android-actions/setup-android@v3
 
-      - name: Run ktlint 🧹
-        run: ./gradlew link:ktlintCheck
-
-      - name: Run detekt 🧹
-        run: ./gradlew link:detekt
+      - name: Run ktlint & detekt 🧹
+        run: ./gradlew link:ktlintCheck link:detekt
 
       - name: Run lint 🧹
         run: ./gradlew link:lintRelease
