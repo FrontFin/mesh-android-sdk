@@ -29,8 +29,9 @@ mesh-android-sdk/
 │   └── libs.versions.toml      # Centralized dependency/version catalog
 ├── .github/workflows/
 │   ├── primary.yaml            # CI: lint + tests + build on PRs to main
-│   ├── deploy.yaml             # CD: manual deploy to Maven Central
-│   └── release-announcement.yaml
+│   └── release.yaml            # CD: publish, tag, GitHub Release, Slack announcement
+├── .claude/
+│   └── commands/               # Claude slash commands (bump-version, release)
 ├── RELEASE.md                  # Manual release process documentation
 ├── detekt.yml                  # Detekt static analysis configuration
 └── build.gradle                # Root build file
@@ -285,9 +286,8 @@ See `RELEASE.md` for full details. Summary:
 
 1. Run `/bump-version` — automatically diffs HEAD against the latest tag, bumps `mesh-link` in `gradle/libs.versions.toml` using semantic versioning, and prepends a new entry to `CHANGELOG.md`
 2. Merge to `main`
-3. Trigger **Deploy** workflow manually in GitHub Actions
+3. Run `/release` — pre-flight checks, then triggers `release.yaml` which publishes to Maven Central, tags the repo, creates the GitHub Release, and posts a Slack announcement
 4. Verify artifact on Maven Central
-5. Create GitHub Release with tag `vX.Y.Z` → triggers Slack announcement
 
 ### Publishing Secrets (GitHub)
 - `MAVEN_USERNAME` / `MAVEN_PASSWORD` — Sonatype credentials
@@ -298,19 +298,36 @@ See `RELEASE.md` for full details. Summary:
 ## CI/CD Workflows
 
 ### `primary.yaml` — runs on PRs to `main`
-1. `ktlintCheck` — formatting
-2. `detekt` — static analysis
-3. `lintRelease` — Android lint
-4. `jacocoCoverageVerification` — coverage ≥ 45%
-5. `assembleRelease` — build AAR
-6. SonarQube analysis
+1. `ktlintCheck` + `detekt` — formatting and static analysis
+2. `lintRelease` — Android lint
+3. `jacocoCoverageVerification` — coverage ≥ 45%
+4. SonarQube analysis
 
-### `deploy.yaml` — manual trigger
-- Runs all CI checks, then publishes to Maven Central
-- Creates and pushes a git tag `vX.Y.Z`
+### `release.yaml` — push to `main` or manual trigger
+- Detects new version (compares `mesh-link` to latest tag) — skips if already released
+- Validates CHANGELOG has a matching entry
+- Runs all CI checks (ktlint+detekt, lint, coverage, Sonar)
+- Publishes to Maven Central
+- Creates and pushes git tag `vX.Y.Z`
+- Creates GitHub Release with changelog notes and full-diff link
+- Posts Slack announcement
 
-### `release-announcement.yaml` — on GitHub Release published
-- Posts Slack notification with version details
+
+---
+
+## Claude Slash Commands
+
+Commands live in `.claude/commands/` and are invoked from within Claude Code with `/command-name`.
+
+| Command | What it does |
+|---|---|
+| `/bump-version` | Diffs HEAD vs latest tag, classifies changes as MAJOR/MINOR/PATCH, bumps `mesh-link` in `libs.versions.toml`, and prepends a new entry to `CHANGELOG.md` |
+| `/release` | Pre-flight check (version bump detected + changelog entry present), then triggers `release.yaml` and monitors the run to completion |
+
+Typical release flow:
+1. `/bump-version` — sets the version and writes the changelog
+2. Merge the version bump PR to `main`
+3. `/release` — triggers and watches the full release pipeline
 
 ---
 
