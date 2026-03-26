@@ -26,7 +26,7 @@ jobs:
       - name: Run ktlint & detekt 🧹
         run: ./gradlew link:ktlintCheck link:detekt
 
-      - name: Run lint 🧹
+      - name: Run lint 🧼
         run: ./gradlew link:lintRelease
 
       - name: Run tests & coverage verification 🥁

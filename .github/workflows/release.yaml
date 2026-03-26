@@ -76,11 +76,14 @@ jobs:
       - name: Run ktlint & detekt 🧹
         run: ./gradlew link:ktlintCheck link:detekt
 
-      - name: Run lint 🧹
+      - name: Run lint 🧼
         run: ./gradlew link:lintRelease
 
       - name: Run tests & coverage verification 🥁
         run: ./gradlew link:jacocoCoverageVerification
+
+      - name: Build 🧩
+        run: ./gradlew link:assembleRelease
 
       - name: Run sonar ✅
         timeout-minutes: 10
