@@ -48,7 +48,7 @@ jobs:
         if: steps.version_check.outputs.new_version == 'true'
         run: |
           VERSION="${{ steps.version_check.outputs.version }}"
-          if ! grep -q "^## ${VERSION}" CHANGELOG.md; then
+          if ! grep -Fq "## ${VERSION}" CHANGELOG.md; then
             echo "Error: No changelog entry found for version ${VERSION} in CHANGELOG.md"
             exit 1
           fi
