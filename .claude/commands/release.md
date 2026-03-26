@@ -1,3 +1,12 @@
+---
+name: release
+description: >
+  Run pre-flight checks and trigger the release workflow.
+  Use this when you want to release the current version to Maven Central.
+  Pre-conditions: version in gradle/libs.versions.toml must differ from the
+  latest git tag, and CHANGELOG.md must have a matching entry.
+---
+
 Run pre-flight checks and trigger the release workflow.
 
 ## Steps
