@@ -79,9 +79,6 @@ jobs:
       - name: Run tests & coverage verification 🥁
         run: ./gradlew link:jacocoCoverageVerification
 
-      - name: Build 🧩
-        run: ./gradlew link:assembleRelease
-
       - name: Run sonar ✅
         run: ./gradlew link:sonar
         env:
