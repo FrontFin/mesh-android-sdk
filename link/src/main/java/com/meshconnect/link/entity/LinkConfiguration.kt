@@ -5,7 +5,7 @@ package com.meshconnect.link.entity
  */
 data class LinkConfiguration(
     /**
-     * Link token returned by the Mesh backend. Base64-encoded.
+     * Link token returned by the Mesh backend.
      */
     val token: String,
     /**

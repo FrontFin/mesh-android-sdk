@@ -46,7 +46,7 @@ internal fun getThemeFromUrl(url: String): String? {
             JSONObject(decodeBase64(it)).optString("th").takeIf { s -> s.isNotBlank() }
         }
     } catch (expected: Exception) {
-        Log.e("Mesh SDK", "getThemeFromUrl", expected)
+        Log.e("MeshSDK", "getThemeFromUrl", expected)
         null
     }
 }

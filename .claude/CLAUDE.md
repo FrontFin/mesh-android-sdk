@@ -150,13 +150,13 @@ launcher.launch(LinkConfiguration(token = "your-link-token"))
 
 ```kotlin
 // Collect individual payloads as they arrive
-LinkPayloads.flow.collect { payload: LinkPayload -> ... }
+LinkPayloads.collect { payload: LinkPayload -> ... }
 
 // Collect raw event maps
-LinkEvents.flow.collect { event: Map<String, *> -> ... }
+LinkEvents.collect { event: Map<String, *> -> ... }
 ```
 
-Both are `SharedFlow` instances in `entity/LinkPayloads.kt` and `entity/LinkEvents.kt`.
+Both are `SharedFlow` instances in `link/src/main/java/com/meshconnect/link/LinkPayloads.kt` and `link/src/main/java/com/meshconnect/link/LinkEvents.kt`.
 
 ---
 
