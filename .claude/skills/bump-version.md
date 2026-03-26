@@ -109,7 +109,7 @@ Read `CHANGELOG.md` if it exists (it may not).
 Prepend a new section at the very top (above any existing content):
 
 ```markdown
-## [X.Y.Z]
+## X.Y.Z
 
 ### Added
 - ...
@@ -125,7 +125,7 @@ Prepend a new section at the very top (above any existing content):
 ```
 
 Rules for the summary:
-- Do **not** include a date — use only the version number: `## [X.Y.Z]`.
+- Do **not** include a date — use only the version number: `## X.Y.Z`.
 - Omit any section heading (`Added`, `Changed`, etc.) that has no items.
 - Keep each bullet to one line — describe **what changed and why it matters** to a consumer of
   the SDK, not internal implementation details. Example:
@@ -142,7 +142,7 @@ All notable changes to the Mesh Connect Android SDK are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [X.Y.Z]
+## X.Y.Z
 ...
 ```
 

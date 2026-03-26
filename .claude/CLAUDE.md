@@ -40,7 +40,7 @@ mesh-android-sdk/
 
 ## Build System
 
-- **Build tool:** Gradle with Kotlin DSL (`.gradle` files, version catalog)
+- **Build tool:** Gradle with Groovy DSL (`build.gradle` files, version catalog)
 - **AGP:** 8.6.1
 - **Kotlin:** 2.1.0
 - **Compile SDK:** 34 | **Target SDK:** 34
@@ -132,7 +132,7 @@ launcher.launch(LinkConfiguration(token = "your-link-token"))
 | `displayFiatCurrency` | `String?` | null | ISO 4217 code for fiat equivalent display (e.g. `"USD"`) |
 | `theme` | `LinkTheme?` | null | UI theme — `LIGHT`, `DARK`, or `SYSTEM` (follows device dark-mode) |
 
-### `LinkResult` (sealed interface, `entity/LinkResult.kt`)
+### `LinkResult` (sealed interface, `ui/LinkResult.kt`)
 
 - `LinkResult.LinkSuccess(payloads: List<LinkPayload>)`
 - `LinkResult.LinkExit(errorMessage: String?, exception: Exception?)`
@@ -169,7 +169,7 @@ Both are `SharedFlow` instances in `entity/LinkPayloads.kt` and `entity/LinkEven
 | `link/src/main/java/.../ui/LinkViewModel.kt` | Message processing, state, SharedFlow emission |
 | `link/src/main/java/.../ui/JSBridge.kt` | `@JavascriptInterface` — receives JS messages |
 | `link/src/main/java/.../entity/` | All public data models |
-| `link/src/main/java/.../entity/LinkTheme.kt` | `LIGHT`/`DARK`/`SYSTEM` enum with `LIGHT_VALUE`/`DARK_VALUE`/`SYSTEM_VALUE` constants |
+| `link/src/main/java/.../entity/LinkTheme.kt` | `LIGHT`/`DARK`/`SYSTEM` enum |
 | `link/src/main/java/.../usecase/DeserializeLinkMessageUseCase.kt` | JSON → LinkEvent |
 | `link/src/main/java/.../usecase/BroadcastLinkMessageUseCase.kt` | LinkEvent → SharedFlow |
 | `link/src/main/java/.../usecase/FilterLinkMessage.kt` | JsType → payload routing |
@@ -177,7 +177,7 @@ Both are `SharedFlow` instances in `entity/LinkPayloads.kt` and `entity/LinkEven
 | `link/src/main/java/.../utils/WhitelistedOrigins.kt` | Allowed WebView domains list |
 | `link/src/main/java/.../utils/CreateURL.kt` | Builds link URL from token/config (`lng`, `fiatCur`, `th` params) |
 | `link/src/main/java/.../utils/DecodeToken.kt` | Base64/URL token decoding |
-| `link/src/main/java/.../utils/Language.kt` | `getSystemLanguage()` + `resolveLanguage()` — device locale resolution |
+| `link/src/main/java/.../utils/Language.kt` | `systemLanguage` property + `resolveLanguage()` — device locale resolution |
 | `link/src/main/java/.../utils/Theme.kt` | `getThemeName()`, `resolveTheme()`, `getThemeFromUrl()`, `isSystemThemeDark()` |
 | `link/src/main/AndroidManifest.xml` | Permissions, LinkActivity declaration |
 | `link/proguard-rules.pro` | R8/ProGuard rules for SDK consumers |
@@ -326,7 +326,7 @@ See `RELEASE.md` for full details. Summary:
   5. Add tests in the corresponding test files
 - **Adding a whitelisted domain:** Edit `WhitelistedOrigins.kt` and add a test case in `WhitelistedOriginsTest`
 - **Changing the public API:** Update ProGuard rules in `link/proguard-rules.pro` if new public classes are added
-- **`LinkTheme` string values:** Always use `LinkTheme.LIGHT_VALUE`, `DARK_VALUE`, `SYSTEM_VALUE` constants instead of raw string literals — never hardcode `"light"`, `"dark"`, `"system"` for theme
+- **`LinkTheme` string values:** Always use the `THEME_LIGHT`, `THEME_DARK`, `THEME_SYSTEM` constants defined in `Theme.kt` instead of raw string literals — never hardcode `"light"`, `"dark"`, `"system"` for theme
 - **`LinkTheme.valueOf` safety:** Use `LinkTheme.entries.find { it.name == name }` instead of `valueOf()` to avoid `IllegalArgumentException` on unrecognised values
 - **Mocking Android statics in tests:** Use `mockkStatic(::functionRef)` for top-level functions (e.g. `decodeBase64`, `isSystemThemeDark`) and `mockkStatic(ClassName::class)` for class statics (e.g. `Uri`, `Log`). Always pair with `unmockkStatic` in `@After`
 - **URL query parameters added by SDK:** `lng` (language), `fiatCur` (display fiat currency), `th` (theme) — see `CreateURL.kt`
