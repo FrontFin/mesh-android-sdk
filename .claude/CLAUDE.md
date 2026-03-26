@@ -299,9 +299,10 @@ See `RELEASE.md` for full details. Summary:
 
 ### `primary.yaml` — runs on PRs to `main`
 1. `ktlintCheck` + `detekt` — formatting and static analysis
-2. `lintRelease` — Android lint
-3. `jacocoCoverageVerification` — coverage ≥ 45%
-4. SonarQube analysis
+2. `assembleRelease` — builds the `link` module release artifact
+3. `lintRelease` — Android lint
+4. `jacocoCoverageVerification` — coverage ≥ 45%
+5. SonarQube analysis
 
 ### `release.yaml` — push to `main` or manual trigger
 - Detects new version (compares `mesh-link` to latest tag) — skips if already released
@@ -321,7 +322,7 @@ Commands live in `.claude/commands/` and are invoked from within Claude Code wit
 
 | Command | What it does |
 |---|---|
-| `/bump-version` | Diffs HEAD vs latest tag, classifies changes as MAJOR/MINOR/PATCH, bumps `mesh-link` in `libs.versions.toml`, and prepends a new entry to `CHANGELOG.md` |
+| `/bump-version` | Diffs HEAD vs latest tag, classifies changes as MAJOR/MINOR/PATCH, bumps `mesh-link` in `gradle/libs.versions.toml`, and prepends a new entry to `CHANGELOG.md` |
 | `/release` | Pre-flight check (version bump detected + changelog entry present), then triggers `release.yaml` and monitors the run to completion |
 
 Typical release flow:
