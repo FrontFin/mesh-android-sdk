@@ -9,4 +9,5 @@
 
 ## 3.2.0
 
-- Removed `transferDestinationTokens` from `LinkConfiguration`.
+### Removed
+- `transferDestinationTokens` from `LinkConfiguration`.

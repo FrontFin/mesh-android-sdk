@@ -126,7 +126,7 @@ Prepend a new section at the very top (above any existing content):
 
 Rules for the summary:
 - Do **not** include a date — use only the version number: `## X.Y.Z`.
-- Omit any section heading (`Added`, `Changed`, etc.) that has no items.
+- **Always** include at least one `### Added` / `### Changed` / `### Fixed` / `### Removed` sub-heading — never write bare bullets directly under a version heading. Omit section headings that have no items, but every version block must have at least one.
 - Keep each bullet to one line — describe **what changed and why it matters** to a consumer of
   the SDK, not internal implementation details. Example:
   - ✅ `Added \`theme\` parameter to \`LinkConfiguration\` for light/dark/system UI theming`
