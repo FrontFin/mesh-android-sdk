@@ -1,10 +1,15 @@
-# 🚀 Release Android SDK
+# Release Android SDK
 
-1. Update [mesh-link](https://github.com/FrontFin/mesh-android-sdk/blob/main/gradle/libs.versions.toml#L26) version according to [Semantic Versioning](https://semver.org/).
+## With Claude Code (recommended)
+
+1. Run `/bump-version` — diffs HEAD against the latest tag, picks the correct MAJOR/MINOR/PATCH bump, updates `mesh-link` in `gradle/libs.versions.toml`, and prepends a new entry to `CHANGELOG.md`.
 2. Merge into `main`.
-3. Run [Deploy Link SDK](https://github.com/FrontFin/mesh-android-sdk/actions/workflows/deploy.yaml).
-4. Verify new version appears on [Maven Central](https://central.sonatype.com/artifact/com.meshconnect/link). You can check the progress on [Deployments](https://central.sonatype.com/publishing).
-5. [Draft a new release](https://github.com/FrontFin/mesh-android-sdk/releases/new).
-6. "Select a tag", according to the version.
-7. “Generate release notes”, use [Mastering SDK Release on GitHub](https://www.notion.so/Mastering-SDK-Release-on-GitHub-2e3f862e950a8079b8d9ccc7a2007a1a?pvs=21). 
-8. “Publish release”.
+3. Run `/release` — validates the version and changelog, triggers the release workflow, and monitors it to completion. The workflow publishes to Maven Central, creates the git tag, creates the GitHub Release, and posts a Slack announcement automatically.
+4. Verify the new version appears on [Maven Central](https://central.sonatype.com/artifact/com.meshconnect/link).
+
+## Manually
+
+1. Update [mesh-link](https://github.com/FrontFin/mesh-android-sdk/blob/main/gradle/libs.versions.toml) version according to [Semantic Versioning](https://semver.org/) and prepend a matching entry to `CHANGELOG.md`.
+2. Merge into `main`.
+3. Trigger [Release](https://github.com/FrontFin/mesh-android-sdk/actions/workflows/release.yaml) workflow manually.
+4. Verify the new version appears on [Maven Central](https://central.sonatype.com/artifact/com.meshconnect/link). You can check progress on [Deployments](https://central.sonatype.com/publishing).
