@@ -98,6 +98,7 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
 
       - name: Create GitHub Release 🚀
+        id: create_release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -118,3 +119,46 @@ jobs:
             --title "$VERSION" \
             --notes-file /tmp/release_notes.md \
             --target main
+
+          RELEASE_URL=$(gh release view "$VERSION" --json url --jq '.url')
+          echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Determine version bump type 📊
+        id: bump_type
+        run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
+          PREV_TAG="${{ needs.check-version.outputs.previous_tag }}"
+
+          IFS='.' read -r L_MAJOR L_MINOR L_PATCH <<< "$VERSION"
+          IFS='.' read -r P_MAJOR P_MINOR P_PATCH <<< "$PREV_TAG"
+
+          if [[ "$L_MAJOR" -gt "$P_MAJOR" ]]; then
+            MESSAGE=":exclamation: Major (breaking change)"
+          elif [[ "$L_MINOR" -gt "$P_MINOR" ]]; then
+            MESSAGE=":yo-yo: Minor (non-breaking change, new feature)"
+          else
+            MESSAGE=":test_tube: Patch (non-breaking change, bugfix or improvement)"
+          fi
+
+          echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Send release announcement to Slack 📣
+        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            blocks:
+              - type: "header"
+                text:
+                  type: "plain_text"
+                  text: ":android: Android SDK Release: ${{ needs.check-version.outputs.version }}"
+                  emoji: true
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "${{ steps.bump_type.outputs.message }}"
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "<!subteam^S091246FEDR> view release on <${{ steps.create_release.outputs.release_url }}|${{ github.repository }}>"
