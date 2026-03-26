@@ -114,7 +114,7 @@ jobs:
           VERSION="${{ needs.check-version.outputs.version }}"
           PREV_TAG="${{ needs.check-version.outputs.previous_tag }}"
 
-          CHANGELOG_SECTION=$(awk "/^## ${VERSION}/{found=1; next} found && /^## /{exit} found{print}" CHANGELOG.md)
+          CHANGELOG_SECTION=$(awk -v version="$VERSION" '$0 == "## " version {found=1; next} found && /^## /{exit} found{print}' CHANGELOG.md)
 
           cat > /tmp/release_notes.md << EOF
           ## What's Changed
