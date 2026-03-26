@@ -4,7 +4,7 @@
 
 This is the **Mesh Connect Android SDK** (`com.meshconnect:link`), a library that enables Android apps to integrate with the Mesh Connect platform via a WebView-based UI flow. Users authenticate with brokerages/crypto wallets and the SDK returns tokens and transfer results to the host app.
 
-- **Current version:** 3.2.0 (defined in `gradle/libs.versions.toml`)
+- **Current version:** see `mesh-link` in `gradle/libs.versions.toml`
 - **Maven coordinates:** `com.meshconnect:link`
 - **GitHub:** https://github.com/FrontFin/mesh-android-sdk
 - **License:** MIT
