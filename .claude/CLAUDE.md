@@ -286,7 +286,7 @@ See `RELEASE.md` for full details. Summary:
 
 1. Run `/bump-version` — automatically diffs HEAD against the latest tag, bumps `mesh-link` in `gradle/libs.versions.toml` using semantic versioning, and prepends a new entry to `CHANGELOG.md`
 2. Merge to `main`
-3. Run `/release` — pre-flight checks, then triggers `release.yaml` which publishes to Maven Central, tags the repo, creates the GitHub Release, and posts a Slack announcement
+3. The release workflow starts automatically on merge to `main`. Optionally run `/release` to trigger it manually or monitor progress
 4. Verify artifact on Maven Central
 
 ### Publishing Secrets (GitHub)
