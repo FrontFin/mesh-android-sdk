@@ -40,6 +40,16 @@ jobs:
             echo "previous_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Validate changelog 📋
+        if: steps.version_check.outputs.new_version == 'true'
+        run: |
+          VERSION="${{ steps.version_check.outputs.version }}"
+          if ! grep -q "^## ${VERSION}" CHANGELOG.md; then
+            echo "Error: No changelog entry found for version ${VERSION} in CHANGELOG.md"
+            exit 1
+          fi
+          echo "Changelog entry for ${VERSION} found ✓"
+
   release:
     needs: check-version
     if: needs.check-version.outputs.new_version == 'true'
@@ -62,15 +72,6 @@ jobs:
 
       - name: Setup Android SDK 🎁
         uses: android-actions/setup-android@v3
-
-      - name: Validate changelog 📋
-        run: |
-          VERSION="${{ needs.check-version.outputs.version }}"
-          if ! grep -q "^## ${VERSION}" CHANGELOG.md; then
-            echo "Error: No changelog entry found for version ${VERSION} in CHANGELOG.md"
-            exit 1
-          fi
-          echo "Changelog entry for ${VERSION} found ✓"
 
       - name: Run code quality checks 🧹
         run: ./gradlew link:ktlintCheck link:detekt link:lintRelease
