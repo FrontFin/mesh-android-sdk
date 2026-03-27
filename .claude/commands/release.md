@@ -13,7 +13,7 @@ Run pre-flight checks and trigger the release workflow.
 
 1. **Read the current version** from `gradle/libs.versions.toml`:
    ```
-   grep "mesh-link" gradle/libs.versions.toml -m 1 | cut -d "=" -f2 | xargs
+   grep -m1 '^mesh-link\s*=' gradle/libs.versions.toml | cut -d "=" -f2 | tr -d ' "'
    ```
 
 2. **Get the latest git tag**:
