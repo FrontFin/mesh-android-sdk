@@ -40,7 +40,7 @@ jobs:
             echo "$s"
           }
 
-          VERSION=$(grep -m1 '^mesh-link\s*=' gradle/libs.versions.toml | cut -d= -f2-)
+          VERSION=$(grep -m1 '^mesh-link[[:space:]]*=' gradle/libs.versions.toml | cut -d= -f2-)
           VERSION=$(normalize_semver "$VERSION")
           LATEST_TAG=$(normalize_semver "$(git tag --sort=-v:refname | head -n 1)")
 
@@ -92,8 +92,12 @@ jobs:
         if: steps.version_check.outputs.new_version == 'true'
         run: |
           VERSION="${{ steps.version_check.outputs.version }}"
+          if [ ! -f CHANGELOG.md ]; then
+            echo "::error::Missing CHANGELOG.md file."
+            exit 1
+          fi
           if ! grep -Fq "## ${VERSION}" CHANGELOG.md; then
-            echo "Error: No changelog entry found for version ${VERSION} in CHANGELOG.md"
+            echo "::error::No changelog entry found for version ${VERSION} in CHANGELOG.md"
             exit 1
           fi
           echo "Changelog entry for ${VERSION} found ✓"
