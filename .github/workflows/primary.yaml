@@ -1,4 +1,4 @@
-name: Build & Test Link SDK
+name: CI
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-test:
+  checks:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -23,8 +23,11 @@ jobs:
       - name: Setup Android SDK 🎁
         uses: android-actions/setup-android@v3
 
-      - name: Run code quality checks 🧹
-        run: ./gradlew link:ktlintCheck link:detekt link:lintRelease
+      - name: Run ktlint & detekt 🧹
+        run: ./gradlew link:ktlintCheck link:detekt
+
+      - name: Run lint 🧼
+        run: ./gradlew link:lintRelease
 
       - name: Run tests & coverage verification 🥁
         run: ./gradlew link:jacocoCoverageVerification
@@ -33,6 +36,7 @@ jobs:
         run: ./gradlew link:assembleRelease
 
       - name: Run sonar ✅
+        timeout-minutes: 10
         run: ./gradlew link:sonar
         env:
           ORG_GRADLE_PROJECT_sonarProjectKey: ${{ vars.SONAR_PROJECT_KEY }}
