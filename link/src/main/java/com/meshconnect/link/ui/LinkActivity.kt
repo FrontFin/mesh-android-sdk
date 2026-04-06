@@ -140,6 +140,17 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        binding.webView.onResume()
+        binding.webView.resumeTimers()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.webView.onPause()
+    }
+
     @Deprecated("Deprecated in Java")
     @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
