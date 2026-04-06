@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.3.1
+
+### Fixed
+- Added `onResume`/`onPause` WebView lifecycle calls to ensure JavaScript timers are properly resumed when the host activity returns to the foreground.
+
 ## 3.3.0
 
 ### Added
