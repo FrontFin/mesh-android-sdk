@@ -12,14 +12,17 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Preserve source file and line number information so that Crashlytics stack traces
+# are human-readable without a mapping file upload.
+-keepattributes SourceFile,LineNumberTable
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
--flattenpackagehierarchy com.meshconnect.link
+# Rename the SourceFile attribute so the original filename is hidden while keeping
+# line numbers intact for deobfuscation.
+-renamesourcefileattribute SourceFile
+
+# Do NOT use -flattenpackagehierarchy for SDK classes: it can move kept Parcelable
+# classes out of their declared packages, causing class-name mismatches when Android
+# resolves the Parcelable.Creator via Class.forName during Intent result unparceling.
 -keepattributes *Annotation*, InnerClasses
 -dontnote kotlinx.serialization.AnnotationsKt # core serialization annotations
 

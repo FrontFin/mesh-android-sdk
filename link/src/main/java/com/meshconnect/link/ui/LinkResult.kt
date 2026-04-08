@@ -10,6 +10,4 @@ sealed interface LinkResult : Parcelable
 data class LinkSuccess(val payloads: List<LinkPayload>) : LinkResult
 
 @Parcelize
-data class LinkExit(val error: Throwable? = null) : LinkResult {
-    val errorMessage: String? get() = error?.message
-}
+data class LinkExit(val errorMessage: String? = null) : LinkResult
