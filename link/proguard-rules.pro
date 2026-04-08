@@ -12,13 +12,10 @@
 #   public *;
 #}
 
-# Preserve source file and line number information so that Crashlytics stack traces
-# are human-readable without a mapping file upload.
+# Preserve source-file names and line numbers so Crashlytics stack traces include
+# file/line information. Class and method names will still be obfuscated unless a
+# mapping file is uploaded to Crashlytics.
 -keepattributes SourceFile,LineNumberTable
-
-# Rename the SourceFile attribute so the original filename is hidden while keeping
-# line numbers intact for deobfuscation.
--renamesourcefileattribute SourceFile
 
 # Do NOT use -flattenpackagehierarchy for SDK classes: it can move kept Parcelable
 # classes out of their declared packages, causing class-name mismatches when Android

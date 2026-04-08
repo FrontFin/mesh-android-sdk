@@ -23,8 +23,32 @@ class LinkResultTest {
 
     @Test
     fun `LinkExit errorMessage is null when null is passed`() {
-        LinkExit(null).errorMessage.shouldBeNull()
+        LinkExit(errorMessage = null).errorMessage.shouldBeNull()
     }
+
+    // region deprecated compat
+
+    @Test
+    fun `deprecated Throwable constructor maps message to errorMessage`() {
+        @Suppress("DEPRECATION")
+        val exit = LinkExit(RuntimeException("legacy error"))
+        exit.errorMessage shouldBeEqualTo "legacy error"
+    }
+
+    @Test
+    fun `deprecated Throwable constructor with null maps to null errorMessage`() {
+        @Suppress("DEPRECATION")
+        val exit = LinkExit(null as Throwable?)
+        exit.errorMessage.shouldBeNull()
+    }
+
+    @Test
+    fun `deprecated error property is always null`() {
+        @Suppress("DEPRECATION")
+        LinkExit(RuntimeException("x")).error.shouldBeNull()
+    }
+
+    // endregion
 
     // endregion
 
