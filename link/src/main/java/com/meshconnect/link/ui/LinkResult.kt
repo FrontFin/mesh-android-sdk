@@ -34,7 +34,7 @@ data class LinkExit(val errorMessage: String? = null) : LinkResult {
      */
     @Deprecated(
         message =
-            "Use LinkExit(errorMessage = throwable?.message) instead. " +
+            "Use LinkExit(errorMessage = error?.message) instead. " +
                 "Throwable cannot be safely parcelled; only the message string is preserved.",
         replaceWith = ReplaceWith("LinkExit(errorMessage = error?.message)"),
     )
