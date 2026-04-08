@@ -63,12 +63,14 @@ class LinkResultTest {
 
     @Test
     fun `getLinkResult returns LinkExit with message when getParcelable throws`() {
-        // Build.VERSION.SDK_INT is 0 in JVM tests (below TIRAMISU), so the deprecated
-        // getParcelableExtra(String) overload is called by the inline getParcelable extension.
+        val exception = RuntimeException("unparcel failure")
         val intent =
             mockk<Intent> {
+                // Stub both overloads so the test is not sensitive to which branch
+                // the inline getParcelable extension picks based on Build.VERSION.SDK_INT.
                 @Suppress("DEPRECATION")
-                every { getParcelableExtra<LinkResult>(any()) } throws RuntimeException("unparcel failure")
+                every { getParcelableExtra<LinkResult>(any()) } throws exception
+                every { getParcelableExtra(any(), LinkResult::class.java) } throws exception
             }
         val result = LinkActivity.getLinkResult(intent)
         result.shouldBeInstanceOf<LinkExit>()
