@@ -12,14 +12,18 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Preserve source-file names and line numbers so Crashlytics stack traces include
+# file/line information. Class and method names will still be obfuscated unless a
+# mapping file is uploaded to Crashlytics.
+-keepattributes SourceFile,LineNumberTable
+
+# ProGuard/R8 obfuscation option that moves all obfuscated classes into a single flat package
+# (or a specified package), collapsing the original package structure.
+-flattenpackagehierarchy com.meshconnect.link
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
--flattenpackagehierarchy com.meshconnect.link
 -keepattributes *Annotation*, InnerClasses
 -dontnote kotlinx.serialization.AnnotationsKt # core serialization annotations
 

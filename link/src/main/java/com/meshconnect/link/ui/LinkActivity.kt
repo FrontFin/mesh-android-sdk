@@ -83,8 +83,11 @@ internal class LinkActivity : AppCompatActivity() {
         }
 
         fun getLinkResult(data: Intent?): LinkResult {
-            val result = data?.getParcelable<LinkResult>(DATA)
-            return result ?: LinkExit()
+            return try {
+                data?.getParcelable<LinkResult>(DATA) ?: LinkExit()
+            } catch (expected: Exception) {
+                LinkExit(expected.message)
+            }
         }
     }
 
@@ -232,7 +235,7 @@ internal class LinkActivity : AppCompatActivity() {
     }
 
     private fun setExitResult(throwable: Throwable?) {
-        setResult(RESULT_CANCELED, LinkExit(throwable))
+        setResult(RESULT_CANCELED, LinkExit(throwable?.message))
     }
 
     private fun setResult(
