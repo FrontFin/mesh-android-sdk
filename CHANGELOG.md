@@ -5,7 +5,6 @@
 ### Changed
 - `LinkExit` now exposes `errorMessage: String?` as a direct field instead of deriving it from a `Throwable`. This eliminates a Parcelable crash (`Class.ifTable` NPE) seen in Crashlytics. 
 - The old `LinkExit(Throwable?)` constructor and `error` property are retained as deprecated — they compile without errors and map to `errorMessage` internally.
-- Removed the `-flattenpackagehierarchy` consumer ProGuard rule that could cause class-name mismatches for Parcelable creators.
 - Enabled `-keepattributes SourceFile,LineNumberTable` in consumer ProGuard rules so Crashlytics stack traces are human-readable.
 
 ## 3.3.1
