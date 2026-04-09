@@ -17,9 +17,13 @@
 # mapping file is uploaded to Crashlytics.
 -keepattributes SourceFile,LineNumberTable
 
-# Do NOT use -flattenpackagehierarchy for SDK classes: it can move kept Parcelable
-# classes out of their declared packages, causing class-name mismatches when Android
-# resolves the Parcelable.Creator via Class.forName during Intent result unparceling.
+# ProGuard/R8 obfuscation option that moves all obfuscated classes into a single flat package
+# (or a specified package), collapsing the original package structure.
+-flattenpackagehierarchy com.meshconnect.link
+
+# If you keep the line number information, uncomment this to
+# hide the original source file name.
+#-renamesourcefileattribute SourceFile
 -keepattributes *Annotation*, InnerClasses
 -dontnote kotlinx.serialization.AnnotationsKt # core serialization annotations
 
