@@ -46,14 +46,15 @@ jobs:
 
           VERSION=$(grep -m1 '^mesh-link[[:space:]]*=' gradle/libs.versions.toml | cut -d= -f2-)
           VERSION=$(normalize_semver "$VERSION")
-          LATEST_TAG=$(normalize_semver "$(git tag --sort=-v:refname | head -n 1)")
+          LATEST_RAW_TAG=$(git tag --sort=-v:refname | head -n 1)
+          LATEST_TAG=$(normalize_semver "$LATEST_RAW_TAG")
 
           if [[ ! "$VERSION" =~ $SEMVER_RE ]]; then
             echo "::error::mesh-link in libs.versions.toml must be MAJOR.MINOR.PATCH (no quotes/v prefix stored in outputs); got: ${VERSION:-<empty>}"
             exit 1
           fi
           if [[ -n "$LATEST_TAG" && ! "$LATEST_TAG" =~ $SEMVER_RE ]]; then
-            echo "::error::Latest git tag must be MAJOR.MINOR.PATCH or unset; normalize or fix tag: $(git tag --sort=-v:refname | head -n 1)"
+            echo "::error::Latest git tag must be MAJOR.MINOR.PATCH or unset; normalize or fix tag: $LATEST_RAW_TAG"
             exit 1
           fi
 
@@ -77,7 +78,7 @@ jobs:
             echo "::error::mesh-link in libs.versions.toml ($VERSION) is not greater than the latest tag ($LATEST_TAG) — accidental downgrade?"
             exit 1
           elif [[ -n "$(git tag -l "$VERSION")" ]]; then
-            echo "::error::Tag $VERSION already exists — bump the version in libs.versions.toml before releasing"
+            echo "::error::Tag $VERSION already exists, means that it was released before — accidental reuse?"
             exit 1
           else
             echo "New version detected: $VERSION (previous: ${LATEST_TAG:-<none>})"
@@ -96,7 +97,7 @@ jobs:
               if [[ "$L_MAJOR" -gt "$P_MAJOR" ]]; then
                 MESSAGE=":exclamation: Major (breaking change)"
               elif [[ "$L_MINOR" -gt "$P_MINOR" ]]; then
-                MESSAGE=":yo-yo: Minor (non-breaking change, new feature)"
+                MESSAGE=":yo-yo: Minor (new feature)"
               else
                 MESSAGE=":broom: Patch (bugfix or improvement)"
               fi
