@@ -1,4 +1,5 @@
 # Changelog
+<!-- releases are documented here -->
 
 ## 3.4.0
 
