@@ -4,19 +4,17 @@
 
 1. Run `/bump-version` — bumps to the correct version according to [Semantic Versioning](https://semver.org/) and prepends a new entry to `CHANGELOG.md`.
 2. Merge into `main`.
-3. The release workflow starts automatically on merge to `main`. Optionally run `/release` to trigger it manually.
+3. The release workflow starts automatically on merge to `main`. Optionally run [Release workflow](https://github.com/FrontFin/mesh-android-sdk/actions/workflows/release.yml) manually.
 4. Verify the new version appears on [Maven Central](https://central.sonatype.com/artifact/com.meshconnect/link).
 
 ## ✍🏼️ Manually
 
-1. Update [mesh-link](https://github.com/FrontFin/mesh-android-sdk/blob/main/gradle/libs.versions.toml) version according to [Semantic Versioning](https://semver.org/) and prepend a matching entry to `CHANGELOG.md`.
-2. Merge into `main`.
-3. The release workflow starts automatically on merge to `main`. Optionally trigger [Release](https://github.com/FrontFin/mesh-android-sdk/actions/workflows/release.yaml) workflow manually.
-4. Verify the new version appears on [Maven Central](https://central.sonatype.com/artifact/com.meshconnect/link).
+1. Update [mesh-link](https://github.com/FrontFin/mesh-android-sdk/blob/main/gradle/libs.versions.toml) version according to [Semantic Versioning](https://semver.org/).
+2. Add a new entry to `CHANGELOG.md`.
+3. Merge into `main`.
+4. The release workflow starts automatically on merge to `main`. Optionally trigger [Release workflow](https://github.com/FrontFin/mesh-android-sdk/actions/workflows/release.yml) manually.
+5. Verify the new version appears on [Maven Central](https://central.sonatype.com/artifact/com.meshconnect/link).
 
 
 > [!NOTE]
 > Publication on Maven Central can take **up to about 15 minutes** after the workflow finishes before the new version is visible.
-
-> [!TIP]
-> For publishing issues, contact [@vitalii-movchan-mesh](https://github.com/vitalii-movchan-mesh).
