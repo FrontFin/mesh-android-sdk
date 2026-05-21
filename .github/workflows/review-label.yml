@@ -1,5 +1,5 @@
 # This workflow automatically labels pull requests based on the number of lines changed.
-name: PR review time label
+name: Review Label
 
 on:
   pull_request:
