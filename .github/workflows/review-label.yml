@@ -41,7 +41,9 @@ jobs:
           echo "Applying label: $LABEL"
 
           for existing in "1 min review" "5 min review" "10 min review" "30 min review"; do
-            gh pr edit $PR_NUMBER --repo $REPO --remove-label "$existing" 2>/dev/null || true
+            if [[ "$existing" != "$LABEL" ]]; then
+              gh pr edit $PR_NUMBER --repo $REPO --remove-label "$existing" 2>/dev/null || true
+            fi
           done
 
           gh pr edit $PR_NUMBER --repo $REPO --add-label "$LABEL"
