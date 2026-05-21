@@ -1,3 +1,6 @@
+# This workflow runs on pushes to the main branch and on demand.
+# It checks if the version in libs.versions.toml has been updated compared to the latest git tag,
+# validates the changelog, runs CI checks, publishes to Maven Central, creates a git tag and GitHub release, and sends a Slack announcement.
 name: Release
 
 on:
@@ -22,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout 🎾
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -53,14 +56,30 @@ jobs:
             exit 1
           fi
 
+          semver_gt() {
+            # Returns 0 (true) if $1 is strictly greater than $2.
+            IFS='.' read -r A_MAJOR A_MINOR A_PATCH <<< "$1"
+            IFS='.' read -r B_MAJOR B_MINOR B_PATCH <<< "$2"
+            if [[ "$A_MAJOR" -gt "$B_MAJOR" ]]; then return 0; fi
+            if [[ "$A_MAJOR" -eq "$B_MAJOR" && "$A_MINOR" -gt "$B_MINOR" ]]; then return 0; fi
+            if [[ "$A_MAJOR" -eq "$B_MAJOR" && "$A_MINOR" -eq "$B_MINOR" && "$A_PATCH" -gt "$B_PATCH" ]]; then return 0; fi
+            return 1
+          }
+
           echo "Current version in libs.versions.toml: $VERSION"
           echo "Latest git tag: ${LATEST_TAG:-<none>}"
 
           if [[ "$VERSION" == "$LATEST_TAG" ]]; then
             echo "No new version detected — skipping release"
             echo "new_version=false" >> "$GITHUB_OUTPUT"
+          elif [[ -n "$LATEST_TAG" ]] && ! semver_gt "$VERSION" "$LATEST_TAG"; then
+            echo "::error::mesh-link in libs.versions.toml ($VERSION) is not greater than the latest tag ($LATEST_TAG) — accidental downgrade?"
+            exit 1
+          elif [[ -n "$(git tag -l "$VERSION")" ]]; then
+            echo "::error::Tag $VERSION already exists — bump the version in libs.versions.toml before releasing"
+            exit 1
           else
-            echo "New version detected: $VERSION (previous: $LATEST_TAG)"
+            echo "New version detected: $VERSION (previous: ${LATEST_TAG:-<none>})"
             echo "new_version=true" >> "$GITHUB_OUTPUT"
             echo "version=$VERSION" >> "$GITHUB_OUTPUT"
             echo "previous_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
@@ -78,7 +97,7 @@ jobs:
               elif [[ "$L_MINOR" -gt "$P_MINOR" ]]; then
                 MESSAGE=":yo-yo: Minor (non-breaking change, new feature)"
               else
-                MESSAGE=":test_tube: Patch (non-breaking change, bugfix or improvement)"
+                MESSAGE=":broom: Patch (bugfix or improvement)"
               fi
             fi
             {
@@ -112,7 +131,7 @@ jobs:
 
     steps:
       - name: Checkout 🎾
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -169,7 +188,7 @@ jobs:
 
           ${CHANGELOG_SECTION}
 
-          **Full Changelog**: https://github.com/FrontFin/mesh-android-sdk/compare/${PREV_TAG}...${VERSION}
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${VERSION}
           EOF
 
           gh release create "$VERSION" \
@@ -177,8 +196,7 @@ jobs:
             --notes-file /tmp/release_notes.md \
             --target main
 
-          RELEASE_URL="https://github.com/FrontFin/mesh-android-sdk/releases/tag/${VERSION}"
-          echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
+          echo "release_url=https://github.com/${{ github.repository }}/releases/tag/${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Send release announcement to Slack 📣
         uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a
