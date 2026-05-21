@@ -28,10 +28,10 @@ mesh-android-sdk/
 ├── gradle/
 │   └── libs.versions.toml      # Centralized dependency/version catalog
 ├── .github/workflows/
-│   ├── primary.yaml            # CI: lint + tests + build on PRs to main
-│   └── release.yaml            # CD: publish, tag, GitHub Release, Slack announcement
+│   ├── ci.yml                  # CI: lint + tests + build on PRs to main
+│   └── release.yml             # CD: publish, tag, GitHub Release, Slack announcement
 ├── .claude/
-│   └── commands/               # Claude slash commands (bump-version, release)
+│   └── commands/               # Claude slash commands (bump-version)
 ├── RELEASE.md                  # Manual release process documentation
 ├── detekt.yml                  # Detekt static analysis configuration
 └── build.gradle                # Root build file
@@ -286,7 +286,7 @@ See `RELEASE.md` for full details. Summary:
 
 1. Run `/bump-version` — automatically diffs HEAD against the latest tag, bumps `mesh-link` in `gradle/libs.versions.toml` using semantic versioning, and prepends a new entry to `CHANGELOG.md`
 2. Merge to `main`
-3. The release workflow starts automatically on merge to `main`. Optionally run `/release` to trigger it manually or monitor progress
+3. The release workflow starts automatically on merge to `main`. Optionally trigger [Release workflow](https://github.com/FrontFin/mesh-android-sdk/actions/workflows/release.yml) manually.
 4. Verify artifact on Maven Central
 
 ### Publishing Secrets (GitHub)
@@ -297,14 +297,14 @@ See `RELEASE.md` for full details. Summary:
 
 ## CI/CD Workflows
 
-### `primary.yaml` — runs on PRs to `main`
+### `ci.yml` — runs on PRs to `main`
 1. `ktlintCheck` + `detekt` — formatting and static analysis
 2. `assembleRelease` — builds the `link` module release artifact
 3. `lintRelease` — Android lint
 4. `jacocoCoverageVerification` — coverage ≥ 45%
 5. SonarQube analysis
 
-### `release.yaml` — push to `main` or manual trigger
+### `release.yml` — push to `main` or manual trigger
 - Detects new version (compares `mesh-link` to latest tag) — skips if already released
 - Validates CHANGELOG has a matching entry
 - Runs all CI checks (ktlint+detekt, lint, coverage, Sonar)
@@ -323,12 +323,11 @@ Commands live in `.claude/commands/` and are invoked from within Claude Code wit
 | Command | What it does |
 |---|---|
 | `/bump-version` | Diffs HEAD vs latest tag, classifies changes as MAJOR/MINOR/PATCH, bumps `mesh-link` in `gradle/libs.versions.toml`, and prepends a new entry to `CHANGELOG.md` |
-| `/release` | Pre-flight check (version bump detected + changelog entry present), then triggers `release.yaml` and monitors the run to completion |
 
 Typical release flow:
 1. `/bump-version` — sets the version and writes the changelog
 2. Merge the version bump PR to `main`
-3. `/release` — triggers and watches the full release pipeline
+3. Release workflow triggers automatically
 
 ---
 
