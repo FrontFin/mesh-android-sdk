@@ -1,8 +1,8 @@
-## PR overview
+## Summary
 
-<Add a link to the Jira issue and describe changes>
+<describe changes here>
 
-## Type of change
+### 🧩 Type of change
 
 - [ ] Bug fix (non-breaking)
 - [ ] New feature (non-breaking)
@@ -11,9 +11,7 @@
 - [ ] Refactor (no functional changes)
 - [ ] Documentation update
 
-## Checklist
-
-Please tick the options you have done:
+### ✅ Checklist
 
 - [ ] Performed a self-review, and it meets ticket criteria
 - [ ] Hard-to-understand areas are commented
