@@ -16,6 +16,7 @@ concurrency:
 jobs:
   check-version:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: github.ref == 'refs/heads/main'
     outputs:
       new_version: ${{ steps.version_check.outputs.new_version }}
@@ -121,19 +122,15 @@ jobs:
           fi
           echo "Changelog entry for ${VERSION} found ✓"
 
-  release:
+  ci:
     needs: check-version
     if: needs.check-version.outputs.new_version == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout 🎾
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Setup Java ♨️
         uses: actions/setup-java@v4
@@ -165,13 +162,42 @@ jobs:
           ORG_GRADLE_PROJECT_sonarHostUrl: ${{ vars.SONAR_HOST_URL }}
           ORG_GRADLE_PROJECT_sonarToken: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Publish release 🎉
+  publish:
+    needs: [check-version, ci]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout 🎾
+        uses: actions/checkout@v6
+
+      - name: Setup Java ♨️
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Android SDK 🎁
+        uses: android-actions/setup-android@v3
+
+      - name: Publish to Maven Central 🎉
         run: ./gradlew link:publishAndReleaseToMavenCentral --no-configuration-cache
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_PASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+
+  release:
+    needs: [check-version, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout 🎾
+        uses: actions/checkout@v6
 
       - name: Create GitHub Release 🚀
         id: create_release
