@@ -45,7 +45,7 @@ jobs:
 
       - name: Run sonar ✅
         timeout-minutes: 10
-        run: ./gradlew link:sonar --stacktrace
+        run: ./gradlew link:sonar
         env:
           ORG_GRADLE_PROJECT_sonarProjectKey: ${{ vars.SONAR_PROJECT_KEY }}
           ORG_GRADLE_PROJECT_sonarOrganization: ${{ vars.SONAR_ORGANIZATION }}
