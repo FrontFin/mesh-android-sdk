@@ -28,11 +28,11 @@ jobs:
 
           echo "Lines changed: $TOTAL ($ADDITIONS added, $DELETIONS deleted)"
 
-          if [[ $TOTAL -lt 50 ]]; then
+          if [[ $TOTAL -lt 100 ]]; then
             LABEL="1 min review"
-          elif [[ $TOTAL -le 250 ]]; then
+          elif [[ $TOTAL -le 500 ]]; then
             LABEL="5 min review"
-          elif [[ $TOTAL -le 1000 ]]; then
+          elif [[ $TOTAL -le 1500 ]]; then
             LABEL="10 min review"
           else
             LABEL="30 min review"
