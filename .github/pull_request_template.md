@@ -1,6 +1,6 @@
-## Summary
+## Overview
 
-<describe changes here>
+<decription>
 
 ### 🎨 Type of change
 
@@ -11,7 +11,7 @@
 - [ ] Refactor (no functional changes)
 - [ ] Documentation update
 
-### ☑️ Checklist
+### 👌 Checklist
 
 - [ ] I've performed a self-review, and it meets ticket criteria.
 - [ ] I've commented hard-to-understand areas.
