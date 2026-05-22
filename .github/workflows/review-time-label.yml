@@ -12,6 +12,7 @@ jobs:
     continue-on-error: true
     permissions:
       pull-requests: write
+      issues: write
 
     steps:
       - name: Apply review time label 🏷️
