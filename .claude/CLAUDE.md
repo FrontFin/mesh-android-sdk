@@ -329,6 +329,14 @@ Typical release flow:
 2. Merge the version bump PR to `main`
 3. Release workflow triggers automatically
 
+### Pull Request Template
+
+When creating PRs (via `gh pr create` or the GitHub UI), always use the repo template at [`.github/pull_request_template.md`](../.github/pull_request_template.md):
+
+- Fill in the **Summary** section with a concise description of what changed and why
+- Leave all checklist boxes **unchecked** — the author fills those in manually
+- Do **not** modify the template structure
+
 ---
 
 ## Development Tips
