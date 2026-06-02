@@ -1,6 +1,3 @@
-# This workflow runs on pushes to the main branch and on demand.
-# It checks if the version in libs.versions.toml has been updated compared to the latest git tag,
-# validates the changelog, runs CI checks, publishes to Maven Central, creates a git tag and GitHub release, and sends a Slack announcement.
 name: Release
 
 on:
