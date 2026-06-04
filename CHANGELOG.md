@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.4.1
+
+### Fixed
+- `LinkActivity` no longer covers the status bar and bottom navigation bar on Android — system bar insets are now applied as padding to the root view.
+
 ## 3.4.0
 
 ### Changed
