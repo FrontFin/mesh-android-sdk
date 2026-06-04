@@ -7,6 +7,7 @@
 
 ### Changed
 - Updated `compileSdk`/`targetSdk` to 36.
+
 ## 3.4.0
 
 ### Changed
