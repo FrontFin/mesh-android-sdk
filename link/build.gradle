@@ -17,10 +17,10 @@ def MESH_VERSION = libs.versions.mesh.link.get()
 android {
     namespace 'com.meshconnect.link'
 
-    compileSdk 34
+    compileSdk 36
     defaultConfig {
         minSdk 24
-        targetSdk 34
+        targetSdk 36
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro'
         versionCode 1
