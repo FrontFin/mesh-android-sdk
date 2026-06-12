@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.4.2
+
+### Fixed
+- Removed `-flattenpackagehierarchy` from the rules shipped to consuming apps, so the SDK no longer repackages and renames host-app classes — fixing unreadable, meshconnect-prefixed class names in consumer logs.
+
+### Changed
+- Split the SDK's ProGuard config into `consumer-rules.pro` (public-API keep rules shipped in the AAR) and `proguard-rules.pro` (library-only build options), preventing global obfuscation directives from leaking into host-app builds.
+
 ## 3.4.1
 
 ### Fixed
