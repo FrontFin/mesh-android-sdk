@@ -19,6 +19,12 @@
 
 # ProGuard/R8 obfuscation option that moves all obfuscated classes into a single flat package
 # (or a specified package), collapsing the original package structure.
+#
+# This is a GLOBAL R8 directive: it repackages every renamed package in the current
+# R8 run into com.meshconnect.link. It is safe ONLY for the SDK's own release build
+# (this file). It MUST NOT live in consumer-rules.pro / consumerProguardFiles — there
+# the R8 scope is the whole consuming app, so it would repackage the consumer's own
+# classes under com.meshconnect.link and corrupt their logs/stack traces.
 -flattenpackagehierarchy com.meshconnect.link
 
 # If you keep the line number information, uncomment this to
