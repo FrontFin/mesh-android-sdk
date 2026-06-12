@@ -16,10 +16,7 @@
 -keep class com.meshconnect.link.LinkEventsKt { *; }
 -keep class com.meshconnect.link.LinkPayloadsKt { *; }
 
-# Retain annotations and inner-class metadata so Gson reflection on the SDK's
-# entities (e.g. @SerializedName, TypeToken generics) keeps working after R8.
--keepattributes *Annotation*, InnerClasses
-
+-keepattributes *Annotation*, InnerClasses, Signature
 #--------- Begin: proguard configuration for Gson ------------
 # https://github.com/google/gson/blob/master/examples/android-proguard-example/proguard.cfg
 -keep public class * implements java.lang.reflect.Type
