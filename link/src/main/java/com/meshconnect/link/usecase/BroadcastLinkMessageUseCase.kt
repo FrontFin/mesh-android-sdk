@@ -70,6 +70,7 @@ internal object FilterLinkMessage {
         val type = map["type"]
         val typeChange = typesMap[type]
         return when {
+            typeChange == "integrationConnected" -> mapOf("type" to typeChange)
             typeChange != null -> map + ("type" to typeChange)
             types.contains(type) -> map
             else -> null
