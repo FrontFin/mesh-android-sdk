@@ -26,6 +26,7 @@ internal object FilterLinkMessage {
     private val types =
         listOf(
             "integrationConnectionError",
+            "integrationConnected",
             "integrationSelected",
             "credentialsEntered",
             "transferStarted",
@@ -36,6 +37,8 @@ internal object FilterLinkMessage {
             "transferExecutionError",
             "transferNoEligibleAssets",
             "walletMessageSigned",
+            "defiWalletError",
+            "paypalComplianceDeclined",
             "verifyDonePage",
             "verifyWalletRejected",
             "integrationMfaRequired",
@@ -44,6 +47,7 @@ internal object FilterLinkMessage {
             "integrationAccountSelectionRequired",
             "transferAmountEntered",
             "transferMfaRequired",
+            "transferMfaEntered",
             "transferKycRequired",
             "connectionDeclined",
             "transferConfigureError",
@@ -59,6 +63,7 @@ internal object FilterLinkMessage {
             "gasIncreaseWarning",
             "linkTransferQRGenerated",
             "methodSelected",
+            "homePageLoaded",
         )
 
     fun filter(map: Map<String, *>): Map<String, *>? {

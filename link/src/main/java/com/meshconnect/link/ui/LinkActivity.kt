@@ -104,7 +104,7 @@ internal class LinkActivity : AppCompatActivity() {
             val language = resolveLanguage(intent.getStringExtra(LANGUAGE))
             val fiatCurrency = intent.getStringExtra(FIAT_CURRENCY)
             val theme = resolveTheme(intent.getStringExtra(THEME), this::isSystemThemeDark)
-            createURL(link, mapOf("lng" to language, "fiatCur" to fiatCurrency, "th" to theme))
+            createURL(link, mapOf("lng" to language, "fiatCur" to fiatCurrency, "th" to theme, "platform" to "android"))
         }.onSuccess { url ->
             setContentView(binding.root)
 
