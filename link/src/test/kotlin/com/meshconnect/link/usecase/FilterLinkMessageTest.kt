@@ -41,6 +41,14 @@ class FilterLinkMessageTest {
             .shouldContainSame(mapOf("type" to "integrationConnected"))
     }
 
+    @Test
+    fun `direct integrationConnected with payload strips the payload`() {
+        val input = mapOf("type" to "integrationConnected", "payload" to mapOf("accountTokens" to listOf<Any>()))
+        filterLinkMessage.filter(input)
+            .shouldNotBeNull()
+            .shouldContainSame(mapOf("type" to "integrationConnected"))
+    }
+
     private fun verifyTypeReplaced(
         original: String,
         expected: String,

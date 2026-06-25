@@ -69,8 +69,9 @@ internal object FilterLinkMessage {
     fun filter(map: Map<String, *>): Map<String, *>? {
         val type = map["type"]
         val typeChange = typesMap[type]
+        val outputType = typeChange ?: type
         return when {
-            typeChange == "integrationConnected" -> mapOf("type" to typeChange)
+            outputType == "integrationConnected" -> mapOf("type" to "integrationConnected")
             typeChange != null -> map + ("type" to typeChange)
             types.contains(type) -> map
             else -> null
