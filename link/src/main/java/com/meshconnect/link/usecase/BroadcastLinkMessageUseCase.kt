@@ -15,10 +15,15 @@ internal class BroadcastLinkMessageUseCase(
 }
 
 internal object FilterLinkMessage {
+    private const val INTEGRATION_CONNECTED = "integrationConnected"
+
+    // Event types that must never carry a payload to the public LinkEvents stream.
+    private val strippedPayloadTypes = setOf(INTEGRATION_CONNECTED)
+
     private val typesMap =
         mapOf(
-            "brokerageAccountAccessToken" to "integrationConnected",
-            "delayedAuthentication" to "integrationConnected",
+            "brokerageAccountAccessToken" to INTEGRATION_CONNECTED,
+            "delayedAuthentication" to INTEGRATION_CONNECTED,
             "transferFinished" to "transferCompleted",
             "loaded" to "pageLoaded",
         )
@@ -26,7 +31,6 @@ internal object FilterLinkMessage {
     private val types =
         listOf(
             "integrationConnectionError",
-            "integrationConnected",
             "integrationSelected",
             "credentialsEntered",
             "transferStarted",
@@ -71,7 +75,7 @@ internal object FilterLinkMessage {
         val typeChange = typesMap[type]
         val outputType = typeChange ?: type
         return when {
-            outputType == "integrationConnected" -> mapOf("type" to "integrationConnected")
+            outputType in strippedPayloadTypes -> mapOf("type" to outputType)
             typeChange != null -> map + ("type" to typeChange)
             types.contains(type) -> map
             else -> null
