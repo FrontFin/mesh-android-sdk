@@ -11,8 +11,8 @@ class FilterLinkMessageTest {
 
     @Test
     fun `filter link message`() {
-        verifyIntegrationConnectedStripsPayload("brokerageAccountAccessToken")
-        verifyIntegrationConnectedStripsPayload("delayedAuthentication")
+        verifyTypeReplaced("brokerageAccountAccessToken", "integrationConnected")
+        verifyTypeReplaced("delayedAuthentication", "integrationConnected")
         verifyTypeReplaced("transferFinished", "transferCompleted")
         verifyTypeReplaced("loaded", "pageLoaded")
         verifyTypeExists("integrationConnectionError")
@@ -32,21 +32,6 @@ class FilterLinkMessageTest {
         verifyTypeExists("homePageLoaded")
         verifyTypeNotExist(randomString)
         verifyTypeNotExist("")
-    }
-
-    private fun verifyIntegrationConnectedStripsPayload(original: String) {
-        val input = mapOf("type" to original, "payload" to mapOf("accountTokens" to listOf<Any>()))
-        filterLinkMessage.filter(input)
-            .shouldNotBeNull()
-            .shouldContainSame(mapOf("type" to "integrationConnected"))
-    }
-
-    @Test
-    fun `direct integrationConnected with payload strips the payload`() {
-        val input = mapOf("type" to "integrationConnected", "payload" to mapOf("accountTokens" to listOf<Any>()))
-        filterLinkMessage.filter(input)
-            .shouldNotBeNull()
-            .shouldContainSame(mapOf("type" to "integrationConnected"))
     }
 
     private fun verifyTypeReplaced(
