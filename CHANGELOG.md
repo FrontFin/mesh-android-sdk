@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.3
+
+### Added
+- Added `platform=android` query parameter to the WebView URL so Link v2 correctly identifies the SDK platform on first render.
+- Added missing event types to the `onEvent` stream: `integrationConnected`, `transferMfaEntered`, `homePageLoaded`, `defiWalletError`, `paypalComplianceDeclined`.
+
 ## 3.4.2
 
 ### Fixed
