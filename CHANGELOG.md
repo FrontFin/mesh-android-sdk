@@ -3,7 +3,7 @@
 ## 3.4.4
 
 ### Changed
-- Updated the `WhitelistedOrigins.kt`
+- Removed hardcoded Revolut origins from the WebView domain whitelist.
 
 ## 3.4.3
 
