@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.4.4
+
+### Changed
+- Removed hardcoded Revolut origins from the WebView domain whitelist.
+
 ## 3.4.3
 
 ### Added
