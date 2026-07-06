@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.4.4
+
+### Changed
+- Updated the `WhitelistedOrigins.kt`
+
 ## 3.4.3
 
 ### Added
