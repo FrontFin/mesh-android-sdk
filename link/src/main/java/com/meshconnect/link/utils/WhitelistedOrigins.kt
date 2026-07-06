@@ -19,9 +19,6 @@ internal val whitelistedOrigins =
         "https://api.cb-device-intelligence.com",
         "https://contentmx.okcoin.com",
         "https://www.recaptcha.net",
-        "https://ramp.revolut.codes",
-        "https://sso.revolut.codes",
-        "https://ramp.revolut.com",
     )
 
 internal fun isUrlWhitelisted(

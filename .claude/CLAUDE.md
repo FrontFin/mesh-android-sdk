@@ -273,7 +273,7 @@ Tests live in `link/src/test/kotlin/com/meshconnect/link/`.
 
 - `meshconnect.com` (and subdomains)
 - `walletconnect.com`, `coinbase.com`, `okx.com`, `gemini.com`
-- `stripe.com`, `recaptcha` (Google), `revolut.com`
+- `stripe.com`, `recaptcha` (Google)
 - And others for OAuth flows
 
 To allow all domains (e.g. for testing): set `disableDomainWhiteList = true` in `LinkConfiguration`.
