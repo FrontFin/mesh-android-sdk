@@ -24,8 +24,8 @@ data class AccessTokenPayload(
 data class AccountToken(
     val account: Account,
     val accessToken: String,
-    val tokenId: String?,
     val refreshToken: String?,
+    val tokenId: String? = null,
 ) : Parcelable
 
 @Parcelize

@@ -5,6 +5,7 @@ import com.meshconnect.link.entity.Account
 import com.meshconnect.link.entity.AccountToken
 import com.meshconnect.link.entity.BrandInfo
 import com.meshconnect.link.readFile
+import org.json.JSONObject
 import org.junit.Test
 
 class AccessTokenPayloadDeserializeTest {
@@ -42,8 +43,8 @@ class AccessTokenPayloadDeserializeTest {
                                     frontAccountId = "wow_id",
                                 ),
                             accessToken = "8/luwjLWf/QxxfilS2r",
-                            tokenId = "tok_9x82lksf",
                             refreshToken = "#34381lmefl93",
+                            tokenId = "tok_9x82lksf",
                         ),
                     ),
             )
@@ -52,8 +53,10 @@ class AccessTokenPayloadDeserializeTest {
 
     @Test
     fun `testAccessToken when tokenId is absent`() {
-        val json = readFile("access-token.json").replace(",\n      \"tokenId\": \"tok_9x82lksf\"", "")
-        val actual = jsonConverter.fromJson(json, AccessTokenPayload::class.java)
+        val jsonObject = JSONObject(readFile("access-token.json"))
+        jsonObject.getJSONArray("accountTokens").getJSONObject(0).remove("tokenId")
+
+        val actual = jsonConverter.fromJson(jsonObject.toString(), AccessTokenPayload::class.java)
 
         assert(actual.accountTokens.single().tokenId == null)
     }
