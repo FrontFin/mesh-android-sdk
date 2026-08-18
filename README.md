@@ -130,6 +130,41 @@ lifecycleScope.launch {
 }
 ```
 
+## Returning users
+
+To skip re-authentication for a broker a user already connected, capture the `tokenId` from
+`AccountToken` in `AccessTokenPayload` on their first session and store it server-side, keyed by
+user and `brokerType`:
+
+```kotlin
+is AccessTokenPayload -> payload.accountTokens.forEach { accountToken ->
+    // Persist accountToken.tokenId + payload.brokerType for this user
+}
+```
+
+On a later session, pass the stored `tokenId` back as the `accessToken` field of an
+`IntegrationAccessToken` via `LinkConfiguration.accessTokens` to skip authentication for that
+broker:
+
+```kotlin
+val configuration = LinkConfiguration(
+    token = "linkToken",
+    accessTokens = listOf(
+        IntegrationAccessToken(
+            accessToken = storedTokenId,
+            brokerType = storedBrokerType,
+            brokerName = "",
+            accountId = "",
+            accountName = "",
+        ),
+    ),
+)
+```
+
+`tokenId` stays stable for a given user + `brokerType` combination even as the underlying access
+token refreshes, so it does not need to be updated once captured. See the
+[Return users guide](https://docs.meshconnect.com/build/return-users) for the full flow.
+
 ## Deep link navigation (recommended)
 
 Standard deep links always create a new task or activity unless you manage the back stack manually.
