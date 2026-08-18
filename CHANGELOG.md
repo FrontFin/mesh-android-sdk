@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.4.5
+
+### Added
+- Added `tokenId` field to `AccountToken` in `AccessTokenPayload`, enabling [return user support](https://docs.meshconnect.com/build/return-users) — upgrade to use this feature.
+
 ## 3.4.4
 
 ### Changed
