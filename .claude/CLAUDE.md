@@ -142,7 +142,7 @@ launcher.launch(LinkConfiguration(token = "your-link-token"))
 
 | Subtype | Key Fields |
 |---|---|
-| `AccessTokenPayload` | `accountTokens: List<AccountToken>`, `brokerType`, `brokerName` |
+| `AccessTokenPayload` | `accountTokens: List<AccountToken>` (each with `account`, `accessToken`, `refreshToken`, `tokenId`), `brokerType`, `brokerName` |
 | `DelayedAuthPayload` | `refreshTokenExpirationDate`, `brokerType`, `brokerName` |
 | `TransferFinishedSuccessPayload` | `txId`, `fromAddress`, `toAddress`, `symbol`, `amount`, `networkId` |
 | `TransferFinishedErrorPayload` | `errorMessage`, `txId` |
@@ -356,3 +356,4 @@ When creating PRs (via `gh pr create` or the GitHub UI), always use the repo tem
 - **Mocking Android statics in tests:** Use `mockkStatic(::functionRef)` for top-level functions (e.g. `decodeBase64`, `isSystemThemeDark`) and `mockkStatic(ClassName::class)` for class statics (e.g. `Uri`, `Log`). Always pair with `unmockkStatic` in `@After`
 - **URL query parameters added by SDK:** `lng` (language), `fiatCur` (display fiat currency), `th` (theme) — see `CreateURL.kt`
 - **Theme resolution from URL:** `getThemeFromUrl(url)` checks the `th` query param first; falls back to the `th` field inside the Base64-encoded `link_style` param if `th` is absent or blank
+- **Returning users (Mesh Managed Tokens):** `AccountToken.tokenId` (in `AccessTokenPayload`) stays stable per user + `brokerType` even as the underlying `accessToken` refreshes. Host apps store it server-side and pass it back as `IntegrationAccessToken.accessToken` in `LinkConfiguration.accessTokens` to skip re-authentication — see the [Return users guide](https://docs.meshconnect.com/build/return-users) and the README's "Returning users" section
