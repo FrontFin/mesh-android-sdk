@@ -37,12 +37,28 @@ class AccessTokenPayloadTest {
     fun `test AccountToken`() {
         val account = mockk<Account>()
         val accessToken = randomString
+        val tokenId = randomString
         val refreshToken = randomString
 
-        val it = AccountToken(account, accessToken, refreshToken)
+        val it = AccountToken(account, accessToken, tokenId, refreshToken)
 
         assertEquals(account, it.account)
         assertEquals(accessToken, it.accessToken)
+        assertEquals(tokenId, it.tokenId)
+        assertEquals(refreshToken, it.refreshToken)
+    }
+
+    @Test
+    fun `test AccountToken with null tokenId`() {
+        val account = mockk<Account>()
+        val accessToken = randomString
+        val refreshToken = randomString
+
+        val it = AccountToken(account, accessToken, null, refreshToken)
+
+        assertEquals(account, it.account)
+        assertEquals(accessToken, it.accessToken)
+        assertEquals(null, it.tokenId)
         assertEquals(refreshToken, it.refreshToken)
     }
 

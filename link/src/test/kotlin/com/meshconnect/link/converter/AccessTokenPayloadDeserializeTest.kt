@@ -42,10 +42,19 @@ class AccessTokenPayloadDeserializeTest {
                                     frontAccountId = "wow_id",
                                 ),
                             accessToken = "8/luwjLWf/QxxfilS2r",
+                            tokenId = "tok_9x82lksf",
                             refreshToken = "#34381lmefl93",
                         ),
                     ),
             )
         assert(actual == expected)
+    }
+
+    @Test
+    fun `testAccessToken when tokenId is absent`() {
+        val json = readFile("access-token.json").replace(",\n      \"tokenId\": \"tok_9x82lksf\"", "")
+        val actual = jsonConverter.fromJson(json, AccessTokenPayload::class.java)
+
+        assert(actual.accountTokens.single().tokenId == null)
     }
 }
