@@ -63,8 +63,8 @@ the result:
 ```kotlin
 private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
     when (result) {
-        is LinkSuccess -> /* handle success */
-        is LinkExit -> /* handle exit */
+        is LinkSuccess -> { /* handle success */ }
+        is LinkExit -> { /* handle exit */ }
     }
 }
 ```
@@ -87,10 +87,10 @@ Returned when a user links an account or completes a transfer. Contains a list o
 private fun onLinkSuccess(result: LinkSuccess) {
     result.payloads.forEach { payload ->
         when (payload) {
-            is AccessTokenPayload -> /* broker connected */
-            is DelayedAuthPayload -> /* delayed authentication */
-            is TransferFinishedSuccessPayload -> /* transfer succeeded */
-            is TransferFinishedErrorPayload -> /* transfer failed */
+            is AccessTokenPayload -> { /* broker connected */ }
+            is DelayedAuthPayload -> { /* delayed authentication */ }
+            is TransferFinishedSuccessPayload -> { /* transfer succeeded */ }
+            is TransferFinishedErrorPayload -> { /* transfer failed */ }
         }
     }
 }
