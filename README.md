@@ -234,6 +234,8 @@ adb shell am start -a android.intent.action.VIEW -d "myapp://"
 
 When triggered:
 
-- If the app is in the background — its existing task is brought to the foreground with the
-  top activity (e.g. `LinkActivity`) resumed as-is, no recreation.
-- If the app is not running — the default launcher Activity is opened.
+- If a task hosting your `MainActivity` exists (the usual case during an active Link flow) — that
+  task is brought to the foreground with the top activity (e.g. `LinkActivity`) resumed as-is, no
+  recreation.
+- If no such task is found — the trampoline simply finishes without launching anything. Adjust the
+  `baseActivity` check to match your app's root Activity if it isn't named `MainActivity`.
