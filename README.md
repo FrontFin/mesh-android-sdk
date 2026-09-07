@@ -63,8 +63,8 @@ the result:
 ```kotlin
 private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
     when (result) {
-        is LinkSuccess -> /* handle success */
-        is LinkExit -> /* handle exit */
+        is LinkSuccess -> { /* handle success */ }
+        is LinkExit -> { /* handle exit */ }
     }
 }
 ```
@@ -87,10 +87,10 @@ Returned when a user links an account or completes a transfer. Contains a list o
 private fun onLinkSuccess(result: LinkSuccess) {
     result.payloads.forEach { payload ->
         when (payload) {
-            is AccessTokenPayload -> /* broker connected */
-            is DelayedAuthPayload -> /* delayed authentication */
-            is TransferFinishedSuccessPayload -> /* transfer succeeded */
-            is TransferFinishedErrorPayload -> /* transfer failed */
+            is AccessTokenPayload -> { /* broker connected */ }
+            is DelayedAuthPayload -> { /* delayed authentication */ }
+            is TransferFinishedSuccessPayload -> { /* transfer succeeded */ }
+            is TransferFinishedErrorPayload -> { /* transfer failed */ }
         }
     }
 }
@@ -167,16 +167,19 @@ token refreshes, so it does not need to be updated once captured. See the
 
 ## Deep link navigation (recommended)
 
-Standard deep links always create a new task or activity unless you manage the back stack manually.
-To resume the previous state, follow these steps:
+When the SDK opens an external browser (e.g. a Chrome Custom Tab), the return deep link
+that brings the user back can restart your task and destroy whatever was on top —
+typically `LinkActivity`. To resume the previous state without recreating any activity,
+route the return deep link through a trampoline Activity that simply moves the existing
+task back to the foreground.
 
-**1. Define a custom URI scheme handled by a no-op Activity.**
+**1. Define a custom URI scheme handled by a trampoline Activity.**
 
 `AndroidManifest.xml`:
 
 ```xml
 <activity
-    android:name=".DeepLinkEntryActivity"
+    android:name=".DeepLinkActivity"
     android:exported="true"
     android:theme="@android:style/Theme.Translucent.NoTitleBar">
     <intent-filter>
@@ -188,19 +191,37 @@ To resume the previous state, follow these steps:
 </activity>
 ```
 
-**2. In the no-op Activity, check whether the app is already running and finish immediately.**
+**2. In the trampoline Activity, move the app's existing task to the front and finish.**
 
-`DeepLinkEntryActivity.kt`:
+`DeepLinkActivity.kt`:
 
 ```kotlin
-class DeepLinkEntryActivity : Activity() {
+/**
+ * Trampoline that handles the return deep link fired from an external browser
+ * (e.g. a Chrome Custom Tab opened by the SDK's LinkActivity).
+ *
+ * It brings the app's existing task back to the foreground and resumes whatever
+ * was on top — typically LinkActivity, which sits above MainActivity in the
+ * task — without recreating any activity, then finishes so the resumed activity
+ * shows through. Starting MainActivity via a launcher intent is deliberately
+ * avoided: that intent carries FLAG_ACTIVITY_RESET_TASK_IF_NEEDED, which resets
+ * the task to its root and destroys LinkActivity.
+ */
+class DeepLinkActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        packageManager.getLaunchIntentForPackage(packageName)?.run {
-            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            startActivity(this)
-        }
+        moveAppTaskToFront()
         finish()
+    }
+
+    private fun moveAppTaskToFront() {
+        val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        am.appTasks.forEach {
+            if (it.taskInfo.baseActivity?.className == MainActivity::class.java.name) {
+                it.moveToFront()
+                return
+            }
+        }
     }
 }
 ```
@@ -213,5 +234,8 @@ adb shell am start -a android.intent.action.VIEW -d "myapp://"
 
 When triggered:
 
-- If the app is in the background — it is brought to the foreground.
-- If the app is not running — the default launcher Activity is opened.
+- If a task hosting your `MainActivity` exists (the usual case during an active Link flow) — that
+  task is brought to the foreground with the top activity (e.g. `LinkActivity`) resumed as-is, no
+  recreation.
+- If no such task is found — the trampoline simply finishes without launching anything. Adjust the
+  `baseActivity` check to match your app's root Activity if it isn't named `MainActivity`.
