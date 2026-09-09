@@ -2,7 +2,9 @@ package com.meshconnect.link
 
 import com.meshconnect.link.converter.JsonConverter
 import com.meshconnect.link.entity.AccessTokenPayload
+import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkEvent
+import com.meshconnect.link.entity.MeshLinkEnvironment
 import com.meshconnect.link.entity.TransferFinishedErrorPayload
 import com.meshconnect.link.entity.TransferFinishedSuccessPayload
 import com.meshconnect.link.usecase.DeserializeLinkMessageUseCase
@@ -10,11 +12,10 @@ import com.meshconnect.link.utils.createURL
 import com.meshconnect.link.utils.decodeToken
 import com.meshconnect.link.utils.isAtLeastOreo
 import com.meshconnect.link.utils.isUrlWhitelisted
+import com.meshconnect.link.utils.sessionLinkUrl
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
-import java.net.URI
-import java.util.Base64
 import org.amshove.kluent.internal.assertFailsWith
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeInstanceOf
@@ -24,6 +25,9 @@ import org.amshove.kluent.shouldNotBeNull
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import java.net.URI
+import java.net.URLDecoder
+import java.util.Base64
 
 /**
  * Cross-SDK MFS parity suite.
@@ -62,8 +66,7 @@ class MfsParityTest {
         unmockkStatic(::isAtLeastOreo)
     }
 
-    private fun tokenFor(url: String): String =
-        Base64.getEncoder().encodeToString(url.toByteArray())
+    private fun tokenFor(url: String): String = Base64.getEncoder().encodeToString(url.toByteArray())
 
     private fun hostOf(url: String): String = URI(url).host
 
@@ -219,6 +222,60 @@ class MfsParityTest {
         val event = deserialize.launch(LEGACY_TRANSFER_FINISHED_ERROR)
         val payload = (event as LinkEvent.Payload).payload
         payload.shouldBeInstanceOf<TransferFinishedErrorPayload>()
+    }
+
+    // -----------------------------------------------------------------------
+    // P5  the MFS-native session entry point
+    // -----------------------------------------------------------------------
+
+    @Test
+    fun `P5_1 a session token becomes a link token for the chosen environment`() {
+        mapOf(
+            MeshLinkEnvironment.PROD to "https://link.meshpay.com/?token=ory_ac_abc",
+            MeshLinkEnvironment.SBX to "https://link.sbx.meshpay.com/?token=ory_ac_abc",
+            MeshLinkEnvironment.DEV to "https://link.dev.meshpay.com/?token=ory_ac_abc",
+        ).forEach { (environment, expected) ->
+            sessionLinkUrl("ory_ac_abc", environment) shouldBeEqualTo expected
+        }
+    }
+
+    @Test
+    fun `P5_2 reserved characters are encoded rather than truncating the URL`() {
+        // Interpolating raw would cut the URL at `&` and lose the rest.
+        val url = sessionLinkUrl("abc&x=1#frag", MeshLinkEnvironment.PROD)
+        url shouldBeEqualTo "https://link.meshpay.com/?token=abc%26x%3D1%23frag"
+        // And it survives a round trip intact.
+        URLDecoder.decode(url.substringAfter("token="), "UTF-8") shouldBeEqualTo "abc&x=1#frag"
+    }
+
+    @Test
+    fun `P5_3 a space percent-encodes rather than becoming the form-encoding plus`() {
+        sessionLinkUrl("a b", MeshLinkEnvironment.PROD) shouldBeEqualTo
+            "https://link.meshpay.com/?token=a%20b"
+    }
+
+    @Test
+    fun `P5_4 the session configuration resolves to the MFS host`() {
+        val configuration =
+            LinkConfiguration(
+                token =
+                    LinkConfiguration.linkToken(
+                        sessionToken = "ory_ac_abc",
+                        environment = MeshLinkEnvironment.PROD,
+                    ),
+            )
+        decodeToken(configuration.token) shouldBeEqualTo
+            "https://link.meshpay.com/?token=ory_ac_abc"
+    }
+
+    @Test
+    fun `P5_5 an empty session token is rejected rather than opening Link with none`() {
+        assertFailsWith<IllegalArgumentException> {
+            LinkConfiguration.linkToken(
+                sessionToken = "",
+                environment = MeshLinkEnvironment.PROD,
+            )
+        }
     }
 
     // -----------------------------------------------------------------------
