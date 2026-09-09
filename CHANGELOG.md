@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.4.6
+
+### Changed
+- Link host updates
+
 ## 3.4.5
 
 ### Added

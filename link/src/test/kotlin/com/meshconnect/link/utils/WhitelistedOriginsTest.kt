@@ -19,4 +19,19 @@ class WhitelistedOriginsTest {
         assertFalse(isUrlWhitelisted("other://", ""))
         assertFalse(isUrlWhitelisted("", ".other.com"))
     }
+
+    @Test
+    fun `MFS Link v3 hosts are whitelisted`() {
+        assert(isUrlWhitelisted("", "link.meshpay.com"))
+        assert(isUrlWhitelisted("", "link.dev.meshpay.com"))
+        assert(isUrlWhitelisted("", "api.meshpay.com"))
+    }
+
+    @Test
+    fun `meshpay lookalikes are not whitelisted`() {
+        // The leading dot in the entry is what stops a lookalike registration
+        // such as evilmeshpay.com from satisfying it.
+        assertFalse(isUrlWhitelisted("", "evilmeshpay.com"))
+        assertFalse(isUrlWhitelisted("", "meshpay.com.evil.com"))
+    }
 }
