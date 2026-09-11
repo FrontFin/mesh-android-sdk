@@ -165,17 +165,17 @@ val configuration = LinkConfiguration(
 token refreshes, so it does not need to be updated once captured. See the
 [Return users guide](https://docs.meshconnect.com/build/return-users) for the full flow.
 
-## Deep link navigation (recommended)
+## Returning to your app with deep links
 
-When the SDK opens an external browser (e.g. a Chrome Custom Tab), the return deep link
-that brings the user back can restart your task and destroy whatever was on top —
-typically `LinkActivity`. To resume the previous state without recreating any activity,
-route the return deep link through a trampoline Activity that simply moves the existing
-task back to the foreground.
+Some integrations cannot complete inside the Link WebView and are handed off to the device's external browser. When the provider finishes, it redirects to a **return URL** that must bring your app back to the foreground so the in-progress Link flow can resume. There are a few approaches that make it happen.
 
-**1. Define a custom URI scheme handled by a trampoline Activity.**
+> **On Android, the return redirect can restart your app's task** and destroy whatever was on top. To resume the previous state without recreating any activity, route the return URL through a lightweight **trampoline Activity** that brings the existing task back to the foreground.
 
-`AndroidManifest.xml`:
+### Native deep link
+
+A custom URL scheme (for example `yourapp://`) is the quickest option and works without any web hosting.
+
+1. Register the scheme with an `intent-filter` on the trampoline Activity in your app's `AndroidManifest.xml`:
 
 ```xml
 <activity
@@ -186,14 +186,12 @@ task back to the foreground.
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
-        <data android:scheme="myapp" />
+        <data android:scheme="yourapp" />
     </intent-filter>
 </activity>
 ```
 
-**2. In the trampoline Activity, move the app's existing task to the front and finish.**
-
-`DeepLinkActivity.kt`:
+2. In the trampoline Activity, move the app's existing task to the front and finish. `DeepLinkActivity.kt`:
 
 ```kotlin
 /**
@@ -226,16 +224,60 @@ class DeepLinkActivity : Activity() {
 }
 ```
 
-**3. Test the deep link:**
+> **A custom scheme is not verified by the system**, so Android may show an app-chooser (disambiguation) dialog if more than one app claims it.
 
-```shell
-adb shell am start -a android.intent.action.VIEW -d "myapp://"
+### App Link (recommended, opens the app with no prompt)
+
+An App Link is a regular `https://` URL that Android routes straight to your app — with **no disambiguation dialog** — as long as the app has a verified association with the website that serves it.
+
+1. Declare the host and set `android:autoVerify="true"` on the trampoline Activity's `intent-filter` in `AndroidManifest.xml`:
+
+```xml
+<activity
+    android:name=".DeepLinkActivity"
+    android:exported="true"
+    android:theme="@android:style/Theme.Translucent.NoTitleBar">
+    <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data
+            android:scheme="https"
+            android:host="links.yourcompany.com" />
+    </intent-filter>
+</activity>
 ```
 
-When triggered:
+2. Host a **Digital Asset Links file** (`assetlinks.json`) on that domain at `https://links.yourcompany.com/.well-known/assetlinks.json`, served over HTTPS with no redirect. Include your app's package name and the SHA-256 fingerprint of its signing certificate:
 
-- If a task hosting your `MainActivity` exists (the usual case during an active Link flow) — that
-  task is brought to the foreground with the top activity (e.g. `LinkActivity`) resumed as-is, no
-  recreation.
-- If no such task is found — the trampoline simply finishes without launching anything. Adjust the
-  `baseActivity` check to match your app's root Activity if it isn't named `MainActivity`.
+```json
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.yourcompany.yourapp",
+      "sha256_cert_fingerprints": [
+        "AB:CD:EF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC"
+      ]
+    }
+  }
+]
+```
+
+3. **Handle the link** in the same trampoline Activity shown above — the intent arrives as `ACTION_VIEW` and the trampoline brings the existing task back to the foreground without recreating any activity.
+
+#### References
+- [Handle Android App Links](https://developer.android.com/training/app-links)
+- [Verify Android App Links](https://developer.android.com/training/app-links/verify-android-applinks)
+- [Create deep links to app content](https://developer.android.com/training/app-links/deep-linking)
+
+#### Testing
+
+```shell
+# Custom scheme
+adb shell am start -a android.intent.action.VIEW -d "yourapp://"
+
+# App Link
+adb shell am start -a android.intent.action.VIEW -d "https://links.yourcompany.com/link/return"
+```
