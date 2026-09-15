@@ -281,6 +281,12 @@ internal class LinkActivity : AppCompatActivity() {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.setSupportMultipleWindows(true)
+            // Without this, WebView silently drops any window.open() that isn't
+            // inside a live user gesture (e.g. an auto-open fired from an async
+            // event) and never even calls onCreateWindow below - so wallet
+            // deep links and OAuth handoffs that should open automatically just
+            // dead-end instead.
+            settings.javaScriptCanOpenWindowsAutomatically = true
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
             addJavascriptInterface(JSBridge { viewModel.onJsonReceived(it) }, JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
@@ -315,13 +321,20 @@ internal class LinkActivity : AppCompatActivity() {
             view: WebView?,
             request: WebResourceRequest?,
         ): Boolean {
-            val override =
+            val url = request?.url ?: return true
+            val allowInWebView =
                 when {
-                    request == null -> true
-                    disableWhiteList -> request.url.scheme != "https"
-                    else -> !isUrlWhitelisted(request.url.toString(), request.url.host.orEmpty())
+                    disableWhiteList -> url.scheme == "https"
+                    else -> isUrlWhitelisted(url.toString(), url.host.orEmpty())
                 }
-            return override // return 'true' to reject loading the url
+            if (!allowInWebView) {
+                // Not something we render ourselves (an exchange/OAuth page) -
+                // hand it to Android like any wallet deep link, instead of
+                // silently dropping it. Custom schemes (wallet://) never match
+                // the whitelist either, so this is also how those get opened.
+                actionView(url)
+            }
+            return !allowInWebView // return 'true' to reject loading the url
         }
     }
 
@@ -392,6 +405,14 @@ internal class LinkActivity : AppCompatActivity() {
     }
 
     private fun startViewIntent(uri: Uri) {
-        startActivity(Intent(Intent.ACTION_VIEW, uri))
+        // Without FLAG_ACTIVITY_NEW_TASK, Android ignores the target app's own
+        // taskAffinity and pushes its activity onto THIS task's back stack
+        // instead of switching to its own task — it renders on top of the host
+        // app with no clean way back, rather than as a separate app/task.
+        val intent =
+            Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        startActivity(intent)
     }
 }

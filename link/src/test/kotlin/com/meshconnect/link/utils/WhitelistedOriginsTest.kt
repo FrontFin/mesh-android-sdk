@@ -19,4 +19,10 @@ class WhitelistedOriginsTest {
         assertFalse(isUrlWhitelisted("other://", ""))
         assertFalse(isUrlWhitelisted("", ".other.com"))
     }
+
+    @Test
+    fun `OKX Wallet's connect host is excluded even though it matches the okx-com suffix`() {
+        assert(isUrlWhitelisted("https://www.okx.com", "www.okx.com"))
+        assertFalse(isUrlWhitelisted("https://web3.okx.com/download", "web3.okx.com"))
+    }
 }
