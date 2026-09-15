@@ -21,10 +21,9 @@ internal val whitelistedOrigins =
         "https://www.recaptcha.net",
     )
 
-// Hosts that match a whitelisted origin above by suffix but are actually a
-// different product than the one that entry is for, so they should NOT be
-// treated as whitelisted. web3.okx.com is OKX Wallet's connect/deep-link
-// host, not OKX Exchange (why ".okx.com" is whitelisted in the first place).
+// Hosts that match a whitelisted origin above by suffix but belong to a
+// different product, so they get opened externally instead (expected).
+// web3.okx.com is OKX Wallet, not OKX Exchange (why ".okx.com" is whitelisted).
 internal val whitelistedOriginExceptions =
     listOf(
         "web3.okx.com",

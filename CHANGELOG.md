@@ -3,10 +3,7 @@
 ## 3.4.6
 
 ### Fixed
-- External wallet apps (e.g. Core) now launch as their own task instead of stacking on top of the host app's task, which left users stuck with no way back. Added `FLAG_ACTIVITY_NEW_TASK` to the external-open intent.
-- OKX Wallet's connect link was being caught by the OKX Exchange domain whitelist and loaded in the webview instead of opening the app. Excluded it so it opens externally like other wallets.
-- Page navigations to a non-whitelisted URL now open externally instead of silently doing nothing (previously only popup windows did this).
-- The webview now allows automatic app-open attempts that aren't tied to a live tap, so wallet connect links that fire asynchronously aren't silently dropped.
+- Improved automated wallet opening, wallet connect works reliably across the catalog.
 
 ## 3.4.5
 
