@@ -351,9 +351,15 @@ internal class LinkActivity : AppCompatActivity() {
                                 view: WebView?,
                                 request: WebResourceRequest?,
                             ): Boolean {
-                                if (request != null && !request.isRedirect) {
-                                    actionView(request.url)
-                                }
+                                // This popup is never actually rendered - every
+                                // navigation attempt is rejected below - so
+                                // skipping redirect hops here (as opposed to the
+                                // original navigation) doesn't defer to a later
+                                // call, it just drops that hop entirely. Wallet
+                                // connect popups commonly redirect from an https
+                                // bridge to the wallet's custom-scheme deep link,
+                                // so the real target is often the redirect.
+                                request?.let { actionView(it.url) }
                                 return true // return 'true' to reject loading the url
                             }
                         }
