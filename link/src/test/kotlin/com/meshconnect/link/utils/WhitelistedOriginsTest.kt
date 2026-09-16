@@ -25,4 +25,10 @@ class WhitelistedOriginsTest {
         assert(isUrlWhitelisted("https://www.okx.com", "www.okx.com"))
         assertFalse(isUrlWhitelisted("https://web3.okx.com/download", "web3.okx.com"))
     }
+
+    @Test
+    fun `OKX Wallet exclusion matches regardless of host casing`() {
+        assertFalse(isUrlWhitelisted("https://WEB3.okx.com/download", "WEB3.okx.com"))
+        assertFalse(isUrlWhitelisted("https://Web3.Okx.Com/download", "Web3.Okx.Com"))
+    }
 }

@@ -33,6 +33,6 @@ internal fun isUrlWhitelisted(
     url: String,
     host: String,
 ): Boolean {
-    if (whitelistedOriginExceptions.contains(host)) return false
+    if (whitelistedOriginExceptions.any { it.equals(host, ignoreCase = true) }) return false
     return whitelistedOrigins.find { url.startsWith(it) || host.endsWith(it) } != null
 }

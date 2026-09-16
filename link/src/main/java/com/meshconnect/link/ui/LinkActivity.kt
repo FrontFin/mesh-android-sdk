@@ -327,11 +327,14 @@ internal class LinkActivity : AppCompatActivity() {
                     disableWhiteList -> url.scheme == "https"
                     else -> isUrlWhitelisted(url.toString(), url.host.orEmpty())
                 }
-            if (!allowInWebView) {
+            if (!allowInWebView && request.isForMainFrame) {
                 // Not something we render ourselves (an exchange/OAuth page) -
                 // hand it to Android like any wallet deep link, instead of
                 // silently dropping it. Custom schemes (wallet://) never match
                 // the whitelist either, so this is also how those get opened.
+                // Subframe requests (e.g. an embedded iframe) are only ever
+                // rejected here, never externalized - launching an app over a
+                // blocked iframe would hijack the whole task unexpectedly.
                 actionView(url)
             }
             return !allowInWebView // return 'true' to reject loading the url
