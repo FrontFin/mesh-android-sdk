@@ -1,6 +1,6 @@
 package com.meshconnect.link.utils
 
-import org.amshove.kluent.internal.assertFalse
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -44,5 +44,11 @@ class WhitelistedOriginsTest {
         assertTrue(isUrlWhitelisted("https://robinhood.com", "robinhood.com"))
         assertTrue(isUrlWhitelisted("https://robinhood.com/login", "robinhood.com"))
         assertTrue(isUrlWhitelisted("https://robinhood.com?next=/home", "robinhood.com"))
+    }
+
+    @Test
+    fun `a legitimately whitelisted domain still matches regardless of host casing`() {
+        assertTrue(isUrlWhitelisted("", "WWW.OKX.COM"))
+        assertTrue(isUrlWhitelisted("", "Web.MeshConnect.Com"))
     }
 }

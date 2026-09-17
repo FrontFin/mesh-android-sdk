@@ -49,5 +49,5 @@ internal fun isUrlWhitelisted(
     host: String,
 ): Boolean {
     if (whitelistedOriginExceptions.any { it.equals(host, ignoreCase = true) }) return false
-    return whitelistedOrigins.find { matchesUrlPrefix(url, it) || host.endsWith(it) } != null
+    return whitelistedOrigins.find { matchesUrlPrefix(url, it) || host.endsWith(it, ignoreCase = true) } != null
 }
