@@ -29,6 +29,13 @@ jobs:
 
       - name: Setup Android SDK 🎁
         uses: android-actions/setup-android@v4
+        with:
+          # Default packages input includes the obsolete "tools" package,
+          # which Google stopped serving (2026-09-15). cmdline-tools (where
+          # sdkmanager itself lives) is already installed by this action
+          # separately, so dropping "tools" here just skips the broken
+          # legacy install without losing anything the build needs.
+          packages: "platform-tools"
 
       - name: Run ktlint & detekt 🧹
         run: ./gradlew link:ktlintCheck link:detekt
