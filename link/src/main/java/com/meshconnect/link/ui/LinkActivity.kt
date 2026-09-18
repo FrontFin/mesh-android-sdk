@@ -324,7 +324,7 @@ internal class LinkActivity : AppCompatActivity() {
             val url = request?.url ?: return true
             val allowInWebView =
                 when {
-                    disableWhiteList -> url.scheme == "https"
+                    disableWhiteList -> url.scheme.equals("https", ignoreCase = true)
                     else -> isUrlWhitelisted(url.toString(), url.host.orEmpty())
                 }
             if (!allowInWebView && request.isForMainFrame) {
