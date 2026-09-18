@@ -327,7 +327,7 @@ internal class LinkActivity : AppCompatActivity() {
                     disableWhiteList -> url.scheme.equals("https", ignoreCase = true)
                     else -> isUrlWhitelisted(url.toString(), url.host.orEmpty())
                 }
-            if (!allowInWebView && request.isForMainFrame) {
+            if (!allowInWebView && request?.isForMainFrame == true) {
                 // Not something we render ourselves (an exchange/OAuth page) -
                 // hand it to Android like any wallet deep link, instead of
                 // silently dropping it. Custom schemes (wallet://) never match
