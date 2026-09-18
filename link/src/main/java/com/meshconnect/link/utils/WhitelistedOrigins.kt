@@ -39,7 +39,7 @@ private fun matchesUrlPrefix(
     url: String,
     prefix: String,
 ): Boolean {
-    if (!url.startsWith(prefix)) return false
+    if (!url.startsWith(prefix, ignoreCase = true)) return false
     val boundary = url.getOrNull(prefix.length)
     return boundary == null || boundary in "/?#:"
 }

@@ -51,4 +51,10 @@ class WhitelistedOriginsTest {
         assertTrue(isUrlWhitelisted("", "WWW.OKX.COM"))
         assertTrue(isUrlWhitelisted("", "Web.MeshConnect.Com"))
     }
+
+    @Test
+    fun `a full-URL whitelist entry still matches regardless of scheme-host casing`() {
+        assertTrue(isUrlWhitelisted("HTTPS://ROBINHOOD.COM/login", "ROBINHOOD.COM"))
+        assertTrue(isUrlWhitelisted("Https://Robinhood.Com", "Robinhood.Com"))
+    }
 }
