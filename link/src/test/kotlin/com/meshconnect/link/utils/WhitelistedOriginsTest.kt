@@ -22,6 +22,21 @@ class WhitelistedOriginsTest {
     }
 
     @Test
+    fun `MFS Link v3 hosts are whitelisted`() {
+        assert(isUrlWhitelisted("", "link.meshpay.com"))
+        assert(isUrlWhitelisted("", "link.dev.meshpay.com"))
+        assert(isUrlWhitelisted("", "api.meshpay.com"))
+    }
+
+    @Test
+    fun `meshpay lookalikes are not whitelisted`() {
+        // The leading dot in the entry is what stops a lookalike registration
+        // such as evilmeshpay.com from satisfying it.
+        assertFalse(isUrlWhitelisted("", "evilmeshpay.com"))
+        assertFalse(isUrlWhitelisted("", "meshpay.com.evil.com"))
+    }
+
+    @Test
     fun `OKX Wallet's connect host is excluded even though it matches the okx-com suffix`() {
         assertTrue(isUrlWhitelisted("https://www.okx.com", "www.okx.com"))
         assertFalse(isUrlWhitelisted("https://web3.okx.com/download", "web3.okx.com"))

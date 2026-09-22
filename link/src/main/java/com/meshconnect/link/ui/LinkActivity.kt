@@ -116,7 +116,7 @@ internal class LinkActivity : AppCompatActivity() {
 
             observeLinkEvent()
             observeThrowable()
-            openWebView(url)
+            openWebView(url, savedInstanceState)
 
             WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
         }.onFailure { throwable ->
@@ -273,8 +273,20 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * The WebView's own history and page state, so a recreated Activity resumes
+     * the flow instead of starting a new one.
+     */
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        binding.webView.saveState(outState)
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
-    private fun openWebView(url: URL) {
+    private fun openWebView(
+        url: URL,
+        savedInstanceState: Bundle?,
+    ) {
         val disableWhiteList = intent.getBooleanExtra(DISABLE_WHITELIST, false)
 
         binding.webView.apply {
@@ -292,7 +304,17 @@ internal class LinkActivity : AppCompatActivity() {
             setBackgroundColor(Color.TRANSPARENT)
             webViewClient = WebClient(disableWhiteList, linkHost = url.host)
             webChromeClient = ChromeClient()
-            loadUrl(url.toString())
+
+            // Restore rather than reload where possible. The Activity is
+            // recreated whenever the system reclaims it while the user is away
+            // in a wallet or a browser, and reloading re-opens the URL with the
+            // same token. An MFS exchange code is single-use, so that lands on
+            // Link's "session has expired" page and the transfer in progress is
+            // lost. restoreState returns null when there is nothing to restore,
+            // which is the first launch.
+            if (savedInstanceState == null || restoreState(savedInstanceState) == null) {
+                loadUrl(url.toString())
+            }
         }
     }
 
