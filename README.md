@@ -46,12 +46,12 @@ val configuration = LinkConfiguration(
 
 #### Additional parameters (optional)
 
-| Parameter | Type | Description                                                                                                                                                                                   |
-|---|---|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Parameter | Type | Description |
+|---|---|---|
 | `accessTokens` | `List<IntegrationAccessToken>?` | Previously obtained access tokens to pre-populate the flow. Useful in transfer flows where the source account is already authenticated. |
 | `disableDomainWhiteList` | `Boolean?` | Disables origin whitelisting in the WebView. By default it's enabled with the predefined [domains](link/src/main/java/com/meshconnect/link/utils/WhitelistedOrigins.kt). Intended for testing only. |
-| `language` | `String?` | BCP-47 language tag that overrides the UI locale (e.g. `"en"`, `"fr-FR"`). Pass `"system"` to use the device's current locale automatically.                                                  |
-| `displayFiatCurrency` | `String?` | ISO 4217 currency code shown as the fiat equivalent of crypto amounts (e.g. `"USD"`, `"EUR"`).                                                                                                |
+| `language` | `String?` | BCP-47 language tag that overrides the UI locale (e.g. `"en"`, `"fr-FR"`). Pass `"system"` to use the device's current locale automatically. |
+| `displayFiatCurrency` | `String?` | ISO 4217 currency code shown as the fiat equivalent of crypto amounts (e.g. `"USD"`, `"EUR"`). |
 | `theme` | `LinkTheme?` | Colour theme of the Link UI. Accepts `LIGHT`, `DARK`, or `SYSTEM`. Pass `SYSTEM` to follow the device's setting. |
 
 ### 2. Register an Activity Result callback
@@ -63,8 +63,8 @@ the result:
 ```kotlin
 private val linkLauncher = registerForActivityResult(LaunchLink()) { result ->
     when (result) {
-        is LinkSuccess -> /* handle success */
-        is LinkExit -> /* handle exit */
+        is LinkSuccess -> { /* handle success */ }
+        is LinkExit -> { /* handle exit */ }
     }
 }
 ```
@@ -87,10 +87,10 @@ Returned when a user links an account or completes a transfer. Contains a list o
 private fun onLinkSuccess(result: LinkSuccess) {
     result.payloads.forEach { payload ->
         when (payload) {
-            is AccessTokenPayload -> /* broker connected */
-            is DelayedAuthPayload -> /* delayed authentication */
-            is TransferFinishedSuccessPayload -> /* transfer succeeded */
-            is TransferFinishedErrorPayload -> /* transfer failed */
+            is AccessTokenPayload -> { /* broker connected */ }
+            is DelayedAuthPayload -> { /* delayed authentication */ }
+            is TransferFinishedSuccessPayload -> { /* transfer succeeded */ }
+            is TransferFinishedErrorPayload -> { /* transfer failed */ }
         }
     }
 }
@@ -165,53 +165,79 @@ val configuration = LinkConfiguration(
 token refreshes, so it does not need to be updated once captured. See the
 [Return users guide](https://docs.meshconnect.com/build/return-users) for the full flow.
 
-## Deep link navigation (recommended)
+## Returning to your app with deep links
 
-Standard deep links always create a new task or activity unless you manage the back stack manually.
-To resume the previous state, follow these steps:
+Some integrations complete in the device's external browser, then redirect to a **return URL** that must bring your app back to the foreground so the flow can resume.
 
-**1. Define a custom URI scheme handled by a no-op Activity.**
+### Trampoline Activity
 
-`AndroidManifest.xml`:
+Route the return URL through a lightweight trampoline Activity that resumes the previous state without recreating any activity. `DeepLinkActivity.kt`:
+
+```kotlin
+/**
+ * Trampoline that brings the app's existing task back to the foreground and
+ * resumes whatever was on top — typically LinkActivity, which sits above
+ * MainActivity in the task — without recreating any activity, then finishes so
+ * the resumed activity shows through. Starting MainActivity via a launcher
+ * intent is deliberately avoided: that intent carries
+ * FLAG_ACTIVITY_RESET_TASK_IF_NEEDED, which resets the task to its root and
+ * destroys LinkActivity.
+ */
+class DeepLinkActivity : Activity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        moveAppTaskToFront()
+        finish()
+    }
+
+    private fun moveAppTaskToFront() {
+        val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        am.appTasks.forEach {
+            if (it.taskInfo.baseActivity?.className == MainActivity::class.java.name) {
+                it.moveToFront()
+                return
+            }
+        }
+    }
+}
+```
+
+Register a deep link to this Activity using one of the options below.
+
+### Native deep link
+
+The custom URL scheme is the quickest option. Add an `intent-filter` in `AndroidManifest.xml`:
 
 ```xml
 <activity
-    android:name=".DeepLinkEntryActivity"
+    android:name=".DeepLinkActivity"
     android:exported="true"
     android:theme="@android:style/Theme.Translucent.NoTitleBar">
     <intent-filter>
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
-        <data android:scheme="myapp" />
+        <data android:scheme="yourapp" />
     </intent-filter>
 </activity>
 ```
 
-**2. In the no-op Activity, check whether the app is already running and finish immediately.**
+### App Link
 
-`DeepLinkEntryActivity.kt`:
+A regular `https://` URL that Android routes straight to your app without any app-chooser dialog.
 
-```kotlin
-class DeepLinkEntryActivity : Activity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        packageManager.getLaunchIntentForPackage(packageName)?.run {
-            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            startActivity(this)
-        }
-        finish()
-    }
-}
+Make sure the [website association is configured](https://developer.android.com/training/app-links/configure-assetlinks) with the app.
+
+Declare the host and set `android:autoVerify="true"` on the Activity's `intent-filter`:
+
+```xml
+<intent-filter android:autoVerify="true">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data
+        android:scheme="https"
+        android:host="links.yourcompany.com" />
+</intent-filter>
 ```
 
-**3. Test the deep link:**
-
-```shell
-adb shell am start -a android.intent.action.VIEW -d "myapp://"
-```
-
-When triggered:
-
-- If the app is in the background — it is brought to the foreground.
-- If the app is not running — the default launcher Activity is opened.

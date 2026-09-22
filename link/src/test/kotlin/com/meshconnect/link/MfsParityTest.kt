@@ -18,6 +18,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import org.amshove.kluent.internal.assertFailsWith
 import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldBeFalse
 import org.amshove.kluent.shouldBeInstanceOf
 import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldBeTrue
@@ -145,15 +146,15 @@ class MfsParityTest {
         isUrlWhitelisted("https://example.com", "example.com") shouldBeEqualTo false
     }
 
-    // KNOWN GAP, pre-existing and unrelated to MFS. The explicit (non-dotted)
-    // entries are matched with url.startsWith and no boundary, so an
-    // attacker-registered host that merely begins with one of them passes.
-    // Documented rather than asserted as desired behaviour; the fix belongs in
-    // its own PR off main.
+    // Android closed this gap: matchesUrlPrefix requires the character after an
+    // explicit (non-dotted) entry to start a path, query, fragment or port, so
+    // a host that merely begins with one no longer passes. The case is kept
+    // because iOS still matches these entries with a bare hasPrefix and so
+    // still accepts the same URL; see its P2_5.
     @Test
-    fun `P2_5 allowlist boundary gap on explicit entries (known)`() {
+    fun `P2_5 explicit entries cannot be spoofed by an attacker-controlled suffix`() {
         isUrlWhitelisted("https://robinhood.com.evil.com", "robinhood.com.evil.com")
-            .shouldBeTrue()
+            .shouldBeFalse()
     }
 
     // -----------------------------------------------------------------------
