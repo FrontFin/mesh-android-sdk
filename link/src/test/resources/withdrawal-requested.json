@@ -1,0 +1,7 @@
+{
+  "type": "withdrawalRequested",
+  "payload": {
+    "transferId": "transfer-1",
+    "status": "pending"
+  }
+}

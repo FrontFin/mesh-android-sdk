@@ -130,6 +130,22 @@ lifecycleScope.launch {
 }
 ```
 
+When a user confirms a withdrawal, `LinkEvents` emits a `withdrawalRequested` event just before Link closes.
+Use it to continue the withdrawal in your app, for example to prompt for your own 2FA.
+The payload carries no address or amount: read the transfer details from the webhook or the transfer API.
+
+```kotlin
+lifecycleScope.launch {
+    LinkEvents.collect { event ->
+        if (event["type"] == "withdrawalRequested") {
+            val payload = event["payload"] as? Map<*, *>
+            val transferId = payload?.get("transferId") as? String
+            val status = payload?.get("status") as? String // "pending" or "success"; treat any other value as pending
+        }
+    }
+}
+```
+
 ## Returning users
 
 To skip re-authentication for a broker a user already connected, capture the `tokenId` from
