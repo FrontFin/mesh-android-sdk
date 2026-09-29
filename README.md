@@ -130,8 +130,9 @@ lifecycleScope.launch {
 }
 ```
 
-When a user confirms a withdrawal, `LinkEvents` emits a `withdrawalRequested` event just before Link closes.
-Use it to continue the withdrawal in your app, for example to prompt for your own 2FA.
+When a user confirms a withdrawal, `LinkEvents` emits a `withdrawalRequested` event, then Link closes and returns its result.
+Keep the `transferId` and continue the withdrawal once Link has closed, for example with your own 2FA prompt.
+`LinkEvents` does not replay events, so start collecting before launching Link and keep collecting while `LinkActivity` is in front: a collector bound to your activity being `STARTED` (such as `repeatOnLifecycle`) misses it.
 The payload carries no address or amount: read the transfer details from the webhook or the transfer API.
 
 ```kotlin
