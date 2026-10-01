@@ -206,38 +206,8 @@ Register a deep link to this Activity using one of the options below.
 
 ### Native deep link
 
-The custom URL scheme is the quickest option. Add an `intent-filter` in `AndroidManifest.xml`:
-
-```xml
-<activity
-    android:name=".DeepLinkActivity"
-    android:exported="true"
-    android:theme="@android:style/Theme.Translucent.NoTitleBar">
-    <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <data android:scheme="yourapp" />
-    </intent-filter>
-</activity>
-```
+A custom URL scheme (e.g. `yourapp://`) is the quickest option. Declare an `intent-filter` with the `VIEW` action, the `DEFAULT` and `BROWSABLE` categories, and your scheme on the trampoline Activity. See [Create deep links to app content](https://developer.android.com/training/app-links/create-deeplinks) for details.
 
 ### App Link
 
-A regular `https://` URL that Android routes straight to your app without any app-chooser dialog.
-
-Make sure the [website association is configured](https://developer.android.com/training/app-links/configure-assetlinks) with the app.
-
-Declare the host and set `android:autoVerify="true"` on the Activity's `intent-filter`:
-
-```xml
-<intent-filter android:autoVerify="true">
-    <action android:name="android.intent.action.VIEW" />
-    <category android:name="android.intent.category.DEFAULT" />
-    <category android:name="android.intent.category.BROWSABLE" />
-    <data
-        android:scheme="https"
-        android:host="links.yourcompany.com" />
-</intent-filter>
-```
-
+A verified `https://` URL that Android opens directly in your app, without an app-chooser dialog. Add an `intent-filter` with `android:autoVerify="true"` for your host, and associate your website with the app by publishing a Digital Asset Links file. See [Configure website associations](https://developer.android.com/training/app-links/configure-assetlinks) for details.
