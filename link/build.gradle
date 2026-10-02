@@ -14,6 +14,14 @@ apply from: "secrets.gradle"
 
 def MESH_VERSION = libs.versions.mesh.link.get()
 
+// The publish plugin sets the publication coordinates below, but the Gradle
+// project itself defaulted to "mesh-android-sdk:link:unspecified". Declaring
+// them here too lets a consumer include this build directly (composite build)
+// and have com.meshconnect:link substituted for the source, which is how the
+// payer app builds against an unreleased SDK.
+group = 'com.meshconnect'
+version = MESH_VERSION
+
 android {
     namespace 'com.meshconnect.link'
 
@@ -97,8 +105,11 @@ mavenPublishing {
     // the first parameter represents the repository to publish
     // the second whether to publish automatically
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-    // sign publication
-    signAllPublications()
+    // sign publication. Skipped for a local publish, which has no GPG key:
+    // the release workflow leaves MESH_SKIP_SIGNING unset and still signs.
+    if (System.getenv('MESH_SKIP_SIGNING') == null) {
+        signAllPublications()
+    }
     // define group, artifact and version
     // the version is taken from gradle/libs.versions.toml file
     coordinates('com.meshconnect', 'link', MESH_VERSION)

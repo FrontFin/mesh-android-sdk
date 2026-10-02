@@ -6,6 +6,7 @@
     <application>
         <activity
             android:name="com.meshconnect.link.ui.LinkActivity"
+            android:configChanges="keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
             android:theme="@style/MeshLink.Theme.Catalog" />
     </application>
 

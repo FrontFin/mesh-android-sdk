@@ -26,6 +26,50 @@
             android:lines="1" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <TextView
+        android:id="@+id/environmentLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:text="@string/env_label"
+        android:textAppearance="?attr/textAppearanceCaption"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/linkTokenInputLayout" />
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/environmentGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/environmentLabel"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <Button
+            android:id="@+id/envProd"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/env_prod" />
+
+        <Button
+            android:id="@+id/envSbx"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/env_sbx" />
+
+        <Button
+            android:id="@+id/envDev"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/env_dev" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
     <Button
         android:id="@+id/link_btn"
         android:layout_width="160dp"
@@ -34,6 +78,6 @@
         android:text="@string/link_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linkTokenInputLayout" />
+        app:layout_constraintTop_toBottomOf="@id/environmentGroup" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

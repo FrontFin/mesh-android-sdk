@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">Mesh Example</string>
-    <string name="link_token_hint">Link Token</string>
+    <string name="link_token_hint">Link or session token</string>
     <string name="link_btn">Link</string>
+    <string name="env_prod">Prod</string>
+    <string name="env_sbx">Sbx</string>
+    <string name="env_dev">Dev</string>
+    <string name="env_label">Environment, used only for a session token</string>
 </resources>

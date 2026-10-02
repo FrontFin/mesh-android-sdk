@@ -5,6 +5,9 @@
 ### Fixed
 - Improved automated wallet opening, wallet connect works reliably across the catalog.
 
+### Changed
+- Link host updates
+
 ## 3.4.5
 
 ### Added

@@ -1,5 +1,7 @@
 package com.meshconnect.link.entity
 
+import com.meshconnect.link.utils.sessionLinkToken
+
 /**
  * Configuration for launching the Mesh Connect Link UI.
  */
@@ -33,4 +35,35 @@ data class LinkConfiguration(
      * Pass [LinkTheme.SYSTEM] to use the device's current theme automatically.
      */
     val theme: LinkTheme? = null,
-)
+) {
+    companion object {
+        /**
+         * Builds a [token] from an MFS session token, as returned by
+         * `POST /v2/sessions`.
+         *
+         * A session token is bare and carries no host, so [environment] supplies
+         * one. It is required rather than defaulted: a session token belongs to
+         * exactly one environment, and quietly assuming production would send a
+         * dev token to the wrong Link and fail in a way that is hard to read.
+         *
+         * Returns a token rather than a whole configuration so it composes with
+         * the constructor's named arguments instead of duplicating them:
+         *
+         * ```
+         *  linkLauncher.launch(
+         *      LinkConfiguration(
+         *          token = LinkConfiguration.linkToken(
+         *              sessionToken = "ory_ac_...",
+         *              environment = MeshLinkEnvironment.PROD,
+         *          ),
+         *          language = "en",
+         *      )
+         *  )
+         * ```
+         */
+        fun linkToken(
+            sessionToken: String,
+            environment: MeshLinkEnvironment,
+        ): String = sessionLinkToken(sessionToken, environment)
+    }
+}
