@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.4.7
+
+### Changed
+- Added `meshpay.com` and its subdomains to the WebView domain whitelist.
+
 ## 3.4.6
 
 ### Fixed

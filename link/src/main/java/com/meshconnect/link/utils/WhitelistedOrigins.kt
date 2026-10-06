@@ -3,6 +3,7 @@ package com.meshconnect.link.utils
 internal val whitelistedOrigins =
     listOf(
         ".meshconnect.com",
+        ".meshpay.com",
         ".walletconnect.com",
         ".walletconnect.org",
         ".walletlink.org",

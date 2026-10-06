@@ -57,4 +57,11 @@ class WhitelistedOriginsTest {
         assertTrue(isUrlWhitelisted("HTTPS://ROBINHOOD.COM/login", "ROBINHOOD.COM"))
         assertTrue(isUrlWhitelisted("Https://Robinhood.Com", "Robinhood.Com"))
     }
+
+    @Test
+    fun `meshpay-com subdomains are whitelisted`() {
+        assertTrue(isUrlWhitelisted("https://web.meshpay.com", "web.meshpay.com"))
+        assertTrue(isUrlWhitelisted("", "Web.MeshPay.Com"))
+        assertFalse(isUrlWhitelisted("https://meshpay.com.evil.com", "meshpay.com.evil.com"))
+    }
 }
