@@ -130,6 +130,24 @@ lifecycleScope.launch {
 }
 ```
 
+When a user confirms a withdrawal, `LinkEvents` emits a `withdrawalRequested` event, then Link closes and returns its result: a withdrawal adds no `LinkPayload`, so this is `LinkExit` unless an earlier step, such as a broker connection, added one.
+Treat the event, not the activity result, as confirmation of the withdrawal.
+Keep the `transferId` and continue the withdrawal once Link has closed, for example with your own 2FA prompt.
+`LinkEvents` does not replay events, so start collecting before launching Link and keep collecting while `LinkActivity` is in front: a collector bound to your activity being `STARTED` (such as `repeatOnLifecycle`) misses it.
+The payload carries no address or amount: read the transfer details from the webhook or the transfer API.
+
+```kotlin
+lifecycleScope.launch {
+    LinkEvents.collect { event ->
+        if (event["type"] == "withdrawalRequested") {
+            val payload = event["payload"] as? Map<*, *>
+            val transferId = payload?.get("transferId") as? String
+            val status = payload?.get("status") as? String // "pending" or "success"; treat any other value as pending
+        }
+    }
+}
+```
+
 ## Returning users
 
 To skip re-authentication for a broker a user already connected, capture the `tokenId` from
