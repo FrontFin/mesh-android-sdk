@@ -64,6 +64,7 @@ internal object FilterLinkMessage {
             "linkTransferQRGenerated",
             "methodSelected",
             "homePageLoaded",
+            "withdrawalRequested",
         )
 
     fun filter(map: Map<String, *>): Map<String, *>? {

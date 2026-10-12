@@ -30,6 +30,7 @@ class FilterLinkMessageTest {
         verifyTypeExists("verifyDonePage")
         verifyTypeExists("transferMfaEntered")
         verifyTypeExists("homePageLoaded")
+        verifyTypeExists("withdrawalRequested")
         verifyTypeNotExist(randomString)
         verifyTypeNotExist("")
     }

@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.4.8
+
+### Added
+- Added the `withdrawalRequested` event to the `LinkEvents` stream, sent when a user confirms a withdrawal in Link.
+
 ## 3.4.7
 
 ### Changed
