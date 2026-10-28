@@ -63,8 +63,6 @@ internal class LinkActivity : AppCompatActivity() {
         private const val MAX_TOAST_MSG_LENGTH = 38
         private const val CBW_HOST = "wallet.coinbase.com"
         private const val CBW_PACKAGE_NAME = "org.toshi"
-        internal const val RECREATED_EXIT_MESSAGE =
-            "Link was closed by the system. Launch Link again with a new link token."
 
         fun getLinkIntent(
             activity: Context,
@@ -100,18 +98,6 @@ internal class LinkActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        if (savedInstanceState != null) {
-            // Android recreated this activity (e.g. the app was killed in the
-            // background) and the WebView session is gone. The link token in the
-            // intent is single-use and was already exchanged, so reloading it
-            // would only show "Session expired". Exit and let the host app
-            // launch Link again with a fresh token.
-            Log.w("MeshSDK", "LinkActivity recreated, not reloading the used link token")
-            setExitResult(IllegalStateException(RECREATED_EXIT_MESSAGE))
-            super.finish()
-            return
-        }
 
         runCatching {
             val link = decodeToken(intent.getStringExtra(TOKEN))
