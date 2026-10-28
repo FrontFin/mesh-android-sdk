@@ -3,7 +3,7 @@
 ## 3.4.9
 
 ### Fixed
-- Link no longer shows "Session expired" after the user rotates the device, switches dark mode, or changes font size or language while Link is open.
+- Bug fix for better user experience
 
 ## 3.4.8
 
