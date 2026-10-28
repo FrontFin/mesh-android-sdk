@@ -4,8 +4,16 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application>
+        <!--
+            configChanges: Link runs on a single-use link token. Letting Android
+            recreate this activity on a rotation, dark-mode switch, font/locale
+            change or window resize would reload Link from that already-used
+            token and dead-end the user on "Session expired". Handling these
+            changes in place keeps the running WebView session alive.
+        -->
         <activity
             android:name="com.meshconnect.link.ui.LinkActivity"
+            android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|density|screenSize|smallestScreenSize|layoutDirection|colorMode|fontWeightAdjustment|grammaticalGender"
             android:theme="@style/MeshLink.Theme.Catalog" />
     </application>
 
