@@ -30,15 +30,15 @@ import com.meshconnect.link.databinding.LinkActivityBinding
 import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
-import com.meshconnect.link.utils.THEME_DARK
 import com.meshconnect.link.utils.alertDialog
-import com.meshconnect.link.utils.createURL
+import com.meshconnect.link.utils.createLinkURL
 import com.meshconnect.link.utils.decodeToken
 import com.meshconnect.link.utils.getOnLoadedScript
 import com.meshconnect.link.utils.getParcelable
-import com.meshconnect.link.utils.getThemeFromUrl
 import com.meshconnect.link.utils.getThemeName
 import com.meshconnect.link.utils.intent
+import com.meshconnect.link.utils.isDarkLinkTheme
+import com.meshconnect.link.utils.isLatestLinkUrl
 import com.meshconnect.link.utils.isSystemThemeDark
 import com.meshconnect.link.utils.isUrlWhitelisted
 import com.meshconnect.link.utils.observeEvent
@@ -46,6 +46,7 @@ import com.meshconnect.link.utils.openTrueAuth
 import com.meshconnect.link.utils.resolveLanguage
 import com.meshconnect.link.utils.resolveTheme
 import com.meshconnect.link.utils.showToast
+import com.meshconnect.link.utils.themeColor
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
 import com.meshconnect.link.utils.windowInsetsController
@@ -100,11 +101,11 @@ internal class LinkActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         runCatching {
-            val link = decodeToken(intent.getStringExtra(TOKEN))
+            val token = decodeToken(intent.getStringExtra(TOKEN))
             val language = resolveLanguage(intent.getStringExtra(LANGUAGE))
             val fiatCurrency = intent.getStringExtra(FIAT_CURRENCY)
             val theme = resolveTheme(intent.getStringExtra(THEME), this::isSystemThemeDark)
-            createURL(link, mapOf("lng" to language, "fiatCur" to fiatCurrency, "th" to theme, "platform" to "android"))
+            createLinkURL(token, language, fiatCurrency, theme)
         }.onSuccess { url ->
             setContentView(binding.root)
 
@@ -126,12 +127,13 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
+    // Resolved when Link loads, the same moment the page reads it.
     private fun applyThemeFromUrl(url: String) {
-        val theme = getThemeFromUrl(url)
-        val isDarkTheme = resolveTheme(theme, this::isSystemThemeDark) == THEME_DARK
+        val isDarkTheme = isDarkLinkTheme(url, this::isSystemThemeDark)
+        val isLatestLink = isLatestLinkUrl(url)
 
-        val topColor = getColor(if (isDarkTheme) R.color.coldGray70 else R.color.coldGray0)
-        val bottomColor = getColor(if (isDarkTheme) R.color.gray80 else R.color.gray0)
+        val topColor = getColor(themeColor(isDarkTheme, isLatestLink, top = true))
+        val bottomColor = getColor(themeColor(isDarkTheme, isLatestLink, top = false))
 
         findViewById<ViewGroup>(android.R.id.content).setBackgroundColor(bottomColor)
 

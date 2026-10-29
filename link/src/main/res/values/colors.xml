@@ -5,4 +5,6 @@
     <color name="coldGray70">#1E1E24</color>
     <color name="coldGray0">#F3F4F5</color>
     <color name="gray80">#0E0D0D</color>
+    <color name="linkCanvasDark">#1C1C1C</color>
+    <color name="linkCanvasLight">#F9F9F9</color>
 </resources>

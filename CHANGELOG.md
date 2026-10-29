@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.10
+
+### Fixed
+- The area around Link now matches Link's theme. No more light bars around a dark page.
+- The `theme` setting now applies on the latest Link, and `SYSTEM` follows the device.
+
 ## 3.4.9
 
 ### Fixed
