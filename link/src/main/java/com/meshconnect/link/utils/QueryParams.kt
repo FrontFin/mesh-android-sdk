@@ -41,7 +41,7 @@ internal fun removeQueryParam(
     val (beforeFragment, fragment) = splitFragment(url)
     val queryStart = beforeFragment.indexOf('?')
     if (queryStart == -1) return url
-    val kept = queryPairs(url).filter { it.isNotEmpty() && pairKey(it) != name }
+    val kept = queryPairs(url).filter { it.isEmpty() || pairKey(it) != name }
     val base = beforeFragment.substring(0, queryStart)
     return base + (if (kept.isEmpty()) "" else "?" + kept.joinToString("&")) + fragment
 }

@@ -47,6 +47,11 @@ class QueryParamsTest {
     }
 
     @Test
+    fun `removeQueryParam should keep empty query parts`() {
+        removeQueryParam("https://a.com/?a=1&&b=2&", "th") shouldBeEqualTo "https://a.com/?a=1&&b=2&"
+    }
+
+    @Test
     fun `removeQueryParam should match an encoded key`() {
         removeQueryParam("https://a.com/?t%68=dark&a=1", "th") shouldBeEqualTo "https://a.com/?a=1"
     }

@@ -129,7 +129,9 @@ internal class LinkActivity : AppCompatActivity() {
 
     // Resolved when Link loads, the same moment the page reads it.
     private fun applyThemeFromUrl(url: String) {
-        val isDarkTheme = isDarkLinkTheme(url, this::isSystemThemeDark)
+        // Without a th, the page follows WebView's prefers-color-scheme, which comes from this
+        // activity's light theme rather than the device, so "follow the device" means light here.
+        val isDarkTheme = isDarkLinkTheme(url) { false }
         val isLatestLink = isLatestLinkUrl(url)
 
         val topColor = getColor(themeColor(isDarkTheme, isLatestLink, top = true))
