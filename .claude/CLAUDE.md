@@ -176,10 +176,10 @@ Both are `SharedFlow` instances in `link/src/main/java/com/meshconnect/link/Link
 | `link/src/main/java/.../usecase/FilterLinkMessage.kt` | JsType → payload routing |
 | `link/src/main/java/.../converter/JsonConverter.kt` | Gson setup with custom deserializers |
 | `link/src/main/java/.../utils/WhitelistedOrigins.kt` | Allowed WebView domains list |
-| `link/src/main/java/.../utils/CreateURL.kt` | Builds link URL from token/config (`lng`, `fiatCur`, `th` params) |
+| `link/src/main/java/.../utils/LinkUrl.kt` | `buildLinkURL()`: one pass that sets `th`, `lng`, `fiatCur`, `platform` and returns the URL plus its theme |
 | `link/src/main/java/.../utils/DecodeToken.kt` | Base64/URL token decoding |
 | `link/src/main/java/.../utils/Language.kt` | `systemLanguage` property + `resolveLanguage()` — device locale resolution |
-| `link/src/main/java/.../utils/Theme.kt` | `getThemeName()`, `resolveTheme()`, `isDarkLinkTheme()`, `isLatestLinkUrl()`, `themeColor()`, `isSystemThemeDark()` |
+| `link/src/main/java/.../utils/Theme.kt` | `resolveTheme()`, `resolveLinkTheme()` (theme priority), `systemBarColor()` (one dark, one light), `isSystemThemeDark()` |
 | `link/src/main/AndroidManifest.xml` | Permissions, LinkActivity declaration |
 | `link/proguard-rules.pro` | R8/ProGuard rules for SDK consumers |
 | `gradle/libs.versions.toml` | All versions — update `mesh-link` to bump SDK version |
@@ -224,10 +224,10 @@ Tests live in `link/src/test/kotlin/com/meshconnect/link/`.
 | `FilterLinkMessageTest` | JsType mapping logic |
 | `JsonConverterTest` | Gson deserializer setup |
 | `DecodeTokenTest` | Token decoding edge cases |
-| `CreateURLTest` | URL builder |
+| `LinkUrlTest` | URL builder (param replace, theme in URL) |
 | `WhitelistedOriginsTest` | Domain allowlist logic |
 | `LanguageTest` | `getSystemLanguage` and `resolveLanguage` including `"system"` passthrough |
-| `ThemeTest` | `getThemeName`, `resolveTheme`, `isDarkLinkTheme`, `isLatestLinkUrl`, `themeColor` — `decodeBase64` mocked via `mockkStatic` |
+| `ThemeTest` | `resolveTheme`, `resolveLinkTheme`, `systemBarColor`, `decodeBase64` mocked via `mockkStatic` |
 
 ### Running Tests
 
@@ -354,6 +354,6 @@ When creating PRs (via `gh pr create` or the GitHub UI), always use the repo tem
 - **`LinkTheme` string values:** Always use the `THEME_LIGHT`, `THEME_DARK`, `THEME_SYSTEM` constants defined in `Theme.kt` instead of raw string literals — never hardcode `"light"`, `"dark"`, `"system"` for theme
 - **`LinkTheme.valueOf` safety:** Use `LinkTheme.entries.find { it.name == name }` instead of `valueOf()` to avoid `IllegalArgumentException` on unrecognised values
 - **Mocking Android statics in tests:** Use `mockkStatic(::functionRef)` for top-level functions (e.g. `decodeBase64`, `isSystemThemeDark`) and `mockkStatic(ClassName::class)` for class statics (e.g. `Uri`, `Log`). Always pair with `unmockkStatic` in `@After`
-- **URL query parameters added by SDK:** `lng` (language), `fiatCur` (display fiat currency), `th` (theme) — see `CreateURL.kt`
-- **Theme resolution from URL:** `isDarkLinkTheme(url)` resolves the theme the way the page does: the first `th` param (`light`/`dark`), then the `th` in the Base64 `link_style` param, then the latest Link token's theme (following the device when it has none). The app's `theme` replaces any `th` already in the token (`createLinkURL`)
+- **URL query parameters set by the SDK:** `th`, `lng`, `fiatCur`, `platform`. App settings replace any value already in the token; see `LinkUrl.kt`
+- **Theme resolution:** `resolveLinkTheme` picks the first of: app `theme`, the token URL's `th`, `link_style.th`, then dark (Link's default). `system` is resolved from the device. Only the app's `theme` is written to `th`; the resolved theme always colors the native bars
 - **Returning users (Mesh Managed Tokens):** `AccountToken.tokenId` (in `AccessTokenPayload`) stays stable per user + `brokerType` even as the underlying `accessToken` refreshes. Host apps store it server-side and pass it back as `IntegrationAccessToken.accessToken` in `LinkConfiguration.accessTokens` to skip re-authentication — see the [Return users guide](https://docs.meshconnect.com/build/return-users) and the README's "Returning users" section

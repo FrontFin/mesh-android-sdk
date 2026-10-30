@@ -12,6 +12,11 @@ internal const val THEME_DARK = "dark"
 internal const val THEME_LIGHT = "light"
 internal const val THEME_SYSTEM = "system"
 
+// Link's own default with no theme anywhere.
+private const val THEME_DEFAULT = THEME_DARK
+
+private const val BASE64_BLOCK = 4
+
 internal fun getThemeName(theme: LinkTheme?): String? =
     when (theme) {
         LinkTheme.DARK -> THEME_DARK
@@ -20,6 +25,7 @@ internal fun getThemeName(theme: LinkTheme?): String? =
         else -> null
     }
 
+/** [theme] as `light` or `dark`, with `system` read from the device; null for anything else. */
 internal fun resolveTheme(
     theme: String?,
     isSystemThemeDark: () -> Boolean,
@@ -31,85 +37,46 @@ internal fun resolveTheme(
         else -> null
     }
 
+/**
+ * The theme Link opens in, `light` or `dark`. First one set wins:
+ * 1. the app's `theme` setting
+ * 2. the `th` already in the token URL
+ * 3. the `th` inside the token's `link_style`
+ * 4. dark, Link's own default
+ */
+internal fun resolveLinkTheme(
+    appTheme: String?,
+    urlTheme: String?,
+    linkStyle: String?,
+    isSystemThemeDark: () -> Boolean,
+): String =
+    resolveTheme(appTheme, isSystemThemeDark)
+        ?: resolveTheme(urlTheme, isSystemThemeDark)
+        ?: resolveTheme(linkStyleTheme(linkStyle), isSystemThemeDark)
+        ?: THEME_DEFAULT
+
 internal fun Activity.isSystemThemeDark(): Boolean {
     val mask = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
     return mask == Configuration.UI_MODE_NIGHT_YES
 }
 
-private const val BASE64_BLOCK = 4
-
-// Base64 or base64url, padded; a '+' turned into a space by URL decoding is restored.
-private fun decodeBase64Param(value: String): String {
-    val base64 = value.replace(' ', '+').replace('-', '+').replace('_', '/')
-    return decodeBase64(base64 + "=".repeat((BASE64_BLOCK - base64.length % BASE64_BLOCK) % BASE64_BLOCK))
-}
-
-private fun getLinkStyleTheme(url: String): String? {
-    val linkStyle = getFirstQueryParam(url, "link_style") ?: return null
-    return JSONObject(decodeBase64Param(linkStyle)).optString("th").takeIf { it.isNotBlank() }
-}
-
-// The latest Link's `token` param, validated the way Link does; null for older links.
-private fun getTokenEnvelope(url: String): JSONObject? {
-    val token = getFirstQueryParam(url, "token")?.takeIf { it.isNotEmpty() } ?: return null
+// `link_style` is base64 JSON with an optional `th`. URL decoding turns its '+' into a space,
+// so that's restored, and the padding is added back in case it was stripped.
+private fun linkStyleTheme(linkStyle: String?): String? {
+    if (linkStyle.isNullOrEmpty()) return null
     return try {
-        val envelope = JSONObject(decodeBase64Param(token))
-        val client = envelope.opt("c")
-        envelope.takeIf { it.opt("v") is Number && client is String && client.isNotEmpty() }
+        val base64 = linkStyle.replace(' ', '+')
+        val padded = base64 + "=".repeat((BASE64_BLOCK - base64.length % BASE64_BLOCK) % BASE64_BLOCK)
+        JSONObject(decodeBase64(padded)).optString("th").takeIf { it.isNotEmpty() }
     } catch (expected: Exception) {
+        Log.w("MeshSDK", "Couldn't read the theme from link_style", expected)
         null
     }
 }
 
-internal fun isLatestLinkUrl(url: String): Boolean = getTokenEnvelope(url) != null
-
 /**
- * Whether Link will render dark, resolved the way the page does so the native background
- * matches it: the first `th` param wins, then legacy `link_style`, then the latest Link
- * token's theme. Such a token without a theme follows the device; legacy links default to light.
+ * The color for the status and navigation bars. One dark and one light color for every Link
+ * version and client branding, close enough to all of them that there's no visible seam.
  */
-internal fun isDarkLinkTheme(
-    url: String,
-    isSystemThemeDark: () -> Boolean,
-): Boolean {
-    val th = getFirstQueryParam(url, "th")?.takeIf { it == THEME_DARK || it == THEME_LIGHT }
-    val linkStyleTheme =
-        try {
-            getLinkStyleTheme(url)
-        } catch (expected: Exception) {
-            Log.e("MeshSDK", "isDarkLinkTheme", expected)
-            null
-        }
-    return when {
-        th != null -> th == THEME_DARK
-        linkStyleTheme == THEME_SYSTEM -> isSystemThemeDark()
-        linkStyleTheme == THEME_DARK || linkStyleTheme == THEME_LIGHT -> linkStyleTheme == THEME_DARK
-        else -> isLatestLinkDark(url, isSystemThemeDark)
-    }
-}
-
-private fun isLatestLinkDark(
-    url: String,
-    isSystemThemeDark: () -> Boolean,
-): Boolean {
-    val envelope = getTokenEnvelope(url) ?: return false
-    return when (envelope.optString("th")) {
-        "LINK_THEME_DARK" -> true
-        "LINK_THEME_LIGHT" -> false
-        else -> isSystemThemeDark()
-    }
-}
-
-// The latest Link uses one canvas color (--color-bg-canvas-dark/light in FrontFin/link
-// packages/ui/src/styles/tailwind.css), so both bars match it and there's no seam.
 @ColorRes
-internal fun themeColor(
-    isDarkTheme: Boolean,
-    isLatestLink: Boolean,
-    top: Boolean,
-): Int =
-    when {
-        isLatestLink -> if (isDarkTheme) R.color.linkCanvasDark else R.color.linkCanvasLight
-        top -> if (isDarkTheme) R.color.coldGray70 else R.color.coldGray0
-        else -> if (isDarkTheme) R.color.gray80 else R.color.gray0
-    }
+internal fun systemBarColor(isDarkTheme: Boolean): Int = if (isDarkTheme) R.color.linkBarDark else R.color.linkBarLight

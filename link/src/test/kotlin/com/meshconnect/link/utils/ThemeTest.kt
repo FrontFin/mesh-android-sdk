@@ -30,6 +30,7 @@ class ThemeTest {
         mockkStatic(Log::class)
         mockkStatic(::decodeBase64)
         every { Log.e(any(), any(), any()) } returns 0
+        every { Log.w(any(), any<String>(), any()) } returns 0
         every { decodeBase64(any()) } answers { String(java.util.Base64.getDecoder().decode(firstArg<String>())) }
     }
 
@@ -98,100 +99,67 @@ class ThemeTest {
         resolveTheme("") { false }.shouldBeNull()
     }
 
-    // --- isDarkLinkTheme ---
+    // --- resolveLinkTheme ---
 
-    private val legacyUrl = "https://web.meshconnect.com/b64?link_token=abc"
+    private val dark = { true }
+    private val light = { false }
 
-    private fun envelope(json: String) = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(json.toByteArray())
-
-    private fun latestLinkUrl(theme: String? = null): String {
-        val th = theme?.let { ""","th":"$it"""" } ?: ""
-        return "https://link.meshpay.com/?token=${envelope("""{"v":1,"c":"code"$th}""")}&clientId=org-1"
+    @Test
+    fun `resolveLinkTheme should prefer the app theme over the url and link_style`() {
+        resolveLinkTheme(THEME_LIGHT, THEME_DARK, darkThemeLinkStyle, dark) shouldBeEqualTo THEME_LIGHT
+        resolveLinkTheme(THEME_DARK, THEME_LIGHT, lightThemeLinkStyle, light) shouldBeEqualTo THEME_DARK
     }
 
     @Test
-    fun `isDarkLinkTheme should follow the first th param`() {
-        isDarkLinkTheme("$legacyUrl&th=dark&th=light") { false } shouldBeEqualTo true
-        isDarkLinkTheme("$legacyUrl&th=light&th=dark") { true } shouldBeEqualTo false
+    fun `resolveLinkTheme should resolve a system app theme from the device`() {
+        resolveLinkTheme(THEME_SYSTEM, THEME_LIGHT, null, dark) shouldBeEqualTo THEME_DARK
+        resolveLinkTheme(THEME_SYSTEM, THEME_DARK, null, light) shouldBeEqualTo THEME_LIGHT
     }
 
     @Test
-    fun `isDarkLinkTheme should prefer th over link_style and the token theme`() {
-        isDarkLinkTheme("$legacyUrl&th=light&link_style=$darkThemeLinkStyle") { true } shouldBeEqualTo false
-        isDarkLinkTheme(latestLinkUrl("LINK_THEME_DARK") + "&th=light") { true } shouldBeEqualTo false
+    fun `resolveLinkTheme should use the url th when the app sets none`() {
+        resolveLinkTheme(null, THEME_DARK, lightThemeLinkStyle, light) shouldBeEqualTo THEME_DARK
+        resolveLinkTheme(null, THEME_LIGHT, darkThemeLinkStyle, dark) shouldBeEqualTo THEME_LIGHT
+        resolveLinkTheme(null, THEME_SYSTEM, null, light) shouldBeEqualTo THEME_LIGHT
     }
 
     @Test
-    fun `isDarkLinkTheme should use link_style when th is missing or not light or dark`() {
-        isDarkLinkTheme("$legacyUrl&link_style=$darkThemeLinkStyle") { false } shouldBeEqualTo true
-        isDarkLinkTheme("$legacyUrl&th=system&link_style=$lightThemeLinkStyle") { true } shouldBeEqualTo false
+    fun `resolveLinkTheme should use link_style when there is no usable th`() {
+        resolveLinkTheme(null, null, darkThemeLinkStyle, light) shouldBeEqualTo THEME_DARK
+        resolveLinkTheme(null, "unknown", lightThemeLinkStyle, dark) shouldBeEqualTo THEME_LIGHT
     }
 
     @Test
-    fun `isDarkLinkTheme should follow the device for a link_style system theme`() {
-        every { decodeBase64(any()) } returns """{"th":"system"}"""
-
-        isDarkLinkTheme("$legacyUrl&link_style=x") { true } shouldBeEqualTo true
-        isDarkLinkTheme("$legacyUrl&link_style=x") { false } shouldBeEqualTo false
+    fun `resolveLinkTheme should resolve a system link_style from the device`() {
+        val systemLinkStyle = "eyJ0aCI6InN5c3RlbSJ9" // {"th":"system"}
+        resolveLinkTheme(null, null, systemLinkStyle, dark) shouldBeEqualTo THEME_DARK
+        resolveLinkTheme(null, null, systemLinkStyle, light) shouldBeEqualTo THEME_LIGHT
     }
 
     @Test
-    fun `isDarkLinkTheme should default to light for a legacy link without a theme`() {
-        isDarkLinkTheme(legacyUrl) { true } shouldBeEqualTo false
-        isDarkLinkTheme("$legacyUrl&link_style=$noThemeLinkStyle") { true } shouldBeEqualTo false
-        isDarkLinkTheme("$legacyUrl&link_style=$emptyThemeLinkStyle") { true } shouldBeEqualTo false
+    fun `resolveLinkTheme should restore a link_style whose plus turned into a space`() {
+        // Base64 of {"th":"dark","x":"~~~"} has a '+' that URL decoding turns into a space.
+        val linkStyle = java.util.Base64.getEncoder().encodeToString("""{"th":"dark","x":"~~~"}""".toByteArray())
+        resolveLinkTheme(null, null, linkStyle.replace('+', ' ').trimEnd('='), light) shouldBeEqualTo THEME_DARK
     }
 
     @Test
-    fun `isDarkLinkTheme should use the latest Link token theme`() {
-        isDarkLinkTheme(latestLinkUrl("LINK_THEME_DARK")) { false } shouldBeEqualTo true
-        isDarkLinkTheme(latestLinkUrl("LINK_THEME_LIGHT")) { true } shouldBeEqualTo false
+    fun `resolveLinkTheme should default to dark when nothing is set`() {
+        resolveLinkTheme(null, null, null, light) shouldBeEqualTo THEME_DARK
+        resolveLinkTheme(null, null, noThemeLinkStyle, light) shouldBeEqualTo THEME_DARK
+        resolveLinkTheme(null, null, emptyThemeLinkStyle, light) shouldBeEqualTo THEME_DARK
     }
 
     @Test
-    fun `isDarkLinkTheme should follow the device for a latest Link token without a theme`() {
-        isDarkLinkTheme(latestLinkUrl()) { true } shouldBeEqualTo true
-        isDarkLinkTheme(latestLinkUrl()) { false } shouldBeEqualTo false
+    fun `resolveLinkTheme should default to dark when link_style cannot be read`() {
+        resolveLinkTheme(null, null, "%%%", light) shouldBeEqualTo THEME_DARK
     }
 
-    @Test
-    fun `isDarkLinkTheme should default to light when link_style cannot be decoded`() {
-        every { decodeBase64(any()) } throws IllegalArgumentException("bad base64")
-
-        isDarkLinkTheme("$legacyUrl&link_style=%%%") { true } shouldBeEqualTo false
-    }
-
-    // --- isLatestLinkUrl ---
+    // --- systemBarColor ---
 
     @Test
-    fun `isLatestLinkUrl should accept a valid token envelope`() {
-        isLatestLinkUrl(latestLinkUrl()) shouldBeEqualTo true
-    }
-
-    @Test
-    fun `isLatestLinkUrl should reject legacy and malformed tokens`() {
-        isLatestLinkUrl(legacyUrl) shouldBeEqualTo false
-        isLatestLinkUrl("https://link.meshpay.com/?token=not-json") shouldBeEqualTo false
-        isLatestLinkUrl("https://link.meshpay.com/?token=${envelope("""{"v":"1","c":"code"}""")}") shouldBeEqualTo false
-        isLatestLinkUrl("https://link.meshpay.com/?token=${envelope("""{"v":1,"c":""}""")}") shouldBeEqualTo false
-        isLatestLinkUrl("https://link.meshpay.com/?token=") shouldBeEqualTo false
-    }
-
-    // --- themeColor ---
-
-    @Test
-    fun `themeColor should use one canvas color for the latest Link`() {
-        themeColor(isDarkTheme = true, isLatestLink = true, top = true) shouldBeEqualTo R.color.linkCanvasDark
-        themeColor(isDarkTheme = true, isLatestLink = true, top = false) shouldBeEqualTo R.color.linkCanvasDark
-        themeColor(isDarkTheme = false, isLatestLink = true, top = true) shouldBeEqualTo R.color.linkCanvasLight
-        themeColor(isDarkTheme = false, isLatestLink = true, top = false) shouldBeEqualTo R.color.linkCanvasLight
-    }
-
-    @Test
-    fun `themeColor should keep the legacy top and bottom colors`() {
-        themeColor(isDarkTheme = true, isLatestLink = false, top = true) shouldBeEqualTo R.color.coldGray70
-        themeColor(isDarkTheme = true, isLatestLink = false, top = false) shouldBeEqualTo R.color.gray80
-        themeColor(isDarkTheme = false, isLatestLink = false, top = true) shouldBeEqualTo R.color.coldGray0
-        themeColor(isDarkTheme = false, isLatestLink = false, top = false) shouldBeEqualTo R.color.gray0
+    fun `systemBarColor should use one color per theme`() {
+        systemBarColor(isDarkTheme = true) shouldBeEqualTo R.color.linkBarDark
+        systemBarColor(isDarkTheme = false) shouldBeEqualTo R.color.linkBarLight
     }
 }

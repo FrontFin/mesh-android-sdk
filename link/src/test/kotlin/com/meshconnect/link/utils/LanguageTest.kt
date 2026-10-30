@@ -80,7 +80,7 @@ class LanguageTest {
     }
 
     @Test
-    fun `resolveLanguage should return empty string when value is empty`() {
-        resolveLanguage("") shouldBeEqualTo ""
+    fun `resolveLanguage should return null when value is empty`() {
+        resolveLanguage("").shouldBeNull()
     }
 }
