@@ -39,7 +39,7 @@ internal fun resolveTheme(
 
 /**
  * The theme Link opens in, `light` or `dark`. First one set wins:
- * 1. the app's `theme` setting
+ * 1. the app's `theme` setting, already resolved by [resolveTheme]
  * 2. the `th` already in the token URL
  * 3. the `th` inside the token's `link_style`
  * 4. dark, Link's own default
@@ -50,7 +50,7 @@ internal fun resolveLinkTheme(
     linkStyle: String?,
     isSystemThemeDark: () -> Boolean,
 ): String =
-    resolveTheme(appTheme, isSystemThemeDark)
+    appTheme
         ?: resolveTheme(urlTheme, isSystemThemeDark)
         ?: resolveTheme(linkStyleTheme(linkStyle), isSystemThemeDark)
         ?: THEME_DEFAULT

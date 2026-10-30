@@ -30,11 +30,12 @@ internal fun buildLinkURL(
     isSystemThemeDark: () -> Boolean,
 ): LinkUrl {
     val query = QueryString.parse(linkUrl)
-    val theme = resolveLinkTheme(options.theme, query.first("th"), query.first("link_style"), isSystemThemeDark)
+    val appTheme = resolveTheme(options.theme, isSystemThemeDark)
+    val theme = resolveLinkTheme(appTheme, query.first("th"), query.first("link_style"), isSystemThemeDark)
     val params =
         buildMap {
             // Only the app's theme is written; otherwise Link reads the token's th or link_style itself.
-            resolveTheme(options.theme, isSystemThemeDark)?.let { put("th", it) }
+            appTheme?.let { put("th", it) }
             resolveLanguage(options.language)?.let { put("lng", it) }
             resolveCurrency(options.fiatCurrency)?.let { put("fiatCur", it) }
             put("platform", PLATFORM)

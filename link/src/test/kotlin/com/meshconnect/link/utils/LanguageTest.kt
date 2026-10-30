@@ -82,5 +82,11 @@ class LanguageTest {
     @Test
     fun `resolveLanguage should return null when value is empty`() {
         resolveLanguage("").shouldBeNull()
+        resolveLanguage("  ").shouldBeNull()
+    }
+
+    @Test
+    fun `resolveLanguage should trim the value`() {
+        resolveLanguage(" es ") shouldBeEqualTo "es"
     }
 }

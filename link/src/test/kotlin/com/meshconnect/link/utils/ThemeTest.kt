@@ -111,12 +111,6 @@ class ThemeTest {
     }
 
     @Test
-    fun `resolveLinkTheme should resolve a system app theme from the device`() {
-        resolveLinkTheme(THEME_SYSTEM, THEME_LIGHT, null, dark) shouldBeEqualTo THEME_DARK
-        resolveLinkTheme(THEME_SYSTEM, THEME_DARK, null, light) shouldBeEqualTo THEME_LIGHT
-    }
-
-    @Test
     fun `resolveLinkTheme should use the url th when the app sets none`() {
         resolveLinkTheme(null, THEME_DARK, lightThemeLinkStyle, light) shouldBeEqualTo THEME_DARK
         resolveLinkTheme(null, THEME_LIGHT, darkThemeLinkStyle, dark) shouldBeEqualTo THEME_LIGHT
