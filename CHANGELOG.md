@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.10
+
+### Fixed
+- The status and navigation bars now match Link's theme. No more light bars around a dark page.
+- `theme`, `language` and `displayFiatCurrency` now override the same values already in the link token, and `SYSTEM` is sent as light or dark.
+
 ## 3.4.9
 
 ### Fixed

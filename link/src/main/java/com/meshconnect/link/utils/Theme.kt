@@ -2,14 +2,20 @@ package com.meshconnect.link.utils
 
 import android.app.Activity
 import android.content.res.Configuration
-import android.net.Uri
 import android.util.Log
+import androidx.annotation.ColorRes
+import com.meshconnect.link.R
 import com.meshconnect.link.entity.LinkTheme
 import org.json.JSONObject
 
 internal const val THEME_DARK = "dark"
 internal const val THEME_LIGHT = "light"
 internal const val THEME_SYSTEM = "system"
+
+// Link's own default with no theme anywhere.
+private const val THEME_DEFAULT = THEME_DARK
+
+private const val BASE64_BLOCK = 4
 
 internal fun getThemeName(theme: LinkTheme?): String? =
     when (theme) {
@@ -19,6 +25,7 @@ internal fun getThemeName(theme: LinkTheme?): String? =
         else -> null
     }
 
+/** [theme] as `light` or `dark`, with `system` read from the device; null for anything else. */
 internal fun resolveTheme(
     theme: String?,
     isSystemThemeDark: () -> Boolean,
@@ -30,23 +37,46 @@ internal fun resolveTheme(
         else -> null
     }
 
+/**
+ * The theme Link opens in, `light` or `dark`. First one set wins:
+ * 1. the app's `theme` setting, already resolved by [resolveTheme]
+ * 2. the `th` already in the token URL
+ * 3. the `th` inside the token's `link_style`
+ * 4. dark, Link's own default
+ */
+internal fun resolveLinkTheme(
+    appTheme: String?,
+    urlTheme: String?,
+    linkStyle: String?,
+    isSystemThemeDark: () -> Boolean,
+): String =
+    appTheme
+        ?: resolveTheme(urlTheme, isSystemThemeDark)
+        ?: resolveTheme(linkStyleTheme(linkStyle), isSystemThemeDark)
+        ?: THEME_DEFAULT
+
 internal fun Activity.isSystemThemeDark(): Boolean {
     val mask = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
     return mask == Configuration.UI_MODE_NIGHT_YES
 }
 
-internal fun getThemeFromUrl(url: String): String? {
+// `link_style` is base64 JSON with an optional `th`. URL decoding turns its '+' into a space,
+// so that's restored, and the padding is added back in case it was stripped.
+private fun linkStyleTheme(linkStyle: String?): String? {
+    if (linkStyle.isNullOrEmpty()) return null
     return try {
-        val uri = Uri.parse(url)
-        val th = uri.getQueryParameter("th")
-        if (!th.isNullOrBlank()) return th
-
-        val linkStyle = uri.getQueryParameter("link_style")
-        linkStyle?.let {
-            JSONObject(decodeBase64(it)).optString("th").takeIf { s -> s.isNotBlank() }
-        }
+        val base64 = linkStyle.replace(' ', '+')
+        val padded = base64 + "=".repeat((BASE64_BLOCK - base64.length % BASE64_BLOCK) % BASE64_BLOCK)
+        JSONObject(decodeBase64(padded)).optString("th").takeIf { it.isNotEmpty() }
     } catch (expected: Exception) {
-        Log.e("MeshSDK", "getThemeFromUrl", expected)
+        Log.w("MeshSDK", "Couldn't read the theme from link_style", expected)
         null
     }
 }
+
+/**
+ * The color for the status and navigation bars. One dark and one light color for every Link
+ * version and client branding, close enough to all of them that there's no visible seam.
+ */
+@ColorRes
+internal fun systemBarColor(isDarkTheme: Boolean): Int = if (isDarkTheme) R.color.linkBarDark else R.color.linkBarLight
