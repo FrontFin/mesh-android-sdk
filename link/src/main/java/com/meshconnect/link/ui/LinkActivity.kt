@@ -39,6 +39,7 @@ import com.meshconnect.link.utils.getParcelable
 import com.meshconnect.link.utils.getThemeFromUrl
 import com.meshconnect.link.utils.getThemeName
 import com.meshconnect.link.utils.intent
+import com.meshconnect.link.utils.isLinkOrigin
 import com.meshconnect.link.utils.isSystemThemeDark
 import com.meshconnect.link.utils.isUrlWhitelisted
 import com.meshconnect.link.utils.observeEvent
@@ -288,11 +289,23 @@ internal class LinkActivity : AppCompatActivity() {
             // dead-end instead.
             settings.javaScriptCanOpenWindowsAutomatically = true
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
-            addJavascriptInterface(JSBridge { viewModel.onJsonReceived(it) }, JSBridge.NAME)
+            addJavascriptInterface(JSBridge(::onBridgeMessage), JSBridge.NAME)
             setBackgroundColor(Color.TRANSPARENT)
             webViewClient = WebClient(disableWhiteList, linkHost = url.host)
             webChromeClient = ChromeClient()
             loadUrl(url.toString())
+        }
+    }
+
+    // Accept bridge messages only when the main page is Mesh Link.
+    // This runs on the JavaBridge thread, so read webView.url on the UI thread.
+    private fun onBridgeMessage(json: String) {
+        binding.webView.post {
+            if (isLinkOrigin(binding.webView.url)) {
+                viewModel.onJsonReceived(json)
+            } else {
+                Log.w("MeshSDK", "Ignored a bridge message from a non-Link page")
+            }
         }
     }
 
