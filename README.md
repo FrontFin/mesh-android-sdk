@@ -52,7 +52,7 @@ val configuration = LinkConfiguration(
 | `disableDomainWhiteList` | `Boolean?` | Disables origin whitelisting in the WebView. By default it's enabled with the predefined [domains](link/src/main/java/com/meshconnect/link/utils/WhitelistedOrigins.kt). Intended for testing only. |
 | `language` | `String?` | BCP-47 language tag that overrides the UI locale (e.g. `"en"`, `"fr-FR"`). Pass `"system"` to use the device's current locale automatically. |
 | `displayFiatCurrency` | `String?` | ISO 4217 currency code shown as the fiat equivalent of crypto amounts (e.g. `"USD"`, `"EUR"`). |
-| `theme` | `LinkTheme?` | Colour theme of the Link UI. Accepts `LIGHT`, `DARK`, or `SYSTEM`. Pass `SYSTEM` to follow the device's setting. |
+| `theme` | `LinkTheme?` | Colour theme of the Link UI. `LIGHT` / `DARK` force that mode, overriding your portal styling. `SYSTEM` (default) or null uses your portal styling: if you styled only one mode, Link always uses it; otherwise it follows the device setting. |
 
 ### 2. Register an Activity Result callback
 

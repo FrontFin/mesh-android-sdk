@@ -1,4 +1,7 @@
+import com.meshconnect.link.entity.LinkTheme
+import com.meshconnect.link.utils.createLinkURL
 import com.meshconnect.link.utils.createURL
+import com.meshconnect.link.utils.getThemeName
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.net.MalformedURLException
@@ -44,5 +47,29 @@ class CreateURLTest {
     @Test(expected = MalformedURLException::class)
     fun `createURL should throw error on malformed url`() {
         createURL("Dx")
+    }
+
+    @Test
+    fun `createLinkURL should send th=system as-is for LinkTheme SYSTEM`() {
+        val url = createLinkURL("https://example.com?token=abc", "en", null, getThemeName(LinkTheme.SYSTEM))
+        assertEquals(URL("https://example.com?token=abc&lng=en&th=system&platform=android"), url)
+    }
+
+    @Test
+    fun `createLinkURL should send th=light and th=dark for LinkTheme LIGHT and DARK`() {
+        assertEquals(
+            URL("https://example.com?th=light&platform=android"),
+            createLinkURL("https://example.com", null, null, getThemeName(LinkTheme.LIGHT)),
+        )
+        assertEquals(
+            URL("https://example.com?th=dark&platform=android"),
+            createLinkURL("https://example.com", null, null, getThemeName(LinkTheme.DARK)),
+        )
+    }
+
+    @Test
+    fun `createLinkURL should omit th when theme is null`() {
+        val url = createLinkURL("https://example.com", null, "USD", getThemeName(null))
+        assertEquals(URL("https://example.com?fiatCur=USD&platform=android"), url)
     }
 }

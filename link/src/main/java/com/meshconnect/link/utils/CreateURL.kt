@@ -15,3 +15,14 @@ internal fun createURL(
     }
     return URL(builder.toString())
 }
+
+/**
+ * Builds the Link URL the WebView loads. `theme` is sent as-is: `light` / `dark` force that
+ * mode, `system` (or no `th`) lets Link use the session theme.
+ */
+internal fun createLinkURL(
+    link: String,
+    language: String?,
+    fiatCurrency: String?,
+    theme: String?,
+): URL = createURL(link, mapOf("lng" to language, "fiatCur" to fiatCurrency, "th" to theme, "platform" to "android"))

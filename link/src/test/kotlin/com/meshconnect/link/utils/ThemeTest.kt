@@ -67,41 +67,51 @@ class ThemeTest {
         getThemeName(null).shouldBeNull()
     }
 
-    // --- resolveTheme ---
+    // --- resolveSystemBarsTheme ---
 
     @Test
-    fun `resolveTheme should return dark when theme is dark`() {
-        resolveTheme(THEME_DARK) { false } shouldBeEqualTo THEME_DARK
+    fun `resolveSystemBarsTheme should use dark url theme over token and device`() {
+        resolveSystemBarsTheme(THEME_DARK, { THEME_LIGHT }) { false } shouldBeEqualTo THEME_DARK
     }
 
     @Test
-    fun `resolveTheme should return light when theme is light`() {
-        resolveTheme(THEME_LIGHT) { false } shouldBeEqualTo THEME_LIGHT
+    fun `resolveSystemBarsTheme should use light url theme over token and device`() {
+        resolveSystemBarsTheme(THEME_LIGHT, { THEME_DARK }) { true } shouldBeEqualTo THEME_LIGHT
     }
 
     @Test
-    fun `resolveTheme should return dark when theme is system and system is dark`() {
-        resolveTheme(THEME_SYSTEM) { true } shouldBeEqualTo THEME_DARK
+    fun `resolveSystemBarsTheme should use token theme when url theme is system`() {
+        resolveSystemBarsTheme(THEME_SYSTEM, { THEME_DARK }) { false } shouldBeEqualTo THEME_DARK
+        resolveSystemBarsTheme(THEME_SYSTEM, { THEME_LIGHT }) { true } shouldBeEqualTo THEME_LIGHT
     }
 
     @Test
-    fun `resolveTheme should return light when theme is system and system is light`() {
-        resolveTheme(THEME_SYSTEM) { false } shouldBeEqualTo THEME_LIGHT
+    fun `resolveSystemBarsTheme should use token theme when url theme is null`() {
+        resolveSystemBarsTheme(null, { THEME_DARK }) { false } shouldBeEqualTo THEME_DARK
+        resolveSystemBarsTheme(null, { THEME_LIGHT }) { true } shouldBeEqualTo THEME_LIGHT
     }
 
     @Test
-    fun `resolveTheme should return null when theme is null`() {
-        resolveTheme(null) { false }.shouldBeNull()
+    fun `resolveSystemBarsTheme should use device when url theme is system and token has no theme`() {
+        resolveSystemBarsTheme(THEME_SYSTEM, { null }) { true } shouldBeEqualTo THEME_DARK
+        resolveSystemBarsTheme(THEME_SYSTEM, { null }) { false } shouldBeEqualTo THEME_LIGHT
     }
 
     @Test
-    fun `resolveTheme should return null when theme is an unknown value`() {
-        resolveTheme("unknown") { false }.shouldBeNull()
+    fun `resolveSystemBarsTheme should use device when url theme is null and token has no theme`() {
+        resolveSystemBarsTheme(null, { null }) { true } shouldBeEqualTo THEME_DARK
+        resolveSystemBarsTheme(null, { null }) { false } shouldBeEqualTo THEME_LIGHT
     }
 
     @Test
-    fun `resolveTheme should return null when theme is empty`() {
-        resolveTheme("") { false }.shouldBeNull()
+    fun `resolveSystemBarsTheme should treat an unknown url theme as no preference`() {
+        resolveSystemBarsTheme("unknown", { THEME_DARK }) { false } shouldBeEqualTo THEME_DARK
+        resolveSystemBarsTheme("", { null }) { true } shouldBeEqualTo THEME_DARK
+    }
+
+    @Test
+    fun `resolveSystemBarsTheme should not read the token when url theme is an override`() {
+        resolveSystemBarsTheme(THEME_LIGHT, { error("token must not be read") }) { true } shouldBeEqualTo THEME_LIGHT
     }
 
     // --- getThemeFromUrl ---
@@ -184,6 +194,14 @@ class ThemeTest {
     }
 
     @Test
+    fun `getThemeFromUrl should return the last th param like Link does`() {
+        val mockUri = mockUri(th = listOf("dark", "system"))
+        every { Uri.parse(any()) } returns mockUri
+
+        getThemeFromUrl(url) shouldBeEqualTo THEME_SYSTEM
+    }
+
+    @Test
     fun `getThemeFromUrl should return null and log error on exception`() {
         every { Uri.parse(any()) } throws RuntimeException("parse error")
 
@@ -195,9 +213,14 @@ class ThemeTest {
     private fun mockUri(
         th: String?,
         linkStyle: String? = null,
+    ): Uri = mockUri(listOfNotNull(th), linkStyle)
+
+    private fun mockUri(
+        th: List<String>,
+        linkStyle: String? = null,
     ): Uri {
         return mockk<Uri>().also { uri ->
-            every { uri.getQueryParameter("th") } returns th
+            every { uri.getQueryParameters("th") } returns th
             every { uri.getQueryParameter("link_style") } returns linkStyle
         }
     }

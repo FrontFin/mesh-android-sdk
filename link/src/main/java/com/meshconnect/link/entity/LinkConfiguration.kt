@@ -30,7 +30,9 @@ data class LinkConfiguration(
     val displayFiatCurrency: String? = null,
     /**
      * Colour theme applied to the Link UI.
-     * Pass [LinkTheme.SYSTEM] to use the device's current theme automatically.
+     * [LinkTheme.LIGHT] / [LinkTheme.DARK] force that mode, overriding your portal styling.
+     * [LinkTheme.SYSTEM] (default) or `null` uses your portal styling: if you styled only one
+     * mode, Link always uses it; otherwise it follows the device setting.
      */
     val theme: LinkTheme? = null,
 )

@@ -131,7 +131,7 @@ launcher.launch(LinkConfiguration(token = "your-link-token"))
 | `disableDomainWhiteList` | `Boolean?` | false | Bypass domain whitelisting |
 | `language` | `String?` | null | BCP-47 language tag; pass `"system"` to use the device locale |
 | `displayFiatCurrency` | `String?` | null | ISO 4217 code for fiat equivalent display (e.g. `"USD"`) |
-| `theme` | `LinkTheme?` | null | UI theme — `LIGHT`, `DARK`, or `SYSTEM` (follows device dark-mode) |
+| `theme` | `LinkTheme?` | null | UI theme — `LIGHT` / `DARK` force that mode over portal styling; `SYSTEM` or null uses portal styling (one styled mode → always that; else device) |
 
 ### `LinkResult` (sealed interface, `ui/LinkResult.kt`)
 
@@ -179,7 +179,7 @@ Both are `SharedFlow` instances in `link/src/main/java/com/meshconnect/link/Link
 | `link/src/main/java/.../utils/CreateURL.kt` | Builds link URL from token/config (`lng`, `fiatCur`, `th` params) |
 | `link/src/main/java/.../utils/DecodeToken.kt` | Base64/URL token decoding |
 | `link/src/main/java/.../utils/Language.kt` | `systemLanguage` property + `resolveLanguage()` — device locale resolution |
-| `link/src/main/java/.../utils/Theme.kt` | `getThemeName()`, `resolveTheme()`, `getThemeFromUrl()`, `isSystemThemeDark()` |
+| `link/src/main/java/.../utils/Theme.kt` | `getThemeName()`, `resolveSystemBarsTheme()`, `getSessionTokenTheme()`, `getThemeFromUrl()`, `getSessionTokenFromUrl()`, `isSystemThemeDark()` |
 | `link/src/main/AndroidManifest.xml` | Permissions, LinkActivity declaration |
 | `link/proguard-rules.pro` | R8/ProGuard rules for SDK consumers |
 | `gradle/libs.versions.toml` | All versions — update `mesh-link` to bump SDK version |
@@ -227,7 +227,7 @@ Tests live in `link/src/test/kotlin/com/meshconnect/link/`.
 | `CreateURLTest` | URL builder |
 | `WhitelistedOriginsTest` | Domain allowlist logic |
 | `LanguageTest` | `getSystemLanguage` and `resolveLanguage` including `"system"` passthrough |
-| `ThemeTest` | `getThemeName`, `resolveTheme`, `getThemeFromUrl` — `decodeBase64` mocked via `mockkStatic` |
+| `ThemeTest` | `getThemeName`, `resolveSystemBarsTheme`, `getSessionTokenTheme`, `getThemeFromUrl` — `decodeBase64` mocked via `mockkStatic` (session-token tests use the real decoder with `isAtLeastOreo` mocked) |
 
 ### Running Tests
 
@@ -355,5 +355,5 @@ When creating PRs (via `gh pr create` or the GitHub UI), always use the repo tem
 - **`LinkTheme.valueOf` safety:** Use `LinkTheme.entries.find { it.name == name }` instead of `valueOf()` to avoid `IllegalArgumentException` on unrecognised values
 - **Mocking Android statics in tests:** Use `mockkStatic(::functionRef)` for top-level functions (e.g. `decodeBase64`, `isSystemThemeDark`) and `mockkStatic(ClassName::class)` for class statics (e.g. `Uri`, `Log`). Always pair with `unmockkStatic` in `@After`
 - **URL query parameters added by SDK:** `lng` (language), `fiatCur` (display fiat currency), `th` (theme) — see `CreateURL.kt`
-- **Theme resolution from URL:** `getThemeFromUrl(url)` checks the `th` query param first; falls back to the `th` field inside the Base64-encoded `link_style` param if `th` is absent or blank
+- **Theme resolution from URL:** `getThemeFromUrl(url)` checks the last `th` query param first; falls back to the `th` field inside the Base64-encoded `link_style` param if `th` is absent or blank. `LinkTheme.SYSTEM` is sent as `th=system`. System bars follow `resolveSystemBarsTheme`: `light`/`dark` → that; else the session token's `th` (`getSessionTokenTheme`, base64url JSON envelope in the URL `token` param); else the device. Never log the session token
 - **Returning users (Mesh Managed Tokens):** `AccountToken.tokenId` (in `AccessTokenPayload`) stays stable per user + `brokerType` even as the underlying `accessToken` refreshes. Host apps store it server-side and pass it back as `IntegrationAccessToken.accessToken` in `LinkConfiguration.accessTokens` to skip re-authentication — see the [Return users guide](https://docs.meshconnect.com/build/return-users) and the README's "Returning users" section
