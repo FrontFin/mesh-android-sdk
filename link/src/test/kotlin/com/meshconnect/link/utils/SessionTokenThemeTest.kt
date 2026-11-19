@@ -31,7 +31,7 @@ class SessionTokenThemeTest {
 
     @Test
     fun `realistic base64url envelope with LINK_THEME_DARK resolves to dark`() {
-        // {"v":1,"c":"AbC123-xYz_789","th":"LINK_THEME_DARK","n":"~~~???"}, base64url without padding.
+        // Encoded without padding and containing URL-safe characters.
         val token = envelope("""{"v":1,"c":"AbC123-xYz_789","th":"LINK_THEME_DARK","n":"~~~???"}""")
         (token.contains('-') || token.contains('_')).shouldBeTrue()
         (token.length % 4 != 0).shouldBeTrue()
@@ -99,7 +99,7 @@ class SessionTokenThemeTest {
     }
 
     @Test
-    fun `raw legacy token has no theme`() {
+    fun `raw token has no theme`() {
         getSessionTokenTheme("a1b2c3d4-e5f6-7890-abcd-ef1234567890").shouldBeNull()
         getSessionTokenTheme("abcd").shouldBeNull()
     }
@@ -127,7 +127,7 @@ class SessionTokenThemeTest {
         every { uri.getQueryParameter("token") } returns token
         every { Uri.parse(any()) } returns uri
 
-        val sessionToken = getSessionTokenFromUrl("https://web.meshconnect.com/link?token=$token&th=system")
+        val sessionToken = getSessionTokenFromUrl("https://example.com/link?token=$token&th=system")
 
         sessionToken shouldBeEqualTo token
         getSessionTokenTheme(sessionToken) shouldBeEqualTo THEME_DARK

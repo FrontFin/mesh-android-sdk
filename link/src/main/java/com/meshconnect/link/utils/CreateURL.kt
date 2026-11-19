@@ -16,10 +16,7 @@ internal fun createURL(
     return URL(builder.toString())
 }
 
-/**
- * Builds the Link URL the WebView loads. `theme` is sent as-is: `light` / `dark` force that
- * mode, `system` (or no `th`) lets Link use the session theme.
- */
+// Pass the theme through unchanged, including SYSTEM: Link resolves "system" itself.
 internal fun createLinkURL(
     link: String,
     language: String?,
