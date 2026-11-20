@@ -23,6 +23,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.webkit.WebMessageCompat
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import com.google.gson.Gson
@@ -313,8 +314,9 @@ internal class LinkActivity : AppCompatActivity() {
             val rules = setOf(linkOrigin)
             WebViewCompat.addWebMessageListener(webView, JSBridge.NAME, rules) { _, message, _, isMainFrame, _ ->
                 // Iframes on the Link origin can send too, so accept only the main page.
-                val json = message.data
-                if (isMainFrame && json != null) {
+                // Read data only for string messages: getData() throws for an ArrayBuffer.
+                val json = message.takeIf { isMainFrame && it.type == WebMessageCompat.TYPE_STRING }?.data
+                if (json != null) {
                     viewModel.onJsonReceived(json)
                 } else {
                     Log.w("MeshSDK", "Ignored a bridge message that did not come from the Link page")

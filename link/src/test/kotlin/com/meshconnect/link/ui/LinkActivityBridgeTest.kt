@@ -82,6 +82,16 @@ class LinkActivityBridgeTest {
     }
 
     @Test
+    fun `new WebViews ignore non-string messages without crashing`() {
+        supportFeatures(true)
+        val activity = launch().get()
+
+        sendFromWebView(isMainFrame = true, message = WebMessageCompat(byteArrayOf(1)))
+
+        assertFalse(waitUntil { activity.isFinishing })
+    }
+
+    @Test
     fun `old WebViews fall back to the JavaScript interface`() {
         supportFeatures(false)
         val activity = launch().get()
@@ -107,10 +117,13 @@ class LinkActivityBridgeTest {
         return Robolectric.buildActivity(LinkActivity::class.java, intent).setup()
     }
 
-    private fun sendFromWebView(isMainFrame: Boolean) {
+    private fun sendFromWebView(
+        isMainFrame: Boolean,
+        message: WebMessageCompat = WebMessageCompat(closeMessage),
+    ) {
         listener.captured.onPostMessage(
             mockk<WebView>(),
-            WebMessageCompat(closeMessage),
+            message,
             Uri.parse(linkOrigin),
             isMainFrame,
             mockk<JavaScriptReplyProxy>(),
