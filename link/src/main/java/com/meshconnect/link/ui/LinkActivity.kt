@@ -300,17 +300,14 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
-    // Lint only reads the first feature check in the condition below.
-    @SuppressLint("RequiresFeature")
     private fun installBridge(
         webView: WebView,
         linkOrigin: String,
     ) {
-        if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER) &&
-            WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
-        ) {
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
             // The WebView checks the sender's origin and frame when the message is sent,
-            // so only the Link page from the token can use the bridge.
+            // so only the Link page from the token can use the bridge. Link calls
+            // JSBridge.postMessage when it exists, so no change is needed on the Link side.
             val rules = setOf(linkOrigin)
             WebViewCompat.addWebMessageListener(webView, JSBridge.NAME, rules) { _, message, _, isMainFrame, _ ->
                 // Iframes on the Link origin can send too, so accept only the main page.
@@ -322,7 +319,6 @@ internal class LinkActivity : AppCompatActivity() {
                     Log.w("MeshSDK", "Ignored a bridge message that did not come from the Link page")
                 }
             }
-            WebViewCompat.addDocumentStartJavaScript(webView, JSBridge.SEND_NATIVE_MESSAGE_SCRIPT, rules)
         } else {
             // Old WebViews: the bridge cannot tell who sent a message.
             webView.addJavascriptInterface(JSBridge(viewModel::onJsonReceived), JSBridge.NAME)

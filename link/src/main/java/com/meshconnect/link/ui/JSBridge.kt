@@ -12,10 +12,5 @@ internal class JSBridge(
 
     companion object {
         const val NAME = "JSBridge"
-
-        // Link calls JSBridge.sendNativeMessage(json). A web message listener object
-        // only has postMessage, so add sendNativeMessage on top of it.
-        const val SEND_NATIVE_MESSAGE_SCRIPT =
-            "if (window.$NAME) $NAME.sendNativeMessage = function (json) { $NAME.postMessage(json) };"
     }
 }

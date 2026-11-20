@@ -42,7 +42,6 @@ class LinkActivityBridgeTest {
     fun setUp() {
         mockkStatic(WebViewFeature::class, WebViewCompat::class)
         every { WebViewCompat.addWebMessageListener(any(), any(), any(), capture(listener)) } returns Unit
-        every { WebViewCompat.addDocumentStartJavaScript(any(), any(), any()) } returns mockk(relaxed = true)
     }
 
     @After
@@ -57,7 +56,6 @@ class LinkActivityBridgeTest {
         val webView = activity.findViewById<WebView>(R.id.web_view)
 
         verify { WebViewCompat.addWebMessageListener(webView, JSBridge.NAME, setOf(linkOrigin), any()) }
-        verify { WebViewCompat.addDocumentStartJavaScript(webView, JSBridge.SEND_NATIVE_MESSAGE_SCRIPT, setOf(linkOrigin)) }
         assertNull(shadowOf(webView).getJavascriptInterface(JSBridge.NAME))
     }
 
