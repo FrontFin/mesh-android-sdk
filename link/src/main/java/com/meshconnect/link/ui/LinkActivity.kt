@@ -23,6 +23,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
 import com.google.gson.Gson
 import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
@@ -39,11 +41,11 @@ import com.meshconnect.link.utils.getParcelable
 import com.meshconnect.link.utils.getThemeFromUrl
 import com.meshconnect.link.utils.getThemeName
 import com.meshconnect.link.utils.intent
-import com.meshconnect.link.utils.isLinkOrigin
 import com.meshconnect.link.utils.isSystemThemeDark
 import com.meshconnect.link.utils.isUrlWhitelisted
 import com.meshconnect.link.utils.observeEvent
 import com.meshconnect.link.utils.openTrueAuth
+import com.meshconnect.link.utils.origin
 import com.meshconnect.link.utils.resolveLanguage
 import com.meshconnect.link.utils.resolveTheme
 import com.meshconnect.link.utils.showToast
@@ -289,7 +291,7 @@ internal class LinkActivity : AppCompatActivity() {
             // dead-end instead.
             settings.javaScriptCanOpenWindowsAutomatically = true
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
-            addJavascriptInterface(JSBridge(::onBridgeMessage), JSBridge.NAME)
+            installBridge(this, url.origin())
             setBackgroundColor(Color.TRANSPARENT)
             webViewClient = WebClient(disableWhiteList, linkHost = url.host)
             webChromeClient = ChromeClient()
@@ -297,15 +299,31 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
-    // Accept bridge messages only when the main page is Mesh Link.
-    // This runs on the JavaBridge thread, so read webView.url on the UI thread.
-    private fun onBridgeMessage(json: String) {
-        binding.webView.post {
-            if (isLinkOrigin(binding.webView.url)) {
-                viewModel.onJsonReceived(json)
-            } else {
-                Log.w("MeshSDK", "Ignored a bridge message from a non-Link page")
+    // Lint only reads the first feature check in the condition below.
+    @SuppressLint("RequiresFeature")
+    private fun installBridge(
+        webView: WebView,
+        linkOrigin: String,
+    ) {
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER) &&
+            WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
+        ) {
+            // The WebView checks the sender's origin and frame when the message is sent,
+            // so only the Link page from the token can use the bridge.
+            val rules = setOf(linkOrigin)
+            WebViewCompat.addWebMessageListener(webView, JSBridge.NAME, rules) { _, message, _, isMainFrame, _ ->
+                // Iframes on the Link origin can send too, so accept only the main page.
+                val json = message.data
+                if (isMainFrame && json != null) {
+                    viewModel.onJsonReceived(json)
+                } else {
+                    Log.w("MeshSDK", "Ignored a bridge message that did not come from the Link page")
+                }
             }
+            WebViewCompat.addDocumentStartJavaScript(webView, JSBridge.SEND_NATIVE_MESSAGE_SCRIPT, rules)
+        } else {
+            // Old WebViews: the bridge cannot tell who sent a message.
+            webView.addJavascriptInterface(JSBridge(viewModel::onJsonReceived), JSBridge.NAME)
         }
     }
 
