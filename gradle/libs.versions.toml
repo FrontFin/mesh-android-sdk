@@ -10,6 +10,7 @@ maven-publish = "0.30.0"
 # libraries
 appcompat = "1.7.0"
 core-ktx = "1.13.1"
+webkit = "1.12.1"
 coroutines = "1.6.3"
 lifecycle = "2.5.1"
 material = "1.12.0"
@@ -23,13 +24,15 @@ org-json = "20240303"
 test-runner = "1.6.2"
 test-rules = "1.6.1"
 core-testing = "2.2.0"
+robolectric = "4.14.1"
 # link
-mesh-link = "3.4.9"
+mesh-link = "3.4.10"
 
 [libraries]
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 androidx-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "core-testing" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "test-runner" }
@@ -46,6 +49,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kluent = { group = "org.amshove.kluent", name = "kluent-android", version.ref = "kluent" }
 org-json = { group = "org.json", name = "json", version.ref = "org-json" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 mesh-link = { group = "com.meshconnect", name = "link", version.ref = "mesh-link" }
 
