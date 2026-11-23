@@ -23,6 +23,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.webkit.WebMessageCompat
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
 import com.google.gson.Gson
 import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
@@ -43,6 +46,7 @@ import com.meshconnect.link.utils.isSystemThemeDark
 import com.meshconnect.link.utils.isUrlWhitelisted
 import com.meshconnect.link.utils.observeEvent
 import com.meshconnect.link.utils.openTrueAuth
+import com.meshconnect.link.utils.origin
 import com.meshconnect.link.utils.resolveLanguage
 import com.meshconnect.link.utils.resolveTheme
 import com.meshconnect.link.utils.showToast
@@ -288,11 +292,36 @@ internal class LinkActivity : AppCompatActivity() {
             // dead-end instead.
             settings.javaScriptCanOpenWindowsAutomatically = true
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
-            addJavascriptInterface(JSBridge { viewModel.onJsonReceived(it) }, JSBridge.NAME)
+            installBridge(this, url.origin())
             setBackgroundColor(Color.TRANSPARENT)
             webViewClient = WebClient(disableWhiteList, linkHost = url.host)
             webChromeClient = ChromeClient()
             loadUrl(url.toString())
+        }
+    }
+
+    private fun installBridge(
+        webView: WebView,
+        linkOrigin: String,
+    ) {
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
+            // The WebView checks the sender's origin and frame when the message is sent,
+            // so only the Link page from the token can use the bridge. Link calls
+            // JSBridge.postMessage when it exists, so no change is needed on the Link side.
+            val rules = setOf(linkOrigin)
+            WebViewCompat.addWebMessageListener(webView, JSBridge.NAME, rules) { _, message, _, isMainFrame, _ ->
+                // Iframes on the Link origin can send too, so accept only the main page.
+                // Read data only for string messages: getData() throws for an ArrayBuffer.
+                val json = message.takeIf { isMainFrame && it.type == WebMessageCompat.TYPE_STRING }?.data
+                if (json != null) {
+                    viewModel.onJsonReceived(json)
+                } else {
+                    Log.w("MeshSDK", "Ignored a bridge message that did not come from the Link page")
+                }
+            }
+        } else {
+            // Old WebViews: the bridge cannot tell who sent a message.
+            webView.addJavascriptInterface(JSBridge(viewModel::onJsonReceived), JSBridge.NAME)
         }
     }
 

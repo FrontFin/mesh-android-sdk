@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.10
+
+### Security
+- On WebViews that support it, the SDK now accepts Link messages only from the Link page itself. Other pages and iframes in the WebView can no longer send connect or transfer results to the app.
+- Added the `androidx.webkit` dependency.
+
 ## 3.4.9
 
 ### Fixed
