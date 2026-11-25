@@ -1,7 +1,5 @@
 package com.meshconnect.link.utils
 
-import android.util.Log
-import com.meshconnect.link.R
 import com.meshconnect.link.entity.LinkTheme
 import io.mockk.every
 import io.mockk.mockkStatic
@@ -13,147 +11,218 @@ import org.junit.Before
 import org.junit.Test
 
 class ThemeTest {
-    // Base64 of {"th":"dark"}
-    private val darkThemeLinkStyle = "eyJ0aCI6ImRhcmsifQ=="
-
-    // Base64 of {"th":"light"}
-    private val lightThemeLinkStyle = "eyJ0aCI6ImxpZ2h0In0="
-
-    // Base64 of {"th":""}
-    private val emptyThemeLinkStyle = "eyJ0aCI6IiJ9"
-
-    // Base64 of {"other":"value"}
-    private val noThemeLinkStyle = "eyJvdGhlciI6InZhbHVlIn0="
+    private val client = """"v":1,"c":"client""""
 
     @Before
     fun setUp() {
-        mockkStatic(Log::class)
         mockkStatic(::decodeBase64)
-        every { Log.e(any(), any(), any()) } returns 0
-        every { Log.w(any(), any<String>(), any()) } returns 0
         every { decodeBase64(any()) } answers { String(java.util.Base64.getDecoder().decode(firstArg<String>())) }
     }
 
     @After
     fun tearDown() {
-        unmockkStatic(Log::class)
         unmockkStatic(::decodeBase64)
     }
+
+    private fun appearance(
+        url: String,
+        isSystemDark: Boolean,
+        appTheme: String? = null,
+    ) = resolveLinkAppearance(QueryString.parse(url), appTheme, isSystemDark)
+
+    private fun isDark(
+        url: String,
+        isSystemDark: Boolean,
+    ) = appearance(url, isSystemDark).isDarkTheme
+
+    private fun background(
+        url: String,
+        isSystemDark: Boolean,
+    ) = appearance(url, isSystemDark).backgroundColor
+
+    private fun session(extra: String = "") = sessionUrl("{$client}", extra)
+
+    private fun sessionWith(
+        field: String,
+        extra: String = "",
+    ) = sessionUrl("{$client,$field}", extra)
 
     // --- getThemeName ---
 
     @Test
-    fun `getThemeName should return dark for DARK`() {
-        getThemeName(LinkTheme.DARK).shouldBeEqualTo(THEME_DARK)
-    }
-
-    @Test
-    fun `getThemeName should return light for LIGHT`() {
-        getThemeName(LinkTheme.LIGHT).shouldBeEqualTo(THEME_LIGHT)
-    }
-
-    @Test
-    fun `getThemeName should return system for SYSTEM`() {
-        getThemeName(LinkTheme.SYSTEM).shouldBeEqualTo(THEME_SYSTEM)
-    }
-
-    @Test
-    fun `getThemeName should return null for null`() {
+    fun `getThemeName should name each app theme`() {
+        getThemeName(LinkTheme.DARK) shouldBeEqualTo THEME_DARK
+        getThemeName(LinkTheme.LIGHT) shouldBeEqualTo THEME_LIGHT
+        getThemeName(LinkTheme.SYSTEM) shouldBeEqualTo THEME_SYSTEM
         getThemeName(null).shouldBeNull()
     }
 
-    // --- resolveTheme ---
+    // --- theme of a link with a session token ---
 
     @Test
-    fun `resolveTheme should return dark when theme is dark`() {
-        resolveTheme(THEME_DARK) { false } shouldBeEqualTo THEME_DARK
+    fun `session link should prefer th light or dark in the url over the token theme`() {
+        isDark(sessionWith(""""th":"LINK_THEME_DARK"""", "&th=light"), true) shouldBeEqualTo false
+        isDark(sessionWith(""""th":"LINK_THEME_LIGHT"""", "&th=dark"), false) shouldBeEqualTo true
     }
 
     @Test
-    fun `resolveTheme should return light when theme is light`() {
-        resolveTheme(THEME_LIGHT) { false } shouldBeEqualTo THEME_LIGHT
+    fun `session link should use the app theme in place of the url th`() {
+        val url = sessionWith(""""th":"LINK_THEME_DARK"""", "&th=dark")
+        appearance(url, true, appTheme = THEME_LIGHT).isDarkTheme shouldBeEqualTo false
     }
 
     @Test
-    fun `resolveTheme should return dark when theme is system and system is dark`() {
-        resolveTheme(THEME_SYSTEM) { true } shouldBeEqualTo THEME_DARK
+    fun `session link should then use the token theme`() {
+        isDark(sessionWith(""""th":"LINK_THEME_DARK""""), false) shouldBeEqualTo true
+        isDark(sessionWith(""""th":"LINK_THEME_LIGHT""""), true) shouldBeEqualTo false
     }
 
     @Test
-    fun `resolveTheme should return light when theme is system and system is light`() {
-        resolveTheme(THEME_SYSTEM) { false } shouldBeEqualTo THEME_LIGHT
+    fun `session link should let the token theme win over th system`() {
+        isDark(sessionWith(""""th":"LINK_THEME_LIGHT"""", "&th=system"), true) shouldBeEqualTo false
+        isDark(sessionWith(""""th":"LINK_THEME_DARK"""", "&th=system"), false) shouldBeEqualTo true
     }
 
     @Test
-    fun `resolveTheme should return null when theme is null`() {
-        resolveTheme(null) { false }.shouldBeNull()
+    fun `session link should then follow the device whether th is system, missing or garbage`() {
+        for (extra in listOf("", "&th=system", "&th=blue", "&th=")) {
+            isDark(session(extra), true) shouldBeEqualTo true
+            isDark(session(extra), false) shouldBeEqualTo false
+        }
     }
 
     @Test
-    fun `resolveTheme should return null when theme is an unknown value`() {
-        resolveTheme("unknown") { false }.shouldBeNull()
+    fun `session link should follow the device for a token theme that is unspecified or unknown`() {
+        for (th in listOf(""""LINK_THEME_UNSPECIFIED"""", """"constructor"""", "7", "null")) {
+            isDark(sessionWith(""""th":$th"""), true) shouldBeEqualTo true
+            isDark(sessionWith(""""th":$th"""), false) shouldBeEqualTo false
+        }
     }
 
     @Test
-    fun `resolveTheme should return null when theme is empty`() {
-        resolveTheme("") { false }.shouldBeNull()
-    }
-
-    // --- resolveLinkTheme ---
-
-    private val dark = { true }
-    private val light = { false }
-
-    @Test
-    fun `resolveLinkTheme should prefer the app theme over the url and link_style`() {
-        resolveLinkTheme(THEME_LIGHT, THEME_DARK, darkThemeLinkStyle, dark) shouldBeEqualTo THEME_LIGHT
-        resolveLinkTheme(THEME_DARK, THEME_LIGHT, lightThemeLinkStyle, light) shouldBeEqualTo THEME_DARK
+    fun `session link should not read link_style`() {
+        val url = session(linkStyleParam("""{"th":"dark"}"""))
+        isDark(url, false) shouldBeEqualTo false
     }
 
     @Test
-    fun `resolveLinkTheme should use the url th when the app sets none`() {
-        resolveLinkTheme(null, THEME_DARK, lightThemeLinkStyle, light) shouldBeEqualTo THEME_DARK
-        resolveLinkTheme(null, THEME_LIGHT, darkThemeLinkStyle, dark) shouldBeEqualTo THEME_LIGHT
-        resolveLinkTheme(null, THEME_SYSTEM, null, light) shouldBeEqualTo THEME_LIGHT
+    fun `a token that is not a session token is a legacy link, so its theme is ignored`() {
+        val notSession =
+            listOf(
+                """{"c":"client","th":"LINK_THEME_DARK"}""",
+                """{"v":"1","c":"client","th":"LINK_THEME_DARK"}""",
+                """{"v":1,"c":"","th":"LINK_THEME_DARK"}""",
+                """{"v":1,"th":"LINK_THEME_DARK"}""",
+            )
+        for (envelope in notSession) {
+            isDark(sessionUrl(envelope), false) shouldBeEqualTo true
+        }
+        isDark("https://link.meshpay.com/?token=not-json", false) shouldBeEqualTo true
+    }
+
+    // --- theme of a legacy link ---
+
+    @Test
+    fun `legacy link should prefer th light or dark in the url over link_style`() {
+        isDark(legacyUrl("""{"th":"dark"}""", "&th=light"), true) shouldBeEqualTo false
+        isDark(legacyUrl("""{"th":"light"}""", "&th=dark"), false) shouldBeEqualTo true
     }
 
     @Test
-    fun `resolveLinkTheme should use link_style when there is no usable th`() {
-        resolveLinkTheme(null, null, darkThemeLinkStyle, light) shouldBeEqualTo THEME_DARK
-        resolveLinkTheme(null, "unknown", lightThemeLinkStyle, dark) shouldBeEqualTo THEME_LIGHT
+    fun `legacy link should read th system as the device even when link_style has a theme`() {
+        isDark(legacyUrl("""{"th":"dark"}""", "&th=system"), false) shouldBeEqualTo false
+        isDark(legacyUrl("""{"th":"light"}""", "&th=system"), true) shouldBeEqualTo true
     }
 
     @Test
-    fun `resolveLinkTheme should resolve a system link_style from the device`() {
-        val systemLinkStyle = "eyJ0aCI6InN5c3RlbSJ9" // {"th":"system"}
-        resolveLinkTheme(null, null, systemLinkStyle, dark) shouldBeEqualTo THEME_DARK
-        resolveLinkTheme(null, null, systemLinkStyle, light) shouldBeEqualTo THEME_LIGHT
+    fun `legacy link should then use link_style th, with system read from the device`() {
+        isDark(legacyUrl("""{"th":"light"}"""), true) shouldBeEqualTo false
+        isDark(legacyUrl("""{"th":"dark"}"""), false) shouldBeEqualTo true
+        isDark(legacyUrl("""{"th":"light"}""", "&th=blue"), true) shouldBeEqualTo false
+        isDark(legacyUrl("""{"th":"system"}"""), false) shouldBeEqualTo false
+        isDark(legacyUrl("""{"th":"system"}"""), true) shouldBeEqualTo true
     }
 
     @Test
-    fun `resolveLinkTheme should restore a link_style whose plus turned into a space`() {
-        // Base64 of {"th":"dark","x":"~~~"} has a '+' that URL decoding turns into a space.
-        val linkStyle = java.util.Base64.getEncoder().encodeToString("""{"th":"dark","x":"~~~"}""".toByteArray())
-        resolveLinkTheme(null, null, linkStyle.replace('+', ' ').trimEnd('='), light) shouldBeEqualTo THEME_DARK
+    fun `legacy link should read a link_style with a stripped padding or a plus read as a space`() {
+        // Base64 of {"th":"light","x":"?>"} has a '+'.
+        val withPlus = "eyJ0aCI6ImxpZ2h0IiwieCI6Ij8+In0="
+
+        fun url(value: String) = "https://link.meshconnect.com/?link_style=$value"
+        isDark(url(withPlus.trimEnd('=')), true) shouldBeEqualTo false
+        isDark(url(withPlus.replace('+', ' ')), true) shouldBeEqualTo false
     }
 
     @Test
-    fun `resolveLinkTheme should default to dark when nothing is set`() {
-        resolveLinkTheme(null, null, null, light) shouldBeEqualTo THEME_DARK
-        resolveLinkTheme(null, null, noThemeLinkStyle, light) shouldBeEqualTo THEME_DARK
-        resolveLinkTheme(null, null, emptyThemeLinkStyle, light) shouldBeEqualTo THEME_DARK
+    fun `legacy link should then default to dark, even on a light device`() {
+        isDark(legacyUrl(), false) shouldBeEqualTo true
+        isDark("https://link.meshconnect.com/", false) shouldBeEqualTo true
+        for (value in listOf("", "%%%", "bm90IGpzb24=", "e30=", "eyJ0aCI6IiJ9")) {
+            isDark("https://link.meshconnect.com/?link_style=$value", false) shouldBeEqualTo true
+        }
+    }
+
+    // --- theme to write ---
+
+    @Test
+    fun `themeToWrite should be the device theme on a legacy link the device decides`() {
+        appearance(legacyUrl("""{"th":"system"}"""), true).themeToWrite shouldBeEqualTo THEME_DARK
+        appearance(legacyUrl(), true, appTheme = THEME_SYSTEM).themeToWrite shouldBeEqualTo THEME_DARK
+        appearance(legacyUrl(extra = "&th=system"), false).themeToWrite shouldBeEqualTo THEME_LIGHT
     }
 
     @Test
-    fun `resolveLinkTheme should default to dark when link_style cannot be read`() {
-        resolveLinkTheme(null, null, "%%%", light) shouldBeEqualTo THEME_DARK
+    fun `themeToWrite should be null when the device does not decide or the link has a session token`() {
+        appearance(legacyUrl(), true).themeToWrite.shouldBeNull()
+        appearance(legacyUrl("""{"th":"light"}"""), true).themeToWrite.shouldBeNull()
+        appearance(session(), true).themeToWrite.shouldBeNull()
+        appearance(session(), true, appTheme = THEME_SYSTEM).themeToWrite.shouldBeNull()
     }
 
-    // --- systemBarColor ---
+    // --- background color ---
 
     @Test
-    fun `systemBarColor should use one color per theme`() {
-        systemBarColor(isDarkTheme = true) shouldBeEqualTo R.color.linkBarDark
-        systemBarColor(isDarkTheme = false) shouldBeEqualTo R.color.linkBarLight
+    fun `background should be the page bgd on a dark theme and bgl on a light theme, from the token`() {
+        val url = { th: String -> sessionWith(""""bgl":"#112233","bgd":"#445566"""", "&th=$th") }
+        background(url("dark"), false) shouldBeEqualTo 0xFF445566.toInt()
+        background(url("light"), true) shouldBeEqualTo 0xFF112233.toInt()
+    }
+
+    @Test
+    fun `background should come from link_style on a legacy link`() {
+        val url = { th: String -> legacyUrl("""{"bgl":"#112233","bgd":"#445566"}""", "&th=$th") }
+        background(url("dark"), false) shouldBeEqualTo 0xFF445566.toInt()
+        background(url("light"), true) shouldBeEqualTo 0xFF112233.toInt()
+    }
+
+    @Test
+    fun `background should expand a short hex and drop the alpha`() {
+        fun color(bgd: String) = background(sessionWith(""""bgd":"$bgd"""", "&th=dark"), false)
+        color("#abc") shouldBeEqualTo 0xFFAABBCC.toInt()
+        color("#abcd") shouldBeEqualTo 0xFFAABBCC.toInt()
+        color("#11223344") shouldBeEqualTo 0xFF112233.toInt()
+        color("#ABCDEF") shouldBeEqualTo 0xFFABCDEF.toInt()
+    }
+
+    @Test
+    fun `background should fall back when the color is missing or invalid`() {
+        val invalid = listOf("\"red\"", "\"rgb(1,2,3)\"", "\"#12\"", "\"#12345\"", "\"#ggg\"", "\"\"", "123", "null")
+        for (bad in invalid) {
+            background(sessionWith(""""bgd":$bad""", "&th=dark"), false) shouldBeEqualTo 0xFF1C1C1C.toInt()
+        }
+    }
+
+    @Test
+    fun `background should fall back for each theme on its own`() {
+        val onlyLight = sessionWith(""""bgl":"#123456"""")
+        background("$onlyLight&th=dark", false) shouldBeEqualTo 0xFF1C1C1C.toInt()
+        background("$onlyLight&th=light", true) shouldBeEqualTo 0xFF123456.toInt()
+    }
+
+    @Test
+    fun `background should use the pair of the Link version`() {
+        background(session("&th=light"), true) shouldBeEqualTo 0xFFF9F9F9.toInt()
+        background(legacyUrl(), false) shouldBeEqualTo 0xFF0E0D0D.toInt()
+        background(legacyUrl("""{"th":"light"}"""), true) shouldBeEqualTo 0xFFFBFBFB.toInt()
     }
 }

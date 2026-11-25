@@ -2,6 +2,4 @@
 <resources>
     <color name="gray0">#FBFBFB</color>
     <color name="meshBlue40">#037FFF</color>
-    <color name="linkBarDark">#1C1C1C</color>
-    <color name="linkBarLight">#F9F9F9</color>
 </resources>

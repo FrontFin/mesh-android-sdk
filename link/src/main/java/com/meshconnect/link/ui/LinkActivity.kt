@@ -17,12 +17,16 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.webkit.WebMessageCompat
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
 import com.google.gson.Gson
 import com.meshconnect.link.BuildConfig
 import com.meshconnect.link.R
@@ -42,8 +46,8 @@ import com.meshconnect.link.utils.isSystemThemeDark
 import com.meshconnect.link.utils.isUrlWhitelisted
 import com.meshconnect.link.utils.observeEvent
 import com.meshconnect.link.utils.openTrueAuth
+import com.meshconnect.link.utils.origin
 import com.meshconnect.link.utils.showToast
-import com.meshconnect.link.utils.systemBarColor
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
 import com.meshconnect.link.utils.windowInsetsController
@@ -104,11 +108,11 @@ internal class LinkActivity : AppCompatActivity() {
                     language = intent.getStringExtra(LANGUAGE),
                     fiatCurrency = intent.getStringExtra(FIAT_CURRENCY),
                 )
-            buildLinkURL(decodeToken(intent.getStringExtra(TOKEN)), options, this::isSystemThemeDark)
-        }.onSuccess { (url, isDarkTheme) ->
+            buildLinkURL(decodeToken(intent.getStringExtra(TOKEN)), options, isSystemThemeDark())
+        }.onSuccess { (url, isDarkTheme, backgroundColor) ->
             setContentView(binding.root)
 
-            applyTheme(isDarkTheme)
+            applyTheme(isDarkTheme, backgroundColor)
 
             binding.back.setOnClickListener { onBack() }
             binding.close.setOnClickListener { showCloseDialog() }
@@ -127,15 +131,16 @@ internal class LinkActivity : AppCompatActivity() {
     }
 
     // Called once, before Link loads. Like the page, the bars don't follow a device switch
-    // while Link is open.
-    private fun applyTheme(isDarkTheme: Boolean) {
-        val barColor = getColor(systemBarColor(isDarkTheme))
-
-        findViewById<ViewGroup>(android.R.id.content).setBackgroundColor(barColor)
+    // while Link is open. Link runs in its own activity, so the host's bars come back on close.
+    private fun applyTheme(
+        isDarkTheme: Boolean,
+        @ColorInt color: Int,
+    ) {
+        findViewById<ViewGroup>(android.R.id.content).setBackgroundColor(color)
 
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.statusBarColor = barColor
-        window.navigationBarColor = barColor
+        window.statusBarColor = color
+        window.navigationBarColor = color
 
         windowInsetsController {
             isAppearanceLightNavigationBars = !isDarkTheme
@@ -286,11 +291,36 @@ internal class LinkActivity : AppCompatActivity() {
             // dead-end instead.
             settings.javaScriptCanOpenWindowsAutomatically = true
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
-            addJavascriptInterface(JSBridge { viewModel.onJsonReceived(it) }, JSBridge.NAME)
+            installBridge(this, url.origin())
             setBackgroundColor(Color.TRANSPARENT)
             webViewClient = WebClient(disableWhiteList, linkHost = url.host)
             webChromeClient = ChromeClient()
             loadUrl(url.toString())
+        }
+    }
+
+    private fun installBridge(
+        webView: WebView,
+        linkOrigin: String,
+    ) {
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
+            // The WebView checks the sender's origin and frame when the message is sent,
+            // so only the Link page from the token can use the bridge. Link calls
+            // JSBridge.postMessage when it exists, so no change is needed on the Link side.
+            val rules = setOf(linkOrigin)
+            WebViewCompat.addWebMessageListener(webView, JSBridge.NAME, rules) { _, message, _, isMainFrame, _ ->
+                // Iframes on the Link origin can send too, so accept only the main page.
+                // Read data only for string messages: getData() throws for an ArrayBuffer.
+                val json = message.takeIf { isMainFrame && it.type == WebMessageCompat.TYPE_STRING }?.data
+                if (json != null) {
+                    viewModel.onJsonReceived(json)
+                } else {
+                    Log.w("MeshSDK", "Ignored a bridge message that did not come from the Link page")
+                }
+            }
+        } else {
+            // Old WebViews: the bridge cannot tell who sent a message.
+            webView.addJavascriptInterface(JSBridge(viewModel::onJsonReceived), JSBridge.NAME)
         }
     }
 
