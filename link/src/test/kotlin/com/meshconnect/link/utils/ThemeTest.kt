@@ -225,4 +225,17 @@ class ThemeTest {
         background(legacyUrl(), false) shouldBeEqualTo 0xFF0E0D0D.toInt()
         background(legacyUrl("""{"th":"light"}"""), true) shouldBeEqualTo 0xFFFBFBFB.toInt()
     }
+
+    // --- isDarkColor ---
+
+    @Test
+    fun `isDarkColor should tell dark colors from light ones`() {
+        isDarkColor(0xFF1C1C1C.toInt()) shouldBeEqualTo true
+        isDarkColor(0xFF0E0D0D.toInt()) shouldBeEqualTo true
+        isDarkColor(0xFF000000.toInt()) shouldBeEqualTo true
+        isDarkColor(0xFFF9F9F9.toInt()) shouldBeEqualTo false
+        isDarkColor(0xFFFFFFFF.toInt()) shouldBeEqualTo false
+        // a client's light page color on a dark theme
+        isDarkColor(0xFFEEEEEE.toInt()) shouldBeEqualTo false
+    }
 }

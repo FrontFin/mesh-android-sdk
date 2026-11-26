@@ -20,6 +20,15 @@ private const val SHORT_HEX_MAX = 4
 private const val RGB_DIGITS = 6
 private const val HEX_RADIX = 16
 
+// Perceived brightness of a color: weighted RGB, 0 (black) to 1 (white).
+private const val RED_SHIFT = 16
+private const val GREEN_SHIFT = 8
+private const val BYTE_MASK = 0xFF
+private const val LUMA_RED = 0.299
+private const val LUMA_GREEN = 0.587
+private const val LUMA_BLUE = 0.114
+private const val HALF = 0.5
+
 // Same shape Link accepts for a page color: #RGB, #RGBA, #RRGGBB or #RRGGBBAA.
 private val HEX_COLOR = Regex("^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
 
@@ -154,6 +163,16 @@ private fun decodeJsonParam(value: String?): JSONObject? {
     } catch (expected: Exception) {
         null
     }
+}
+
+/** Whether [color] is dark, so light system bar icons stay readable on it. */
+internal fun isDarkColor(
+    @ColorInt color: Int,
+): Boolean {
+    val red = (color shr RED_SHIFT) and BYTE_MASK
+    val green = (color shr GREEN_SHIFT) and BYTE_MASK
+    val blue = color and BYTE_MASK
+    return (LUMA_RED * red + LUMA_GREEN * green + LUMA_BLUE * blue) / BYTE_MASK < HALF
 }
 
 internal fun Activity.isSystemThemeDark(): Boolean {

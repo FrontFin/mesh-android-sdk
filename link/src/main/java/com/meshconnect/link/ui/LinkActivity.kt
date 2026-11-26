@@ -42,6 +42,7 @@ import com.meshconnect.link.utils.getOnLoadedScript
 import com.meshconnect.link.utils.getParcelable
 import com.meshconnect.link.utils.getThemeName
 import com.meshconnect.link.utils.intent
+import com.meshconnect.link.utils.isDarkColor
 import com.meshconnect.link.utils.isSystemThemeDark
 import com.meshconnect.link.utils.isUrlWhitelisted
 import com.meshconnect.link.utils.observeEvent
@@ -109,10 +110,10 @@ internal class LinkActivity : AppCompatActivity() {
                     fiatCurrency = intent.getStringExtra(FIAT_CURRENCY),
                 )
             buildLinkURL(decodeToken(intent.getStringExtra(TOKEN)), options, isSystemThemeDark())
-        }.onSuccess { (url, isDarkTheme, backgroundColor) ->
+        }.onSuccess { (url, _, backgroundColor) ->
             setContentView(binding.root)
 
-            applyTheme(isDarkTheme, backgroundColor)
+            applyTheme(backgroundColor)
 
             binding.back.setOnClickListener { onBack() }
             binding.close.setOnClickListener { showCloseDialog() }
@@ -133,9 +134,9 @@ internal class LinkActivity : AppCompatActivity() {
     // Called once, before Link loads. Like the page, the bars don't follow a device switch
     // while Link is open. Link runs in its own activity, so the host's bars come back on close.
     private fun applyTheme(
-        isDarkTheme: Boolean,
         @ColorInt color: Int,
     ) {
+        // Icons follow the color, not the theme: a client's page color can be light on a dark theme.
         findViewById<ViewGroup>(android.R.id.content).setBackgroundColor(color)
 
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
@@ -143,8 +144,8 @@ internal class LinkActivity : AppCompatActivity() {
         window.navigationBarColor = color
 
         windowInsetsController {
-            isAppearanceLightNavigationBars = !isDarkTheme
-            isAppearanceLightStatusBars = !isDarkTheme
+            isAppearanceLightNavigationBars = !isDarkColor(color)
+            isAppearanceLightStatusBars = !isDarkColor(color)
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->

@@ -9,6 +9,8 @@
 ### Fixed
 - The status bar, navigation bar and background now match Link's theme and the client's page color. No more light bars around a dark page.
 - `theme`, `language` and `displayFiatCurrency` now replace the same values already in the link token. `SYSTEM` is sent as `system`, and `system` language is sent as the full device tag.
+- Link now follows the device's dark mode, so the page and the bars agree when no theme is set.
+- The status bar and navigation bar icons follow the bar color, so they stay readable on a client's custom page color.
 
 ## 3.4.9
 
