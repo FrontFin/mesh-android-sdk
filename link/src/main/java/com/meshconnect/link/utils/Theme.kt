@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import androidx.annotation.ColorInt
 import com.meshconnect.link.entity.LinkTheme
 import org.json.JSONObject
+import kotlin.math.pow
 
 internal const val THEME_DARK = "dark"
 internal const val THEME_LIGHT = "light"
@@ -20,14 +21,19 @@ private const val SHORT_HEX_MAX = 4
 private const val RGB_DIGITS = 6
 private const val HEX_RADIX = 16
 
-// Perceived brightness of a color: weighted RGB, 0 (black) to 1 (white).
+// Relative luminance of an sRGB color (WCAG), used to pick the bar icon color.
 private const val RED_SHIFT = 16
 private const val GREEN_SHIFT = 8
 private const val BYTE_MASK = 0xFF
-private const val LUMA_RED = 0.299
-private const val LUMA_GREEN = 0.587
-private const val LUMA_BLUE = 0.114
-private const val HALF = 0.5
+private const val LUMA_RED = 0.2126
+private const val LUMA_GREEN = 0.7152
+private const val LUMA_BLUE = 0.0722
+private const val FLARE = 0.05
+private const val SRGB_KNEE = 0.03928
+private const val SRGB_LOW_DIVISOR = 12.92
+private const val SRGB_OFFSET = 0.055
+private const val SRGB_SCALE = 1.055
+private const val SRGB_GAMMA = 2.4
 
 // Same shape Link accepts for a page color: #RGB, #RGBA, #RRGGBB or #RRGGBBAA.
 private val HEX_COLOR = Regex("^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
@@ -165,14 +171,26 @@ private fun decodeJsonParam(value: String?): JSONObject? {
     }
 }
 
-/** Whether [color] is dark, so light system bar icons stay readable on it. */
+/**
+ * Whether light system bar icons read better than dark ones on [color]: true when white has the
+ * higher WCAG contrast ratio against it.
+ */
 internal fun isDarkColor(
     @ColorInt color: Int,
 ): Boolean {
-    val red = (color shr RED_SHIFT) and BYTE_MASK
-    val green = (color shr GREEN_SHIFT) and BYTE_MASK
-    val blue = color and BYTE_MASK
-    return (LUMA_RED * red + LUMA_GREEN * green + LUMA_BLUE * blue) / BYTE_MASK < HALF
+    val luminance =
+        LUMA_RED * linearChannel((color shr RED_SHIFT) and BYTE_MASK) +
+            LUMA_GREEN * linearChannel((color shr GREEN_SHIFT) and BYTE_MASK) +
+            LUMA_BLUE * linearChannel(color and BYTE_MASK)
+    return (1 + FLARE) / (luminance + FLARE) > (luminance + FLARE) / FLARE
+}
+
+private fun linearChannel(value: Int): Double {
+    val channel = value / BYTE_MASK.toDouble()
+    return when {
+        channel <= SRGB_KNEE -> channel / SRGB_LOW_DIVISOR
+        else -> ((channel + SRGB_OFFSET) / SRGB_SCALE).pow(SRGB_GAMMA)
+    }
 }
 
 internal fun Activity.isSystemThemeDark(): Boolean {

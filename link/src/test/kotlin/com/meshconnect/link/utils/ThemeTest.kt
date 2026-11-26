@@ -237,5 +237,8 @@ class ThemeTest {
         isDarkColor(0xFFFFFFFF.toInt()) shouldBeEqualTo false
         // a client's light page color on a dark theme
         isDarkColor(0xFFEEEEEE.toInt()) shouldBeEqualTo false
+        // a mid green: black icons have the better contrast (8.1 against 2.6)
+        isDarkColor(0xFF00BB00.toInt()) shouldBeEqualTo false
+        isDarkColor(0xFF1A2440.toInt()) shouldBeEqualTo true
     }
 }
