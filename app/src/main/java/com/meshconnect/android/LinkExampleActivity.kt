@@ -12,6 +12,7 @@ import com.meshconnect.link.entity.AccessTokenPayload
 import com.meshconnect.link.entity.DelayedAuthPayload
 import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkPayload
+import com.meshconnect.link.entity.LinkTheme
 import com.meshconnect.link.entity.TransferFinishedErrorPayload
 import com.meshconnect.link.entity.TransferFinishedSuccessPayload
 import com.meshconnect.link.ui.LaunchLink
@@ -47,7 +48,14 @@ class LinkExampleActivity : AppCompatActivity() {
             val token = binding.linkTokenInputText.text.toString()
             if (token.isNotEmpty()) {
                 binding.linkTokenInputText.text = null
-                linkLauncher.launch(LinkConfiguration(token, language = "en"))
+                linkLauncher.launch(
+                    LinkConfiguration(
+                        token,
+                        language = "system",
+                        displayFiatCurrency = "USD",
+                        theme = LinkTheme.SYSTEM,
+                    ),
+                )
             }
         }
 

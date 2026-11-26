@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="MeshLink.Theme" parent="Theme.MaterialComponents.Light">
+    <!-- DayNight, so the WebView's prefers-color-scheme follows the same device mode the system
+         bars are colored from (see resolveLinkAppearance). -->
+    <style name="MeshLink.Theme" parent="Theme.MaterialComponents.DayNight">
         <item name="colorPrimary">@color/meshBlue40</item>
         <item name="materialAlertDialogTheme">@style/MeshLink.MaterialAlertDialog</item>
     </style>

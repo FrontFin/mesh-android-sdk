@@ -17,6 +17,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -33,22 +34,20 @@ import com.meshconnect.link.databinding.LinkActivityBinding
 import com.meshconnect.link.entity.LinkConfiguration
 import com.meshconnect.link.entity.LinkEvent
 import com.meshconnect.link.entity.LinkPayload
-import com.meshconnect.link.utils.THEME_DARK
+import com.meshconnect.link.utils.LinkUrlOptions
 import com.meshconnect.link.utils.alertDialog
-import com.meshconnect.link.utils.createURL
+import com.meshconnect.link.utils.buildLinkURL
 import com.meshconnect.link.utils.decodeToken
 import com.meshconnect.link.utils.getOnLoadedScript
 import com.meshconnect.link.utils.getParcelable
-import com.meshconnect.link.utils.getThemeFromUrl
 import com.meshconnect.link.utils.getThemeName
 import com.meshconnect.link.utils.intent
+import com.meshconnect.link.utils.isDarkColor
 import com.meshconnect.link.utils.isSystemThemeDark
 import com.meshconnect.link.utils.isUrlWhitelisted
 import com.meshconnect.link.utils.observeEvent
 import com.meshconnect.link.utils.openTrueAuth
 import com.meshconnect.link.utils.origin
-import com.meshconnect.link.utils.resolveLanguage
-import com.meshconnect.link.utils.resolveTheme
 import com.meshconnect.link.utils.showToast
 import com.meshconnect.link.utils.viewBinding
 import com.meshconnect.link.utils.viewModel
@@ -104,15 +103,17 @@ internal class LinkActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         runCatching {
-            val link = decodeToken(intent.getStringExtra(TOKEN))
-            val language = resolveLanguage(intent.getStringExtra(LANGUAGE))
-            val fiatCurrency = intent.getStringExtra(FIAT_CURRENCY)
-            val theme = resolveTheme(intent.getStringExtra(THEME), this::isSystemThemeDark)
-            createURL(link, mapOf("lng" to language, "fiatCur" to fiatCurrency, "th" to theme, "platform" to "android"))
-        }.onSuccess { url ->
+            val options =
+                LinkUrlOptions(
+                    theme = intent.getStringExtra(THEME),
+                    language = intent.getStringExtra(LANGUAGE),
+                    fiatCurrency = intent.getStringExtra(FIAT_CURRENCY),
+                )
+            buildLinkURL(decodeToken(intent.getStringExtra(TOKEN)), options, isSystemThemeDark())
+        }.onSuccess { (url, _, backgroundColor) ->
             setContentView(binding.root)
 
-            applyThemeFromUrl(url.toString())
+            applyTheme(backgroundColor)
 
             binding.back.setOnClickListener { onBack() }
             binding.close.setOnClickListener { showCloseDialog() }
@@ -130,22 +131,21 @@ internal class LinkActivity : AppCompatActivity() {
         }
     }
 
-    private fun applyThemeFromUrl(url: String) {
-        val theme = getThemeFromUrl(url)
-        val isDarkTheme = resolveTheme(theme, this::isSystemThemeDark) == THEME_DARK
-
-        val topColor = getColor(if (isDarkTheme) R.color.coldGray70 else R.color.coldGray0)
-        val bottomColor = getColor(if (isDarkTheme) R.color.gray80 else R.color.gray0)
-
-        findViewById<ViewGroup>(android.R.id.content).setBackgroundColor(bottomColor)
+    // Called once, before Link loads. Like the page, the bars don't follow a device switch
+    // while Link is open. Link runs in its own activity, so the host's bars come back on close.
+    private fun applyTheme(
+        @ColorInt color: Int,
+    ) {
+        // Icons follow the color, not the theme: a client's page color can be light on a dark theme.
+        findViewById<ViewGroup>(android.R.id.content).setBackgroundColor(color)
 
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.statusBarColor = topColor
-        window.navigationBarColor = bottomColor
+        window.statusBarColor = color
+        window.navigationBarColor = color
 
         windowInsetsController {
-            isAppearanceLightNavigationBars = !isDarkTheme
-            isAppearanceLightStatusBars = !isDarkTheme
+            isAppearanceLightNavigationBars = !isDarkColor(color)
+            isAppearanceLightStatusBars = !isDarkColor(color)
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->

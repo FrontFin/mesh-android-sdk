@@ -6,6 +6,12 @@
 - On WebViews that support it, the SDK now accepts Link messages only from the Link page itself. Other pages and iframes in the WebView can no longer send connect or transfer results to the app.
 - Added the `androidx.webkit` dependency.
 
+### Fixed
+- The status bar, navigation bar and background now match Link's theme and the client's page color. No more light bars around a dark page.
+- `theme`, `language` and `displayFiatCurrency` now replace the same values already in the link token. `SYSTEM` is sent as `system` on a link with a session token. On a legacy link the device decides, so the resolved light or dark is sent. `system` language is sent as the full device tag.
+- On a link with a session token and no theme set, Link and the bars follow the device's dark mode together. A legacy link with no theme still opens dark.
+- The status bar and navigation bar icons follow the bar color, so they stay readable on a client's custom page color.
+
 ## 3.4.9
 
 ### Fixed
